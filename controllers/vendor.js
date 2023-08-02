@@ -196,8 +196,6 @@ exports.editVendor = async (req, res) => {
   try {
     let vendor = null;
 
-    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
-
     if (id) {
       vendor = await User.findByPk(id, {
         include: [Vendor],
@@ -217,14 +215,14 @@ exports.editVendor = async (req, res) => {
     const { email, phone } = req.body;
     if (
       email &&
-      email !== user.email &&
+      email !== vendor.email &&
       (await User.findOne({ where: { email } }))
     ) {
       return res.status(400).json({ message: "email already exist" });
     }
     if (
       phone &&
-      phone !== user.phone &&
+      phone !== vendor.phone &&
       (await User.findOne({ where: { phone } }))
     ) {
       return res.status(400).json({ message: "phone number already exist" });
