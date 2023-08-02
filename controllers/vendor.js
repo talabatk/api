@@ -191,7 +191,7 @@ exports.getAllVendors = async (req, res) => {
 };
 
 exports.editVendor = async (req, res) => {
-  const { id } = res.body;
+  const { id } = req.body;
 
   try {
     let vendor = null;
