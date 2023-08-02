@@ -141,7 +141,7 @@ exports.getUserByToken = async (req, res) => {
         fcm,
         role: "vendor",
         description: user.vendor.description,
-        image: user.vendor.image,
+        image: "http://" + req.get("host") + "/uploads/" + user.vendor.image,
         open: user.vendor.open,
       });
     }
