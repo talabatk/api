@@ -2,7 +2,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 //models===================
 const User = require("../models/user");
-
+const Vendor = require("../models/vendor");
+const Admin = require("../models/admin");
+const AdminRole = require("../models/adminRole");
 //generate token=======================
 const generateToken = (userId) => {
   const token = jwt.sign({ userId }, "talabatek2309288/k_ss-jdls88", {
@@ -120,6 +122,7 @@ exports.getUserByToken = async (req, res) => {
 
     const user = await User.findOne({
       where: { token },
+      include: [Vendor, { model: Admin, include: AdminRole }],
       attributes: { exclude: ["password"] },
     });
 
@@ -127,7 +130,43 @@ exports.getUserByToken = async (req, res) => {
       return res.status(404).json({ message: "notfound" });
     }
 
-    return res.status(200).json(user);
+    const { id, name, email, phone, address, fcm } = user;
+    if (user.vendor) {
+      return res.status(200).json({
+        id,
+        name,
+        email,
+        phone,
+        address,
+        fcm,
+        role: "vendor",
+        description: user.vendor.description,
+        image: user.vendor.image,
+        open: user.vendor.open,
+      });
+    }
+
+    if (user.admin) {
+      return res.status(200).json({
+        id,
+        name,
+        email,
+        phone,
+        fcm,
+        role: "admin",
+        super_admin: user.admin.super_admin,
+      });
+    }
+
+    return res.status(200).json({
+      id,
+      name,
+      email,
+      address,
+      phone,
+      fcm,
+      role: "customer",
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
