@@ -79,7 +79,7 @@ exports.login = async (req, res) => {
         .json({ message: "user with this email or phone not exist" });
     }
 
-    const isEqual = await bcrypt.compare(password, user.admin.password);
+    const isEqual = await bcrypt.compare(password, user.password);
 
     if (!isEqual) {
       return res.status(401).json({ error: "password is not correct" });
