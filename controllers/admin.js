@@ -21,12 +21,12 @@ exports.login = async (req, res) => {
     let user = null;
 
     if (key.includes("@")) {
-      await User.findOne({
+      user = await User.findOne({
         where: { email: key, role: "admin" },
         include: [{ model: Admin, include: AdminRole }],
       });
     } else {
-      await User.findOne({
+      user = await User.findOne({
         where: { phone: key, role: "admin" },
         include: [{ model: Admin, include: AdminRole }],
       });
