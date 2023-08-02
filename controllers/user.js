@@ -165,7 +165,7 @@ exports.getUserByToken = async (req, res) => {
       address,
       phone,
       fcm,
-      role: "customer",
+      role: user.role,
     });
   } catch (error) {
     console.error(error);
