@@ -120,6 +120,7 @@ exports.getUserByToken = async (req, res) => {
 
     const user = await User.findOne({
       where: { token },
+      attributes: { exclude: ["password"] },
     });
 
     if (!user) {
