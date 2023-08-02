@@ -170,7 +170,7 @@ exports.getAllAdmins = async (req, res) => {
 };
 
 exports.updateRoles = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.query;
   try {
     const admin = await Admin.findOne({
       where: { userId },
