@@ -37,8 +37,8 @@ exports.login = async (req, res) => {
         .json({ message: "user with this email not exist" });
     }
 
-    if (!user.delivery) {
-      return res.status(401).json({ error: "you are not delivery" });
+    if (!user.vendor) {
+      return res.status(401).json({ error: "you are not vendor" });
     }
 
     const isEqual = await bcrypt.compare(password, user.password);
