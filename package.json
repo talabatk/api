@@ -1,0 +1,32 @@
+{
+  "name": "talabatek",
+  "version": "1.0.0",
+  "description": "talabated app backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "start-server": "node app.js"
+  },
+  "author": "omar mohamed",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.18.3"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.0",
+    "express-validator": "^7.0.1",
+    "firebase": "^10.1.0",
+    "firebase-admin": "^11.10.1",
+    "jsonwebtoken": "^9.0.1",
+    "moment": "^2.29.4",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.5.2",
+    "sequelize": "^6.32.1"
+  }
+}
