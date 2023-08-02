@@ -103,6 +103,7 @@ exports.login = async (req, res) => {
         fcm: user.fcm,
         email: user.email,
         phone: user.phone,
+        address: user.address,
         token,
         role: "customer",
       },
