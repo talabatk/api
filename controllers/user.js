@@ -189,7 +189,7 @@ exports.resetPassword = async (req, res) => {
     const isEqual = await bcrypt.compare(old_password, user.password);
 
     if (!isEqual) {
-      res.status(401).json({ error: "wrong password" });
+      return res.status(401).json({ error: "wrong password" });
     }
 
     if (new_password !== confirm_password) {
