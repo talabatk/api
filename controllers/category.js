@@ -52,24 +52,24 @@ exports.getOne = async (req, res) => {
 exports.editOne = async (req, res) => {
   const { id } = req.params;
 
-  Category.update(req.body, { where: { id } })
-    .then(() => {
-      if (req.file) {
-        Category.update({ image: req.file.filename }, { where: { id } });
-      }
-    })
-    .then(() => Category.findByPk(id))
-    .then((category) =>
-      res.json({
-        ...category.toJSON(),
-        image: category.image
-          ? "http://" + req.get("host") + "/uploads/" + req.file
-            ? req.file.filename
-            : category.image
-          : null,
-      })
-    )
-    .catch((error) => res.status(400).json({ error }));
+  try {
+    const category = await Category.update(req.body, { where: { id } });
+
+    if (req.file) {
+      category.image = req.file.filename;
+      await category.save();
+    }
+
+    if (category.image) {
+      category.image =
+        "http://" + req.get("host") + "/uploads/" + category.image;
+    }
+
+    return res.status(200).json(category);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.deleteOne = async (req, res, next) => {
