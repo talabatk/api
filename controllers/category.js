@@ -53,19 +53,22 @@ exports.editOne = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const category = await Category.update(req.body, { where: { id } });
+    const category = await Category.findByPk(id);
+
+    await category.update(req.body);
 
     if (req.file) {
-      category.image = req.file.filename;
-      await category.save();
+      await category.update({
+        image: req.file.filename,
+      });
     }
 
-    if (category.image) {
-      category.image =
-        "http://" + req.get("host") + "/uploads/" + category.image;
-    }
-
-    return res.status(200).json(category);
+    return res.status(200).json({
+      ...category.toJSON(),
+      image: category.image
+        ? "http://" + req.get("host") + "/uploads/" + category.image
+        : null,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
