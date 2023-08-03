@@ -24,7 +24,7 @@ exports.getAll = async (req, res, next) => {
   Category.findAll()
     .then((categories) => {
       const categoriesWithUrls = categories.map((item) => ({
-        name: item.name,
+        ...item.toJSON(),
         image: item.image
           ? "http://" + req.get("host") + "/uploads/" + item.image
           : null,
