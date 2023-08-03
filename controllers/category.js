@@ -53,8 +53,20 @@ exports.editOne = async (req, res) => {
   const { id } = req.params;
 
   Category.update(req.body, { where: { id } })
+    .then(() => {
+      if (req.file) {
+        Category.update({ image: req.file.filename }, { where: { id } });
+      }
+    })
     .then(() => Category.findByPk(id))
-    .then((category) => res.json(category))
+    .then((category) =>
+      res.json({
+        ...category.toJSON(),
+        image: category.image
+          ? "http://" + req.get("host") + "/uploads/" + category.image
+          : null,
+      })
+    )
     .catch((error) => res.status(400).json({ error }));
 };
 
