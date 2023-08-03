@@ -63,7 +63,9 @@ exports.editOne = async (req, res) => {
       res.json({
         ...category.toJSON(),
         image: category.image
-          ? "http://" + req.get("host") + "/uploads/" + category.image
+          ? "http://" + req.get("host") + "/uploads/" + req.file
+            ? req.file.filename
+            : category.image
           : null,
       })
     )
