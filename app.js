@@ -14,13 +14,16 @@ const Admin = require("./models/admin");
 const AdminRole = require("./models/adminRole");
 const Delivery = require("./models/delivery");
 const Vendor = require("./models/vendor");
-
+const Category = require("./models/category");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
 const deliveryRoutes = require("./routes/delivery");
 const vendorRoutes = require("./routes/vendor");
-
+const Notification = require("./models/notifications");
+const UserNotification = require("./models/userNotification");
+const notificationsRouts = require("./routes//notification");
+const categoryRoutes = require("./routes/category");
 //--------relations---------------------------
 
 //assign admin to user profile
@@ -37,6 +40,11 @@ AdminRole.belongsTo(Admin);
 
 User.hasOne(Vendor);
 Vendor.belongsTo(User);
+
+// define associations between the models
+User.belongsToMany(Notification, { through: UserNotification });
+Notification.belongsToMany(User, { through: UserNotification });
+
 //-------settings-----------------------------
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -69,6 +77,10 @@ app.use("/admin", adminRoutes);
 app.use("/delivery", deliveryRoutes);
 
 app.use("/vendor", vendorRoutes);
+
+app.use("/api", notificationsRouts);
+
+app.use("/api", categoryRoutes);
 
 sequelize
   .sync()
