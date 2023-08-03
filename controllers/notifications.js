@@ -107,7 +107,7 @@ exports.getUserNotification = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
-    const decodedToken = jwt.verify(token, "jdjdjdjnnnn");
+    const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
     if (!decodedToken.userId) {
       return res.status(404).json({ message: "المستخدم غير موجود" });
