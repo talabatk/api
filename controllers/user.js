@@ -29,6 +29,7 @@ exports.register = async (req, res) => {
       address,
       email,
       password: hashedPassword,
+      image: req.file ? req.file.filename : null,
       role: "customer",
       phone,
       fcm,
@@ -48,6 +49,9 @@ exports.register = async (req, res) => {
         address,
         email,
         role: "customer",
+        image: req.file
+          ? "http://" + req.get("host") + "/uploads/" + req.file.filename
+          : null,
         phone,
         fcm,
         token,
@@ -106,6 +110,9 @@ exports.login = async (req, res) => {
         email: user.email,
         phone: user.phone,
         address: user.address,
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
         token,
         role: "customer",
       },
@@ -131,6 +138,7 @@ exports.getUserByToken = async (req, res) => {
     }
 
     const { id, name, email, phone, address, fcm } = user;
+
     if (user.vendor) {
       return res.status(200).json({
         id,
@@ -141,7 +149,9 @@ exports.getUserByToken = async (req, res) => {
         fcm,
         role: "vendor",
         description: user.vendor.description,
-        image: "http://" + req.get("host") + "/uploads/" + user.vendor.image,
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
         open: user.vendor.open,
       });
     }
@@ -155,6 +165,9 @@ exports.getUserByToken = async (req, res) => {
         fcm,
         role: "admin",
         super_admin: user.admin.super_admin,
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
       });
     }
 
@@ -166,6 +179,9 @@ exports.getUserByToken = async (req, res) => {
       phone,
       fcm,
       role: user.role,
+      image: user.image
+        ? "http://" + req.get("host") + "/uploads/" + user.image
+        : null,
     });
   } catch (error) {
     console.error(error);
@@ -203,6 +219,15 @@ exports.updateProfile = async (req, res) => {
     }
 
     const updatedUser = await user.update(req.body);
+
+    if (req.file) {
+      const updateUser = await user.update({
+        image: req.file.filename,
+      });
+
+      updatedUser.image =
+        "http://" + req.get("host") + "/uploads/" + updatedUser.image;
+    }
 
     return res.status(200).json(updatedUser);
   } catch (error) {

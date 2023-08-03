@@ -14,10 +14,6 @@ const Vendor = sequelize.define("vendor", {
     allowNull: false,
     defaultValue: true,
   },
-  image: {
-    type: Sequelize.STRING,
-    allowNull: true,
-  },
   description: {
     type: Sequelize.STRING,
     allowNull: true,

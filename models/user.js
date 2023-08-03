@@ -33,6 +33,10 @@ const User = sequelize.define("user", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  image: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   fcm: {
     type: Sequelize.STRING,
     allowNull: true,

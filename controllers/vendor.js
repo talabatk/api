@@ -69,8 +69,8 @@ exports.login = async (req, res) => {
         role: user.role,
         description: user.vendor.description,
         open: user.vendor.open,
-        image: user.vendor.image
-          ? "http://" + req.get("host") + "/uploads/" + user.vendor.image
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
           : null,
         token,
       },
@@ -107,13 +107,13 @@ exports.createVendor = async (req, res) => {
       phone,
       fcm,
       address,
+      image: req.file ? req.file.filename : null,
       role: "vendor",
       password: hashedPassword,
     });
 
     const vendor = await Vendor.create({
       description,
-      image: req.file ? req.file.filename : null,
       userId: user.id,
       open,
     });
@@ -165,21 +165,21 @@ exports.getAllVendors = async (req, res) => {
     }); // Get total number of admins
 
     const results = users.map((user) => {
-      if (user.vendor.image) {
-        user.vendor.image =
-          "http://" + req.get("host") + "/uploads/" + user.vendor.image;
+      if (user.image) {
+        user.image = "http://" + req.get("host") + "/uploads/" + user.image;
       }
-      const { id, name, email, phone, address, fcm } = user;
+      const { id, name, email, phone, address, fcm, open } = user;
       return {
         id,
         name,
         email,
         phone,
         address,
+        open,
         fcm,
         role: "vendor",
         description: user.vendor.description,
-        image: user.vendor.image,
+        image: user.image,
       };
     });
 
