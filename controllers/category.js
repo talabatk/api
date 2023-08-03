@@ -38,7 +38,14 @@ exports.getOne = async (req, res) => {
   const { id } = req.params;
 
   Category.findByPk(id)
-    .then((category) => res.json(category))
+    .then((category) =>
+      res.json({
+        ...category.toJSON(),
+        image: category.image
+          ? "http://" + req.get("host") + "/uploads/" + category.image
+          : null,
+      })
+    )
     .catch((error) => res.status(400).json({ error }));
 };
 
