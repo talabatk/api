@@ -230,6 +230,15 @@ exports.editVendor = async (req, res) => {
 
     const updatedVendor = await vendor.update(req.body);
 
+    if (req.file) {
+      const updateUser = await vendor.update({
+        image: req.file.filename,
+      });
+
+      updatedVendor.image =
+        "http://" + req.get("host") + "/uploads/" + updatedVendor.image;
+    }
+
     return res.status(200).json(updatedVendor);
   } catch (error) {
     console.error(error);
