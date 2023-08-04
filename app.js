@@ -15,6 +15,8 @@ const AdminRole = require("./models/adminRole");
 const Delivery = require("./models/delivery");
 const Vendor = require("./models/vendor");
 const Category = require("./models/category");
+const Slider = require("./models/slider");
+const Product = require("./models/product");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -24,6 +26,7 @@ const Notification = require("./models/notifications");
 const UserNotification = require("./models/userNotification");
 const notificationsRouts = require("./routes//notification");
 const categoryRoutes = require("./routes/category");
+const sliderRoutes = require("./routes/slider");
 //--------relations---------------------------
 
 //assign admin to user profile
@@ -41,6 +44,15 @@ AdminRole.belongsTo(Admin);
 User.hasOne(Vendor);
 Vendor.belongsTo(User);
 
+Product.hasMany(Slider);
+Slider.belongsTo(Product);
+
+User.hasMany(Slider, {
+  foreignKey: "vendorId",
+});
+Slider.belongsTo(User, {
+  foreignKey: "vendorId",
+});
 // define associations between the models
 User.belongsToMany(Notification, { through: UserNotification });
 Notification.belongsToMany(User, { through: UserNotification });
@@ -81,6 +93,8 @@ app.use("/vendor", vendorRoutes);
 app.use("/api", notificationsRouts);
 
 app.use("/api", categoryRoutes);
+
+app.use("/api", sliderRoutes);
 
 sequelize
   .sync()
