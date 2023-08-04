@@ -68,6 +68,9 @@ exports.login = async (req, res) => {
         phone: user.phone,
         role: user.role,
         super_admin: user.admin.super_admin,
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
         roles: !user.admin.super_admin ? user.admin.adminRole : null,
         token,
       },
@@ -101,6 +104,7 @@ exports.createAdmin = async (req, res) => {
       name,
       email,
       phone,
+      image: req.file ? req.file.filename : null,
       fcm,
       role: "admin",
       password: hashedPassword,
@@ -132,6 +136,9 @@ exports.createAdmin = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        image: req.file
+          ? "http://" + req.get("host") + "/uploads/" + req.file.filename
+          : null,
         phone,
         fcm: user.fcm,
         super_admin: admin.super_admin,
@@ -156,13 +163,22 @@ exports.getAllAdmins = async (req, res) => {
       attributes: { exclude: ["password"] },
     });
 
+    const results = users.map((user) => {
+      return {
+        ...user.toJSON(),
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
+      };
+    });
+
     const count = await User.count({
       where: {
         role: "admin",
       },
     }); // Get total number of admins
 
-    return res.status(200).json({ count: count, results: users });
+    return res.status(200).json({ count: count, results: results });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });

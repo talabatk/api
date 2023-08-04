@@ -66,6 +66,9 @@ exports.login = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
         token,
       },
     });
@@ -90,6 +93,7 @@ exports.createDelivery = async (req, res) => {
       email,
       phone,
       fcm,
+      image: req.file ? req.file.filename : null,
       role: "delivery",
       password: hashedPassword,
     });
@@ -112,6 +116,9 @@ exports.createDelivery = async (req, res) => {
         email,
         phone,
         fcm,
+        image: req.file
+          ? "http://" + req.get("host") + "/uploads/" + req.file.filename
+          : null,
         token,
         role: "delivery",
       },
@@ -132,13 +139,22 @@ exports.getAllDeliveries = async (req, res) => {
       attributes: { exclude: ["password"] },
     });
 
+    const results = users.map((user) => {
+      return {
+        ...user.toJSON(),
+        image: user.image
+          ? "http://" + req.get("host") + "/uploads/" + user.image
+          : null,
+      };
+    });
+
     const count = await User.count({
       where: {
         role: "delivery",
       },
     }); // Get total number of admins
 
-    return res.status(200).json({ count: count, results: users });
+    return res.status(200).json({ count: count, results: results });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
