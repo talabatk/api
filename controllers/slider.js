@@ -44,6 +44,10 @@ exports.editOne = async (req, res) => {
       slider.image = req.file.filename;
     }
 
+    if (req.body.title) {
+      slider.title = req.body.title;
+    }
+
     if (req.body.productId) {
       slider.productId = req.body.productId;
     }
