@@ -9,6 +9,6 @@ router.post("/create-admin", validateUser, adminController.createAdmin);
 
 router.get("/get-admins", adminController.getAllAdmins);
 
-router.get("/updated-roles", adminController.updateRoles);
+router.patch("/updated-roles", adminController.updateRoles);
 
 module.exports = router;
