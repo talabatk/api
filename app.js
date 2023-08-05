@@ -18,7 +18,7 @@ const Category = require("./models/category");
 const Slider = require("./models/slider");
 const Product = require("./models/product");
 const ProductImage = require("./models/productImage");
-const UserFavoriteProduct = require("./models/UserFavoriteproduct");
+// const UserFavoriteProduct = require("./models/UserFavoriteproduct");
 
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
@@ -56,8 +56,8 @@ Slider.belongsTo(Product);
 Product.hasMany(ProductImage);
 ProductImage.belongsTo(Product);
 
-User.belongsToMany(Product, { through: UserFavoriteProduct });
-Product.belongsToMany(User, { through: UserFavoriteProduct });
+// User.belongsToMany(Product, { through: UserFavoriteProduct });
+// Product.belongsToMany(User, { through: UserFavoriteProduct });
 
 User.hasMany(Product, {
   foreignKey: "vendorId",
