@@ -17,6 +17,9 @@ const Vendor = require("./models/vendor");
 const Category = require("./models/category");
 const Slider = require("./models/slider");
 const Product = require("./models/product");
+const ProductImage = require("./models/productImage");
+const UserFavoriteProduct = require("./models/UserFavoriteproduct");
+
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -27,6 +30,9 @@ const UserNotification = require("./models/userNotification");
 const notificationsRouts = require("./routes//notification");
 const categoryRoutes = require("./routes/category");
 const sliderRoutes = require("./routes/slider");
+const productRoutes = require("./routes/product");
+const favoriteRoutes = require("./routes/favorite");
+
 //--------relations---------------------------
 
 //assign admin to user profile
@@ -47,12 +53,29 @@ Vendor.belongsTo(User);
 Product.hasMany(Slider);
 Slider.belongsTo(Product);
 
+Product.hasMany(ProductImage);
+ProductImage.belongsTo(Product);
+
+User.belongsToMany(Product, { through: UserFavoriteProduct });
+Product.belongsToMany(User, { through: UserFavoriteProduct });
+
+User.hasMany(Product, {
+  foreignKey: "vendorId",
+});
+Product.belongsTo(User, {
+  foreignKey: "vendorId",
+});
+
+Category.hasMany(Product);
+Product.belongsTo(Category);
+
 User.hasMany(Slider, {
   foreignKey: "vendorId",
 });
 Slider.belongsTo(User, {
   foreignKey: "vendorId",
 });
+
 // define associations between the models
 User.belongsToMany(Notification, { through: UserNotification });
 Notification.belongsToMany(User, { through: UserNotification });
@@ -73,7 +96,7 @@ const app = express();
 // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(upload.single("image"));
+app.use(upload.array("image"));
 
 app.use("/uploads", express.static("uploads"));
 
@@ -95,6 +118,10 @@ app.use("/api", notificationsRouts);
 app.use("/api", categoryRoutes);
 
 app.use("/api", sliderRoutes);
+
+app.use("/api", productRoutes);
+
+app.use("/api", favoriteRoutes);
 
 sequelize
   .sync()

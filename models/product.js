@@ -21,5 +21,20 @@ const Product = sequelize.define("product", {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,
   },
+  available: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
+  featured: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  orders: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
 });
 module.exports = Product;
