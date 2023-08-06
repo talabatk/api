@@ -104,7 +104,7 @@ exports.createAdmin = async (req, res) => {
       name,
       email,
       phone,
-      image: req.file ? req.file.filename : null,
+      image: req.files[0] ? req.files[0].filename : null,
       fcm,
       role: "admin",
       password: hashedPassword,
@@ -136,8 +136,8 @@ exports.createAdmin = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        image: req.file
-          ? "http://" + req.get("host") + "/uploads/" + req.file.filename
+        image: req.files[0]
+          ? "http://" + req.get("host") + "/uploads/" + req.files[0].filename
           : null,
         phone,
         fcm: user.fcm,

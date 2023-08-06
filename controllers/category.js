@@ -6,7 +6,7 @@ exports.createCategory = async (req, res, next) => {
   try {
     const category = await Category.create({
       name,
-      image: req.file ? req.file.filename : null,
+      image: req.files[0] ? req.files[0].filename : null,
     });
 
     category.image = "http://" + req.get("host") + "/uploads/" + category.image;
@@ -57,9 +57,9 @@ exports.editOne = async (req, res) => {
 
     await category.update(req.body);
 
-    if (req.file) {
+    if (req.files[0]) {
       await category.update({
-        image: req.file.filename,
+        image: req.files[0].filename,
       });
     }
 

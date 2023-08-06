@@ -107,7 +107,7 @@ exports.createVendor = async (req, res) => {
       phone,
       fcm,
       address,
-      image: req.file ? req.file.filename : null,
+      image: req.files[0] ? req.files[0].filename : null,
       role: "vendor",
       password: hashedPassword,
     });
@@ -133,8 +133,8 @@ exports.createVendor = async (req, res) => {
         address,
         phone,
         description,
-        image: req.file
-          ? "http://" + req.get("host") + "/uploads/" + req.file.filename
+        image: req.files[0]
+          ? "http://" + req.get("host") + "/uploads/" + req.files[0].filename
           : null,
         fcm,
         token,
@@ -230,9 +230,9 @@ exports.editVendor = async (req, res) => {
 
     const updatedVendor = await vendor.update(req.body);
 
-    if (req.file) {
+    if (req.files[0]) {
       const updateUser = await vendor.update({
-        image: req.file.filename,
+        image: req.files[0].filename,
       });
 
       updatedVendor.image =
