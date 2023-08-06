@@ -11,6 +11,6 @@ router.get("/get-admins", adminController.getAllAdmins);
 
 router.patch("/updated-roles", adminController.updateRoles);
 
-router.patch("/updated-admin", adminController.editAdmin);
+router.patch("/update-admin", adminController.editAdmin);
 
 module.exports = router;
