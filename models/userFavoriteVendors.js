@@ -3,7 +3,7 @@ const Sequelize = require("sequelize");
 const sequelize = require("../util/database");
 // define a new model for the junction table
 
-const UserFavoriteProduct = sequelize.define("user_favorite_product", {
+const UserFavoriteVendor = sequelize.define("user_favorite_Vendor", {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
@@ -16,4 +16,4 @@ const UserFavoriteProduct = sequelize.define("user_favorite_product", {
   },
 });
 
-module.exports = UserFavoriteProduct;
+module.exports = UserFavoriteVendor;
