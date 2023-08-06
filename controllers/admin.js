@@ -250,7 +250,7 @@ exports.editAdmin = async (req, res) => {
         "http://" + req.get("host") + "/uploads/" + updatedAdmin.image;
     }
 
-    return res.status(200).json(updatedVendor);
+    return res.status(200).json(updatedAdmin);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
