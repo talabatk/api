@@ -200,3 +200,59 @@ exports.updateRoles = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.editAdmin = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    let admin = null;
+
+    if (id) {
+      admin = await User.findByPk(id, {
+        include: [Admin],
+      });
+    } else {
+      admin = await User.findOne({
+        where: { token },
+        include: [Admin],
+      });
+    }
+
+    if (!admin) {
+      return res.status(404).json({ message: "notfound" });
+    }
+
+    // Check if email or phone exists and belongs to someone else
+    const { email, phone } = req.body;
+    if (
+      email &&
+      email !== admin.email &&
+      (await User.findOne({ where: { email } }))
+    ) {
+      return res.status(400).json({ message: "email already exist" });
+    }
+    if (
+      phone &&
+      phone !== admin.phone &&
+      (await User.findOne({ where: { phone } }))
+    ) {
+      return res.status(400).json({ message: "phone number already exist" });
+    }
+
+    const updatedAdmin = await admin.update(req.body);
+
+    if (req.files[0]) {
+      const updateUser = await admin.update({
+        image: req.files[0].filename,
+      });
+
+      updatedAdmin.image =
+        "http://" + req.get("host") + "/uploads/" + updatedAdmin.image;
+    }
+
+    return res.status(200).json(updatedVendor);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
