@@ -162,7 +162,9 @@ exports.getUserfavoriteVendors = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    return res.status(200).json({ results: favouriteVendors });
+    const results = favouriteVendors.map((item) => item.user);
+
+    return res.status(200).json({ results: results });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
