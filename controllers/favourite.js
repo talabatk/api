@@ -82,7 +82,9 @@ exports.getUserFavoriteProducts = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    return res.status(200).json({ results: userFavorites });
+    const results = userFavorites.map((item) => item.product);
+
+    return res.status(200).json({ results: results });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
