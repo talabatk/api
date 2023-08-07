@@ -190,12 +190,20 @@ exports.getUserByToken = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
+  const { id } = req.body;
+
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
-    const user = await User.findOne({
-      where: { token },
-    });
+    let user = null;
+
+    if (id) {
+      user = await User.findByPk(id);
+    } else {
+      user = await User.findOne({
+        where: { token },
+      });
+    }
 
     if (!user) {
       return res.status(404).json({ message: "notfound" });
