@@ -193,13 +193,12 @@ exports.updateProfile = async (req, res) => {
   const { id } = req.body;
 
   try {
-    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
-
     let user = null;
 
     if (id) {
       user = await User.findByPk(id);
     } else {
+      const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
       user = await User.findOne({
         where: { token },
       });
