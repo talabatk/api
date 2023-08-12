@@ -93,7 +93,7 @@ exports.createDelivery = async (req, res) => {
       email,
       phone,
       fcm,
-      image: req.files[0] ? req.files[0].filename : null,
+      image: req.files.image[0] ? req.files.image[0].filename : null,
       role: "delivery",
       password: hashedPassword,
     });
@@ -116,8 +116,11 @@ exports.createDelivery = async (req, res) => {
         email,
         phone,
         fcm,
-        image: req.files[0]
-          ? "http://" + req.get("host") + "/uploads/" + req.files[0].filename
+        image: req.files.image[0]
+          ? "http://" +
+            req.get("host") +
+            "/uploads/" +
+            req.files.image[0].filename
           : null,
         token,
         role: "delivery",

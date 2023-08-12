@@ -8,7 +8,7 @@ exports.createSlider = async (req, res) => {
       title,
       productId,
       vendorId,
-      image: req.files[0].filename,
+      image: req.files.image[0].filename,
     });
     return res.status(201).json({ message: "slider created", slider });
   } catch (error) {
@@ -40,8 +40,8 @@ exports.editOne = async (req, res) => {
   try {
     const slider = await Slider.findByPk(id);
 
-    if (req.files[0]) {
-      slider.image = req.files[0].filename;
+    if (req.files.image[0]) {
+      slider.image = req.files.image[0].filename;
     }
 
     if (req.body.title) {

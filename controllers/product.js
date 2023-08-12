@@ -7,6 +7,9 @@ const User = require("../models/user");
 const Category = require("../models/category");
 
 const Sequelize = require("sequelize");
+const VendorCategory = require("../models/vendorCategories");
+const OptionGroup = require("../models/optionGroup");
+const Option = require("../models/option");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -21,6 +24,21 @@ exports.createProduct = async (req, res) => {
 
   try {
     // Create the product with the provided data
+    const vendorCategory = await VendorCategory.findOne({
+      where: { categoryId },
+    });
+
+    if (vendorCategory) {
+      vendorCategory.products_number = +vendorCategory.products_number + 1;
+      await vendorCategory.save();
+    } else {
+      await VendorCategory.create({
+        categoryId,
+        userId: vendorId,
+        products_number: 1,
+      });
+    }
+
     let product = await Product.create({
       title,
       description,
@@ -32,7 +50,7 @@ exports.createProduct = async (req, res) => {
     });
 
     const images = await ProductImage.bulkCreate(
-      req.files.map((file) => ({
+      req.files.image.map((file) => ({
         productId: product.id,
         image: file.filename,
       }))
@@ -110,6 +128,11 @@ exports.getAll = async (req, res) => {
             ],
           },
           {
+            model: OptionGroup,
+            attributes: ["id", "name"],
+            include: { model: Option, attributes: ["id", "name", "value"] },
+          },
+          {
             model: User,
             attributes: [
               "id",
@@ -155,6 +178,11 @@ exports.getAll = async (req, res) => {
                 "image",
               ],
             ],
+          },
+          {
+            model: OptionGroup,
+            attributes: ["id", "name"],
+            include: { model: Option, attributes: ["id", "name", "value"] },
           },
           {
             model: User,
@@ -218,6 +246,11 @@ exports.getOne = async (req, res) => {
               "image",
             ],
           ],
+        },
+        {
+          model: OptionGroup,
+          attributes: ["id", "name"],
+          include: { model: Option, attributes: ["id", "name", "value"] },
         },
         {
           model: User,
@@ -306,7 +339,7 @@ exports.editOne = async (req, res) => {
     await product.update(req.body);
 
     const images = await ProductImage.bulkCreate(
-      req.files.map((file) => ({
+      req.files.image.map((file) => ({
         productId: product.id,
         image: file.filename,
       }))
@@ -334,10 +367,27 @@ exports.editOne = async (req, res) => {
 
 exports.deleteOne = async (req, res) => {
   const { id } = req.params;
+  try {
+    const product = await Product.findByPk(id);
 
-  Product.destroy({ where: { id } })
-    .then(() => res.json({ message: "deleted" }))
-    .catch((error) => res.status(400).json({ error }));
+    const vendorCategory = await VendorCategory.findOne({
+      where: { categoryId: product.categoryId, userId: product.vendorId },
+    });
+
+    if (+vendorCategory.products_number === 1) {
+      await VendorCategory.destroy({ where: { id: vendorCategory.id } });
+    } else {
+      vendorCategory.products_number = +vendorCategory.products_number - 1;
+      await vendorCategory.save();
+    }
+
+    Product.destroy({ where: { id } }).then(() =>
+      res.json({ message: "deleted" })
+    );
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.deleteProductImage = async (req, res) => {

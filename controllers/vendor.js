@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 //models===============================
 const User = require("../models/user");
 const Vendor = require("../models/vendor");
+const DeliveryCost = require("../models/delivery_cost");
+const Area = require("../models/area");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -22,7 +24,7 @@ exports.login = async (req, res) => {
     if (key.includes("@")) {
       user = await User.findOne({
         where: { email: key, role: "vendor" },
-        include: [Vendor],
+        include: [Vendor, Area],
       });
     } else {
       user = await User.findOne({
@@ -69,10 +71,17 @@ exports.login = async (req, res) => {
         role: user.role,
         description: user.vendor.description,
         open: user.vendor.open,
+        direction: user.vendor.direction,
+        distance: user.vendor.distance,
+        delivery_time: user.vendor.delivery_time,
         image: user.image
           ? "http://" + req.get("host") + "/uploads/" + user.image
           : null,
+        cover: user.vendor.cover
+          ? "http://" + req.get("host") + "/uploads/" + user.cover
+          : null,
         token,
+        areas: user.areas,
       },
     });
   } catch (error) {
@@ -92,6 +101,9 @@ exports.createVendor = async (req, res) => {
     confirm_password,
     open,
     description,
+    delivery_time,
+    direction,
+    distance,
   } = req.body;
 
   if (password !== confirm_password) {
@@ -99,6 +111,7 @@ exports.createVendor = async (req, res) => {
   }
 
   try {
+    console.log(req.files);
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await User.create({
@@ -107,7 +120,7 @@ exports.createVendor = async (req, res) => {
       phone,
       fcm,
       address,
-      image: req.files[0] ? req.files[0].filename : null,
+      image: req.files.image[0] ? req.files.image[0].filename : null,
       role: "vendor",
       password: hashedPassword,
     });
@@ -115,7 +128,11 @@ exports.createVendor = async (req, res) => {
     const vendor = await Vendor.create({
       description,
       userId: user.id,
+      cover: req.files.cover[0] ? req.files.cover[0].filename : null,
       open,
+      delivery_time,
+      direction,
+      distance,
     });
 
     const token = generateToken(user.id);
@@ -133,12 +150,24 @@ exports.createVendor = async (req, res) => {
         address,
         phone,
         description,
-        image: req.files[0]
-          ? "http://" + req.get("host") + "/uploads/" + req.files[0].filename
+        image: req.files.image[0]
+          ? "http://" +
+            req.get("host") +
+            "/uploads/" +
+            req.files.image[0].filename
+          : null,
+        cover: req.files.cover[0]
+          ? "http://" +
+            req.get("host") +
+            "/uploads/" +
+            req.files.cover[0].filename
           : null,
         fcm,
         token,
         open,
+        direction,
+        distance,
+        delivery_time,
         role: "vendor",
       },
     });
@@ -154,7 +183,7 @@ exports.getAllVendors = async (req, res) => {
       where: {
         role: "vendor",
       },
-      include: [Vendor],
+      include: [Vendor, Area],
       attributes: { exclude: ["password"] },
     });
 
@@ -168,6 +197,10 @@ exports.getAllVendors = async (req, res) => {
       if (user.image) {
         user.image = "http://" + req.get("host") + "/uploads/" + user.image;
       }
+      if (user.vendor.cover) {
+        user.vendor.cover =
+          "http://" + req.get("host") + "/uploads/" + user.vendor.cover;
+      }
       const { id, name, email, phone, address, fcm, open } = user;
       return {
         id,
@@ -179,7 +212,12 @@ exports.getAllVendors = async (req, res) => {
         fcm,
         role: "vendor",
         description: user.vendor.description,
+        direction: user.vendor.direction,
+        distance: user.vendor.distance,
+        delivery_time: user.vendor.delivery_time,
         image: user.image,
+        cover: user.vendor.cover,
+        areas: user.areas,
       };
     });
 
@@ -230,14 +268,23 @@ exports.editVendor = async (req, res) => {
 
     const updatedVendor = await vendor.update(req.body);
 
-    if (req.files[0]) {
+    if (req.files.image) {
       const updateUser = await vendor.update({
-        image: req.files[0].filename,
+        image: req.files.image[0].filename,
       });
 
       updatedVendor.image =
         "http://" + req.get("host") + "/uploads/" + updatedVendor.image;
     }
+
+    if (req.files.cover) {
+      await vendor.vendor.update({ cover: req.files.cover[0].filename });
+
+      updatedVendor.vendor.cover =
+        "http://" + req.get("host") + "/uploads/" + req.files.cover[0].filename;
+    }
+
+    await vendor.vendor.update(req.body);
 
     return res.status(200).json(updatedVendor);
   } catch (error) {

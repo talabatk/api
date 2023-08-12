@@ -12,4 +12,5 @@ router.patch("/category/:id", categoryController.editOne);
 
 router.delete("/category/:id", categoryController.deleteOne);
 
+router.post("/vendor-categories", categoryController.getVendorCategories);
 module.exports = router;

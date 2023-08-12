@@ -9,12 +9,4 @@ const sequelize = new Sequelize({
   dialect: "mysql",
 });
 
-// const sequelize = new Sequelize({
-//   host: "localhost",
-//   database: "talabatek",
-//   username: "root",
-//   password: "",
-//   dialect: "mysql",
-// });
-
 module.exports = sequelize;

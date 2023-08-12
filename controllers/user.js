@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
       address,
       email,
       password: hashedPassword,
-      image: req.files[0] ? req.files[0].filename : null,
+      image: req.files.image[0] ? req.files.image[0].filename : null,
       role: "customer",
       phone,
       fcm,
@@ -49,8 +49,11 @@ exports.register = async (req, res) => {
         address,
         email,
         role: "customer",
-        image: req.files[0]
-          ? "http://" + req.get("host") + "/uploads/" + req.files[0].filename
+        image: req.files.image[0]
+          ? "http://" +
+            req.get("host") +
+            "/uploads/" +
+            req.files.image[0].filename
           : null,
         phone,
         fcm,
@@ -227,9 +230,9 @@ exports.updateProfile = async (req, res) => {
 
     const updatedUser = await user.update(req.body);
 
-    if (req.files[0]) {
+    if (req.files.image[0]) {
       const updateUser = await user.update({
-        image: req.files[0].filename,
+        image: req.files.image[0].filename,
       });
 
       updatedUser.image =

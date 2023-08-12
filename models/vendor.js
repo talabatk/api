@@ -18,6 +18,22 @@ const Vendor = sequelize.define("vendor", {
     type: Sequelize.STRING,
     allowNull: true,
   },
+  cover: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  delivery_time: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  direction: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  distance: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = Vendor;
