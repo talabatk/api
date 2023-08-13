@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
         address,
         email,
         role: "customer",
-        image: req.files.image[0]
+        image: req.files.image
           ? "http://" +
             req.get("host") +
             "/uploads/" +
@@ -230,7 +230,7 @@ exports.updateProfile = async (req, res) => {
 
     const updatedUser = await user.update(req.body);
 
-    if (req.files.image[0]) {
+    if (req.files.image) {
       const updateUser = await user.update({
         image: req.files.image[0].filename,
       });

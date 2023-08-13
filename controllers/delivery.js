@@ -93,7 +93,7 @@ exports.createDelivery = async (req, res) => {
       email,
       phone,
       fcm,
-      image: req.files.image[0] ? req.files.image[0].filename : null,
+      image: req.files.image ? req.files.image[0].filename : null,
       role: "delivery",
       password: hashedPassword,
     });
@@ -116,7 +116,7 @@ exports.createDelivery = async (req, res) => {
         email,
         phone,
         fcm,
-        image: req.files.image[0]
+        image: req.files.image
           ? "http://" +
             req.get("host") +
             "/uploads/" +

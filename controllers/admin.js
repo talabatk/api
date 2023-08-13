@@ -104,7 +104,7 @@ exports.createAdmin = async (req, res) => {
       name,
       email,
       phone,
-      image: req.files.image[0] ? req.files.image[0].filename : null,
+      image: req.files.image ? req.files.image[0].filename : null,
       fcm,
       role: "admin",
       password: hashedPassword,
@@ -136,7 +136,7 @@ exports.createAdmin = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        image: req.files.image[0]
+        image: req.files.image
           ? "http://" +
             req.get("host") +
             "/uploads/" +
@@ -244,7 +244,7 @@ exports.editAdmin = async (req, res) => {
 
     const updatedAdmin = await admin.update(req.body);
 
-    if (req.files.image[0]) {
+    if (req.files.image) {
       const updateUser = await admin.update({
         image: req.files.image[0].filename,
       });

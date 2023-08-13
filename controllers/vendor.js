@@ -120,7 +120,7 @@ exports.createVendor = async (req, res) => {
       phone,
       fcm,
       address,
-      image: req.files.image[0] ? req.files.image[0].filename : null,
+      image: req.files.image ? req.files.image[0].filename : null,
       role: "vendor",
       password: hashedPassword,
     });
@@ -128,7 +128,7 @@ exports.createVendor = async (req, res) => {
     const vendor = await Vendor.create({
       description,
       userId: user.id,
-      cover: req.files.cover[0] ? req.files.cover[0].filename : null,
+      cover: req.files.cover ? req.files.cover[0].filename : null,
       status,
       delivery_time,
       direction,
@@ -150,13 +150,13 @@ exports.createVendor = async (req, res) => {
         address,
         phone,
         description,
-        image: req.files.image[0]
+        image: req.files.image
           ? "http://" +
             req.get("host") +
             "/uploads/" +
             req.files.image[0].filename
           : null,
-        cover: req.files.cover[0]
+        cover: req.files.cover
           ? "http://" +
             req.get("host") +
             "/uploads/" +
