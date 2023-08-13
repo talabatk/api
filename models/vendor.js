@@ -10,7 +10,8 @@ const Vendor = sequelize.define("vendor", {
     primaryKey: true,
   },
   status: {
-    type: Sequelize.STRING,
+    type: Sequelize.ENUM,
+    values: ["open", "close", "busy", "soon"],
     allowNull: false,
     defaultValue: "open",
   },
