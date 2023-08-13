@@ -9,10 +9,10 @@ const Vendor = sequelize.define("vendor", {
     allowNull: false,
     primaryKey: true,
   },
-  open: {
-    type: Sequelize.BOOLEAN,
+  status: {
+    type: Sequelize.STRING,
     allowNull: false,
-    defaultValue: true,
+    defaultValue: "open",
   },
   description: {
     type: Sequelize.STRING,

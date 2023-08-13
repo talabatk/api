@@ -94,14 +94,24 @@ exports.deleteOne = async (req, res, next) => {
 };
 
 exports.getVendorCategories = async (req, res) => {
-  const { vendorId } = req.body;
+  const { vendorId } = req.params;
 
   try {
-    const vendorCategories = await VendorCategory.findAll({
-      where: { userId: vendorId },
-    });
+    let vendorCategories = null;
 
-    const categoriesId = vendorCategories.map((item) => item.categoryId);
+    let categoriesId = null;
+
+    let filter = {};
+
+    if (vendorId) {
+      vendorCategories = await VendorCategory.findAll({
+        where: { userId: vendorId },
+      });
+
+      categoriesId = vendorCategories.map((item) => item.categoryId);
+
+      filter = { id: { [Op.in]: categoriesId } };
+    }
 
     const categories = await Category.findAll({
       attributes: [
@@ -135,7 +145,7 @@ exports.getVendorCategories = async (req, res) => {
           ],
         },
       ],
-      where: { id: { [Op.in]: categoriesId } },
+      where: filter,
     });
 
     return res.status(200).json({ results: categories });

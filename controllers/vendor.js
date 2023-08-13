@@ -70,7 +70,7 @@ exports.login = async (req, res) => {
         address: user.address,
         role: user.role,
         description: user.vendor.description,
-        open: user.vendor.open,
+        status: user.vendor.status,
         direction: user.vendor.direction,
         distance: user.vendor.distance,
         delivery_time: user.vendor.delivery_time,
@@ -99,7 +99,7 @@ exports.createVendor = async (req, res) => {
     fcm,
     password,
     confirm_password,
-    open,
+    status,
     description,
     delivery_time,
     direction,
@@ -129,7 +129,7 @@ exports.createVendor = async (req, res) => {
       description,
       userId: user.id,
       cover: req.files.cover[0] ? req.files.cover[0].filename : null,
-      open,
+      status,
       delivery_time,
       direction,
       distance,
@@ -164,7 +164,7 @@ exports.createVendor = async (req, res) => {
           : null,
         fcm,
         token,
-        open,
+        status,
         direction,
         distance,
         delivery_time,
@@ -201,14 +201,14 @@ exports.getAllVendors = async (req, res) => {
         user.vendor.cover =
           "http://" + req.get("host") + "/uploads/" + user.vendor.cover;
       }
-      const { id, name, email, phone, address, fcm, open } = user;
+      const { id, name, email, phone, address, fcm, status } = user;
       return {
         id,
         name,
         email,
         phone,
         address,
-        open,
+        status,
         fcm,
         role: "vendor",
         description: user.vendor.description,
