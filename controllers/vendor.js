@@ -201,14 +201,15 @@ exports.getAllVendors = async (req, res) => {
         user.vendor.cover =
           "http://" + req.get("host") + "/uploads/" + user.vendor.cover;
       }
-      const { id, name, email, phone, address, fcm, status } = user;
+      const { id, name, email, phone, address, fcm } = user;
+
       return {
         id,
         name,
         email,
         phone,
         address,
-        status,
+        status: user.vendor.status,
         fcm,
         role: "vendor",
         description: user.vendor.description,
