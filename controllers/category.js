@@ -94,7 +94,7 @@ exports.deleteOne = async (req, res, next) => {
 };
 
 exports.getVendorCategories = async (req, res) => {
-  const { vendorId } = req.params;
+  const { vendorId } = req.query;
 
   try {
     let vendorCategories = null;
