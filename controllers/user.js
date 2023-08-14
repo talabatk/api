@@ -126,6 +126,34 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.smsLogin = async (req, res) => {
+  const { phone, fcm } = req.body;
+
+  try {
+    const [user, created] = await User.findOrCreate({
+      where: { phone },
+      defaults: {
+        name: phone,
+        phone,
+        role: "customer",
+        fcm,
+      },
+      attributes: ["id", "name", "role", "fcm", "phone", "token"],
+    });
+
+    const token = generateToken(user.id);
+
+    user.token = token;
+
+    await user.save();
+
+    return res.status(200).json({ message: "success", user });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 exports.getUserByToken = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header

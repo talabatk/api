@@ -7,6 +7,8 @@ router.post("/signup", validateUser, userController.register);
 
 router.post("/login", userController.login);
 
+router.post("/sms-login", userController.smsLogin);
+
 router.get("/profile", userController.getUserByToken);
 
 router.post("/reset-password", userController.resetPassword);
