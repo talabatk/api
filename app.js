@@ -25,6 +25,7 @@ const Area = require("./models/area");
 const DeliveryCost = require("./models/delivery_cost");
 const OptionGroup = require("./models/optionGroup");
 const Option = require("./models/option");
+const Cart = require("./models/cart");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -49,6 +50,10 @@ Admin.belongsTo(User);
 //assign admin to user profile
 User.hasOne(Delivery);
 Delivery.belongsTo(User);
+
+//assign Cart  to user profile
+User.hasOne(Cart);
+Cart.belongsTo(User);
 
 //assign roles to admin profile
 Admin.hasOne(AdminRole);

@@ -5,6 +5,8 @@ const User = require("../models/user");
 const Vendor = require("../models/vendor");
 const Admin = require("../models/admin");
 const AdminRole = require("../models/adminRole");
+const Cart = require("../models/cart");
+
 //generate token=======================
 const generateToken = (userId) => {
   const token = jwt.sign({ userId }, "talabatek2309288/k_ss-jdls88", {
@@ -41,6 +43,8 @@ exports.register = async (req, res) => {
 
     await user.save();
 
+    const cart = await Cart.create({ userId: user.id });
+
     return res.status(200).json({
       message: "signup process success",
       user: {
@@ -58,6 +62,7 @@ exports.register = async (req, res) => {
         phone,
         fcm,
         token,
+        cart,
       },
     });
   } catch (error) {
@@ -75,10 +80,12 @@ exports.login = async (req, res) => {
     if (key.includes("@")) {
       user = await User.findOne({
         where: { email: key },
+        include: Cart,
       });
     } else {
       user = await User.findOne({
         where: { phone: key },
+        include: Cart,
       });
     }
 
@@ -104,6 +111,12 @@ exports.login = async (req, res) => {
 
     await user.save();
 
+    let cart = null;
+
+    if (!user.cart) {
+      cart = await Cart.create({ userId: user.id });
+    }
+
     return res.status(200).json({
       message: "login success",
       user: {
@@ -118,6 +131,7 @@ exports.login = async (req, res) => {
           : null,
         token,
         role: "customer",
+        cart: user.cart ? user.cart : cart,
       },
     });
   } catch (error) {
@@ -139,6 +153,7 @@ exports.smsLogin = async (req, res) => {
         fcm,
       },
       attributes: ["id", "name", "role", "fcm", "phone", "token"],
+      include: Cart,
     });
 
     const token = generateToken(user.id);
@@ -147,7 +162,16 @@ exports.smsLogin = async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({ message: "success", user });
+    let cart = null;
+
+    if (!user.cart) {
+      cart = await Cart.create({ userId: user.id });
+    }
+
+    return res.status(200).json({
+      message: "success",
+      user: { ...user.toJSON(), cart: cart ? cart : user.cart },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
@@ -160,7 +184,7 @@ exports.getUserByToken = async (req, res) => {
 
     const user = await User.findOne({
       where: { token },
-      include: [Vendor, { model: Admin, include: AdminRole }],
+      include: [Vendor, { model: Admin, include: AdminRole }, Cart],
       attributes: { exclude: ["password"] },
     });
 
@@ -202,6 +226,12 @@ exports.getUserByToken = async (req, res) => {
       });
     }
 
+    let cart = null;
+
+    if (!user.cart) {
+      cart = await Cart.create({ userId: user.id });
+    }
+
     return res.status(200).json({
       id,
       name,
@@ -213,6 +243,7 @@ exports.getUserByToken = async (req, res) => {
       image: user.image
         ? "http://" + req.get("host") + "/uploads/" + user.image
         : null,
+      cart: cart ? cart : user.cart,
     });
   } catch (error) {
     console.error(error);
