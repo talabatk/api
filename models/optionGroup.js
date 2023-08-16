@@ -13,5 +13,11 @@ const OptionGroup = sequelize.define("options_group", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  type: {
+    type: Sequelize.ENUM,
+    values: ["single", "multi"],
+    allowNull: false,
+    defaultValue: "single",
+  },
 });
 module.exports = OptionGroup;

@@ -9,6 +9,7 @@ exports.createGroup = async (req, res) => {
         return {
           productId,
           name: group.name,
+          type: group.type,
         };
       })
     );
@@ -46,11 +47,11 @@ exports.createGroup = async (req, res) => {
 
 exports.editGroup = async (req, res) => {
   const id = req.params.id;
-  const { name, options } = req.body;
+  const { name, type, options } = req.body;
   try {
     const group = await OptionGroup.findByPk(id, { include: Option });
 
-    await group.update({ name });
+    await group.update({ name, type: type ? type : group.type });
 
     let groupOptions = [];
 

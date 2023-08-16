@@ -129,7 +129,7 @@ exports.getAll = async (req, res) => {
           },
           {
             model: OptionGroup,
-            attributes: ["id", "name"],
+            attributes: ["id", "name", "type"],
             include: { model: Option, attributes: ["id", "name", "value"] },
           },
           {
@@ -181,7 +181,7 @@ exports.getAll = async (req, res) => {
           },
           {
             model: OptionGroup,
-            attributes: ["id", "name"],
+            attributes: ["id", "name", "type"],
             include: { model: Option, attributes: ["id", "name", "value"] },
           },
           {
@@ -249,7 +249,7 @@ exports.getOne = async (req, res) => {
         },
         {
           model: OptionGroup,
-          attributes: ["id", "name"],
+          attributes: ["id", "name", "type"],
           include: { model: Option, attributes: ["id", "name", "value"] },
         },
         {
