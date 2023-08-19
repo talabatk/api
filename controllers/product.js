@@ -397,3 +397,18 @@ exports.deleteProductImage = async (req, res) => {
     .then(() => res.json({ message: "deleted" }))
     .catch((error) => res.status(400).json({ error }));
 };
+
+exports.dataAnalysis = async (req, res) => {
+  try {
+    const products = await Product.count(); // Get total number of products
+
+    const customers = await User.count({ where: { role: "customer" } }); // Get total number of customers
+
+    const orders = 0;
+
+    return res.status(200).json({ products, customers, orders });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
