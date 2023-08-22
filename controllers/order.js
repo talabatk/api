@@ -284,10 +284,10 @@ exports.getOne = async (req, res) => {
   try {
     const order = await Order.findByPk(id, {
       include: [
+        { model: User, attributes: ["id", "name", "phone", "address"] },
         {
           model: CartProduct,
           include: [
-            { model: User, attributes: ["id", "name", "phone", "address"] },
             {
               model: Product,
               include: [
