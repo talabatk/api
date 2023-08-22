@@ -131,31 +131,33 @@ exports.calculateShipping = async (req, res) => {
       ],
     });
 
-    cart.cart_products.forEach((e) => {
-      const area = e.product.user.areas.find((item) => item.id === +areaId);
+    if (cart?.cart_products) {
+      cart.cart_products.forEach((e) => {
+        const area = e.product.user.areas.find((item) => item.id === +areaId);
 
-      const directionIndex = shippingDirections.findIndex(
-        (item) => item.direction === e.product.user.vendor.direction
-      );
+        const directionIndex = shippingDirections.findIndex(
+          (item) => item.direction === e.product.user.vendor.direction
+        );
 
-      if (directionIndex >= 0) {
-        const direction = shippingDirections[directionIndex];
+        if (directionIndex >= 0) {
+          const direction = shippingDirections[directionIndex];
 
-        if (direction.cost < +area.delivery_cost.cost) {
-          shippingDirections[directionIndex] = {
+          if (direction.cost < +area.delivery_cost.cost) {
+            shippingDirections[directionIndex] = {
+              vendor: +e.product.user.vendor.id,
+              cost: +area.delivery_cost.cost,
+              direction: e.product.user.vendor.direction,
+            };
+          }
+        } else {
+          shippingDirections.push({
             vendor: +e.product.user.vendor.id,
             cost: +area.delivery_cost.cost,
             direction: e.product.user.vendor.direction,
-          };
+          });
         }
-      } else {
-        shippingDirections.push({
-          vendor: +e.product.user.vendor.id,
-          cost: +area.delivery_cost.cost,
-          direction: e.product.user.vendor.direction,
-        });
-      }
-    });
+      });
+    }
 
     shippingDirections.forEach((e) => {
       shipping = shipping + e.cost;
