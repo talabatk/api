@@ -171,14 +171,14 @@ exports.calculateShipping = async (req, res) => {
       shipping = shipping + e.cost;
     });
 
-    return res
-      .status(200)
-      .json({
-        message: "success",
-        shipping,
-        subtotal: +cart.total,
-        total: +cart.total + shipping,
-      });
+    return res.status(200).json({
+      message: "success",
+      shipping,
+      subtotal: +cart.total,
+      total: +cart.total + shipping,
+      time: 30,
+      distance: 50,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
