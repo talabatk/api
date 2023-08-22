@@ -12,7 +12,7 @@ router.get("/order/:id", orderController.getOne);
 
 router.patch("/order/:id", orderController.updateOrder);
 
-router.patch("/start-order/:id", orderController.assignDelivery);
+router.get("/start-order/:id", orderController.assignDelivery);
 
 router.get("/user-orders", orderController.getUserOrders);
 
