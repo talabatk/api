@@ -45,6 +45,7 @@ exports.getUserCart = async (req, res) => {
             },
             Option,
           ],
+          where: { ordered: false },
         },
       ],
     });

@@ -28,5 +28,10 @@ const CartProduct = sequelize.define("cart_product", {
     allowNull: false,
     defaultValue: 0,
   },
+  ordered: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 });
 module.exports = CartProduct;

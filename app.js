@@ -28,6 +28,7 @@ const Option = require("./models/option");
 const Cart = require("./models/cart");
 const CartProduct = require("./models/cartProduct");
 const CartProductOption = require("./models/cartProductOption");
+const Order = require("./models/order");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -44,6 +45,8 @@ const areaRoutes = require("./routes/area");
 const deliverCostRoutes = require("./routes/deliverCosts");
 const optionGroupRoutes = require("./routes/optionsGroup");
 const cartRoutes = require("./routes/cart");
+const orderRoutes = require("./routes/order");
+
 //--------relations---------------------------
 
 //assign admin to user profile
@@ -61,6 +64,14 @@ Cart.belongsTo(User);
 //assign cart product to user cart
 Cart.hasMany(CartProduct);
 CartProduct.belongsTo(Cart);
+
+//assign cart product to user order
+Order.hasMany(CartProduct);
+CartProduct.belongsTo(Order);
+
+//assign cart product to user order
+User.hasMany(Order);
+Order.belongsTo(User);
 
 Product.hasMany(CartProduct);
 CartProduct.belongsTo(Product);
@@ -181,6 +192,8 @@ app.use("/api", deliverCostRoutes);
 app.use("/api", optionGroupRoutes);
 
 app.use("/api", cartRoutes);
+
+app.use("/api", orderRoutes);
 
 sequelize
   .sync()
