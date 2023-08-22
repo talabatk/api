@@ -20,9 +20,6 @@ exports.createOrder = async (req, res) => {
 
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
-    if (+cart.total_quantity === 0) {
-      return res.status(400).json({ message: "no items in cart" });
-    }
     const cart = await Cart.findOne({
       where: { userId: decodedToken.userId },
       include: [
@@ -42,6 +39,10 @@ exports.createOrder = async (req, res) => {
         },
       ],
     });
+
+    if (!cart) {
+      return res.status(400).json({ message: "no items in cart" });
+    }
 
     cart.cart_products.forEach((e) => {
       const area = e.product.user.areas.find((item) => item.id === +areaId);
@@ -199,7 +200,7 @@ exports.getAllOrders = async (req, res) => {
                 include: [
                   {
                     model: User,
-                    attributes: ["id", "name", "phone", "address"],
+                    attributes: ["id", "name", "email", "phone", "address"],
                     include: {
                       model: Vendor,
                       attributes: ["id", "direction", "distance"],
@@ -226,7 +227,7 @@ exports.getAllOrders = async (req, res) => {
                 include: [
                   {
                     model: User,
-                    attributes: ["id", "name", "phone", "address"],
+                    attributes: ["id", "name", "email", "phone", "address"],
                     include: {
                       model: Vendor,
                       attributes: ["id", "direction", "distance"],
@@ -299,7 +300,7 @@ exports.getOne = async (req, res) => {
               include: [
                 {
                   model: User,
-                  attributes: ["id", "name", "phone", "address"],
+                  attributes: ["id", "name", "email", "phone", "address"],
                   include: {
                     model: Vendor,
                     attributes: ["id", "direction", "distance"],
@@ -337,7 +338,7 @@ exports.getUserOrders = async (req, res) => {
               include: [
                 {
                   model: User,
-                  attributes: ["id", "name", "phone", "address"],
+                  attributes: ["id", "name", "email", "phone", "address"],
                   include: {
                     model: Vendor,
                     attributes: ["id", "direction", "distance"],
