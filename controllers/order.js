@@ -20,6 +20,9 @@ exports.createOrder = async (req, res) => {
 
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
+    if (+cart.total_quantity === 0) {
+      return res.status(400).json({ message: "no items in cart" });
+    }
     const cart = await Cart.findOne({
       where: { userId: decodedToken.userId },
       include: [
