@@ -14,7 +14,23 @@ const Order = sequelize.define("order", {
     values: ["not started", "started", "preparing", "in the way", "complete"],
     defaultValue: "not started",
   },
+  name: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   address: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  location: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  phone: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  notes: {
     type: Sequelize.STRING,
     allowNull: true,
   },

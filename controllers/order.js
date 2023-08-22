@@ -9,7 +9,7 @@ const Vendor = require("../models/vendor");
 const Option = require("../models/option");
 
 exports.createOrder = async (req, res) => {
-  const { areaId, address } = req.body;
+  const { areaId, address, name, phone, location, notes } = req.body;
 
   try {
     let shippingDirections = [];
@@ -75,6 +75,10 @@ exports.createOrder = async (req, res) => {
       total_quantity: cart.total_quantity,
       subtotal: +cart.total,
       shipping,
+      name,
+      phone,
+      location,
+      notes,
       total: shipping + +cart.total,
       userId: decodedToken.userId,
     });
@@ -248,9 +252,8 @@ exports.getAllOrders = async (req, res) => {
 
 exports.updateOrder = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
   try {
-    const order = await Order.update({ status }, { where: { id } });
+    const order = await Order.update(req.body, { where: { id } });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
