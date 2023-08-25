@@ -44,7 +44,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "no items in cart" });
     }
 
-    cart.cart_products.forEach((e) => {
+    cart.cart_products.forEach(async (e) => {
       const area = e.product.user.areas.find((item) => item.id === +areaId);
 
       const directionIndex = shippingDirections.findIndex(
@@ -68,6 +68,11 @@ exports.createOrder = async (req, res) => {
           direction: e.product.user.vendor.direction,
         });
       }
+
+      await Product.update(
+        { orders: +e.product.orders + +e.quantity },
+        { where: { id: e.product.id } }
+      );
     });
 
     shippingDirections.forEach((e) => {
@@ -193,6 +198,12 @@ exports.getAllOrders = async (req, res) => {
 
     let orders = null;
 
+    let filters = {};
+
+    if (deliveryId) {
+      filters.deliveryId = deliveryId;
+    }
+
     if (page) {
       orders = await Order.findAll({
         limit: limit,
@@ -220,6 +231,7 @@ exports.getAllOrders = async (req, res) => {
             where: { ordered: true },
           },
         ],
+        where: filters,
         order: [["createdAt", "DESC"]],
       });
     } else {
@@ -245,9 +257,10 @@ exports.getAllOrders = async (req, res) => {
               Option,
             ],
             where: { ordered: true },
-            order: [["createdAt", "DESC"]],
           },
         ],
+        where: filters,
+        order: [["createdAt", "DESC"]],
       });
     }
 
