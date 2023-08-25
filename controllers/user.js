@@ -146,6 +146,10 @@ exports.smsLogin = async (req, res) => {
 
     user.token = token;
 
+    if (req.body.fcm) {
+      user.fcm = req.body.fcm;
+    }
+
     await user.save();
 
     return res.status(200).json({

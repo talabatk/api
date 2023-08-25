@@ -120,6 +120,10 @@ exports.calculateShipping = async (req, res) => {
 
     let shipping = 0;
 
+    let time = 0;
+
+    let distance = 0;
+
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
@@ -167,6 +171,8 @@ exports.calculateShipping = async (req, res) => {
             vendor: +e.product.user.vendor.id,
             cost: +area.delivery_cost.cost,
             direction: e.product.user.vendor.direction,
+            time: e.product.user.vendor.delivery_time,
+            distance: e.product.user.vendor.distance,
           });
         }
       });
@@ -174,6 +180,8 @@ exports.calculateShipping = async (req, res) => {
 
     shippingDirections.forEach((e) => {
       shipping = shipping + e.cost;
+      time = time + e.time;
+      distance = distance + e.distance;
     });
 
     return res.status(200).json({
@@ -181,8 +189,8 @@ exports.calculateShipping = async (req, res) => {
       shipping,
       subtotal: +cart.total,
       total: +cart.total + shipping,
-      time: 30,
-      distance: 50,
+      time: time,
+      distance: distance,
     });
   } catch (error) {
     console.log(error);
