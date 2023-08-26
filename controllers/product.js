@@ -344,19 +344,23 @@ exports.editOne = async (req, res) => {
 
     await product.update(req.body);
 
-    const images = await ProductImage.bulkCreate(
-      req.files.image.map((file) => ({
-        productId: product.id,
-        image: file.filename,
-      }))
-    );
+    let imagesWithUrl = [];
 
-    const imagesWithUrl = images.map((image) => {
-      return {
-        ...image.toJSON(),
-        image: "http://" + req.get("host") + "/uploads/" + image.image,
-      };
-    });
+    if (req.files.image) {
+      const images = await ProductImage.bulkCreate(
+        req.files.image?.map((file) => ({
+          productId: product.id,
+          image: file.filename,
+        }))
+      );
+
+      imagesWithUrl = images.map((image) => {
+        return {
+          ...image.toJSON(),
+          image: "http://" + req.get("host") + "/uploads/" + image.image,
+        };
+      });
+    }
 
     return res.status(200).json({
       message: "success",
