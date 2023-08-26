@@ -17,12 +17,10 @@ exports.getUserCart = async (req, res) => {
 
     const [cart, created] = await Cart.findOrCreate({
       where: { userId: decodedToken.userId },
-      defaults: {
-        userId: decodedToken.userId,
-      },
       include: [
         {
           model: CartProduct,
+          required: false,
           include: [
             {
               model: Product,
@@ -48,6 +46,9 @@ exports.getUserCart = async (req, res) => {
           where: { ordered: false },
         },
       ],
+      defaults: {
+        userId: decodedToken.userId,
+      },
     });
 
     return res.status(200).json({ message: "success", cart });
