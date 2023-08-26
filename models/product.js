@@ -21,6 +21,11 @@ const Product = sequelize.define("product", {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,
   },
+  show_price: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
   available: {
     type: Sequelize.BOOLEAN,
     allowNull: false,

@@ -20,6 +20,7 @@ exports.createProduct = async (req, res) => {
     available,
     vendorId,
     categoryId,
+    show_price,
   } = req.body;
 
   try {
@@ -47,6 +48,7 @@ exports.createProduct = async (req, res) => {
       featured,
       vendorId,
       categoryId,
+      show_price,
     });
 
     const images = await ProductImage.bulkCreate(
