@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/login", vendorController.login);
 
-router.post("/create-vendor", validateUser, vendorController.createVendor);
+router.post("/create-vendor", vendorController.createVendor);
 
 router.get("/get-vendors", vendorController.getAllVendors);
 

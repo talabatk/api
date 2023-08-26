@@ -251,14 +251,7 @@ exports.editVendor = async (req, res) => {
     }
 
     // Check if email or phone exists and belongs to someone else
-    const { email, phone } = req.body;
-    if (
-      email &&
-      email !== vendor.email &&
-      (await User.findOne({ where: { email } }))
-    ) {
-      return res.status(400).json({ message: "email already exist" });
-    }
+    const { phone } = req.body;
     if (
       phone &&
       phone !== vendor.phone &&
