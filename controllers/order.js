@@ -240,7 +240,7 @@ exports.calculateShipping = async (req, res) => {
 };
 
 exports.getAllOrders = async (req, res) => {
-  const { size, page, vendorId, deliveryId } = req.query;
+  const { size, page, status, deliveryId } = req.query;
   try {
     const limit = parseInt(size);
     const offset = (parseInt(page) - 1) * limit;
@@ -251,6 +251,10 @@ exports.getAllOrders = async (req, res) => {
 
     if (deliveryId) {
       filters.deliveryId = deliveryId;
+    }
+
+    if (status) {
+      filters.status = status;
     }
 
     if (page) {
