@@ -7,6 +7,16 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const Vendor = require("../models/vendor");
 const Option = require("../models/option");
+const { io } = require("../app");
+
+let deliveryId = null;
+
+io.on("connection", (socket) => {
+  socket.on("delivery-id", (message) => {
+    console.log(message);
+    deliveryId = message;
+  });
+});
 
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
@@ -104,6 +114,37 @@ exports.createOrder = async (req, res) => {
     cart.total = 0;
 
     await cart.save();
+
+    const orders = await Order.findAll({
+      include: [
+        { model: User, attributes: ["id", "name", "phone", "address"] },
+        {
+          model: CartProduct,
+          required: false,
+          include: [
+            {
+              model: Product,
+              include: [
+                {
+                  model: User,
+                  attributes: ["id", "name", "email", "phone", "address"],
+                  include: {
+                    model: Vendor,
+                    attributes: ["id", "direction", "distance"],
+                  },
+                },
+              ],
+            },
+            Option,
+          ],
+          where: { ordered: true },
+        },
+      ],
+      where: { status: "not started" },
+      order: [["createdAt", "DESC"]],
+    });
+
+    io.emit("pending-orders", { results: orders });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
@@ -220,6 +261,7 @@ exports.getAllOrders = async (req, res) => {
           { model: User, attributes: ["id", "name", "phone", "address"] },
           {
             model: CartProduct,
+            required: false,
             include: [
               {
                 model: Product,
@@ -248,6 +290,7 @@ exports.getAllOrders = async (req, res) => {
           { model: User, attributes: ["id", "name", "phone", "address"] },
           {
             model: CartProduct,
+            required: false,
             include: [
               {
                 model: Product,
@@ -287,6 +330,69 @@ exports.updateOrder = async (req, res) => {
   try {
     const order = await Order.update(req.body, { where: { id } });
 
+    const orders = await Order.findAll({
+      include: [
+        { model: User, attributes: ["id", "name", "phone", "address"] },
+        {
+          model: CartProduct,
+          required: false,
+          include: [
+            {
+              model: Product,
+              include: [
+                {
+                  model: User,
+                  attributes: ["id", "name", "email", "phone", "address"],
+                  include: {
+                    model: Vendor,
+                    attributes: ["id", "direction", "distance"],
+                  },
+                },
+              ],
+            },
+            Option,
+          ],
+          where: { ordered: true },
+        },
+      ],
+      where: { status: "not started" },
+      order: [["createdAt", "DESC"]],
+    });
+
+    io.emit("pending-orders", { results: orders });
+
+    if (deliveryId) {
+      const deliveryOrders = await Order.findAll({
+        include: [
+          { model: User, attributes: ["id", "name", "phone", "address"] },
+          {
+            model: CartProduct,
+            required: false,
+            include: [
+              {
+                model: Product,
+                include: [
+                  {
+                    model: User,
+                    attributes: ["id", "name", "email", "phone", "address"],
+                    include: {
+                      model: Vendor,
+                      attributes: ["id", "direction", "distance"],
+                    },
+                  },
+                ],
+              },
+              Option,
+            ],
+            where: { ordered: true },
+          },
+        ],
+        where: { deliveryId },
+        order: [["createdAt", "DESC"]],
+      });
+
+      io.emit("delivery-orders", { results: deliveryOrders });
+    }
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     console.log(error);
@@ -305,6 +411,70 @@ exports.assignDelivery = async (req, res) => {
       { status: "started", deliveryId: decodedToken.userId },
       { where: { id } }
     );
+
+    const orders = await Order.findAll({
+      include: [
+        { model: User, attributes: ["id", "name", "phone", "address"] },
+        {
+          model: CartProduct,
+          required: false,
+          include: [
+            {
+              model: Product,
+              include: [
+                {
+                  model: User,
+                  attributes: ["id", "name", "email", "phone", "address"],
+                  include: {
+                    model: Vendor,
+                    attributes: ["id", "direction", "distance"],
+                  },
+                },
+              ],
+            },
+            Option,
+          ],
+          where: { ordered: true },
+        },
+      ],
+      where: { status: "not started" },
+      order: [["createdAt", "DESC"]],
+    });
+
+    io.emit("pending-orders", { results: orders });
+
+    if (deliveryId) {
+      const deliveryOrders = await Order.findAll({
+        include: [
+          { model: User, attributes: ["id", "name", "phone", "address"] },
+          {
+            model: CartProduct,
+            required: false,
+            include: [
+              {
+                model: Product,
+                include: [
+                  {
+                    model: User,
+                    attributes: ["id", "name", "email", "phone", "address"],
+                    include: {
+                      model: Vendor,
+                      attributes: ["id", "direction", "distance"],
+                    },
+                  },
+                ],
+              },
+              Option,
+            ],
+            where: { ordered: true },
+          },
+        ],
+        where: { deliveryId },
+        order: [["createdAt", "DESC"]],
+      });
+
+      io.emit("delivery-orders", { results: deliveryOrders });
+    }
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {

@@ -6,7 +6,63 @@ const bodyParser = require("body-parser");
 
 const sequelize = require("./util/database");
 
+const socketIO = require("socket.io");
+
+const http = require("http");
+
 const cors = require("cors");
+
+//-------settings-----------------------------
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
+
+const app = express();
+
+const server = http.createServer(app);
+
+// app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(
+  upload.fields([
+    { name: "image", maxCount: 3 },
+    { name: "cover", maxCount: 1 },
+  ])
+);
+
+app.use("/uploads", express.static("uploads"));
+
+app.options("*", cors()); // include before other routes
+
+app.use(cors());
+
+const io = socketIO(server, {
+  transports: ["polling"],
+  cors: {
+    origin: "*",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("A user is connected");
+
+  socket.on("message", (message) => {
+    console.log(`message from ${socket.id} : ${message}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`socket ${socket.id} disconnected`);
+  });
+});
+
+module.exports = { io };
 
 //---------models---------------------------------
 const User = require("./models/user");
@@ -46,6 +102,7 @@ const deliverCostRoutes = require("./routes/deliverCosts");
 const optionGroupRoutes = require("./routes/optionsGroup");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
+const { log } = require("console");
 
 //--------relations---------------------------
 
@@ -137,34 +194,6 @@ OptionGroup.belongsTo(Product);
 
 OptionGroup.hasMany(Option);
 Option.belongsTo(OptionGroup);
-//-------settings-----------------------------
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
-
-const app = express();
-
-// app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-app.use(
-  upload.fields([
-    { name: "image", maxCount: 3 },
-    { name: "cover", maxCount: 1 },
-  ])
-);
-
-app.use("/uploads", express.static("uploads"));
-
-app.options("*", cors()); // include before other routes
-
-app.use(cors());
 
 //routes=====================
 app.use("/user", userRoutes);
@@ -198,7 +227,7 @@ app.use("/api", orderRoutes);
 sequelize
   .sync()
   .then((result) => {
-    app.listen(3000);
+    server.listen(3000);
   })
   .catch((err) => {
     console.log(err);
