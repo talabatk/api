@@ -26,7 +26,7 @@ exports.createProduct = async (req, res) => {
   try {
     // Create the product with the provided data
     const vendorCategory = await VendorCategory.findOne({
-      where: { categoryId },
+      where: { categoryId, userId: vendorId },
     });
 
     if (vendorCategory) {
