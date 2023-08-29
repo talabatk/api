@@ -9,9 +9,10 @@ exports.createCategory = async (req, res, next) => {
   const { name, order } = req.body;
 
   try {
+    const maxOrder = await Category.max("order");
     const category = await Category.create({
       name,
-      order,
+      order: order ? order : +maxOrder + 1,
       image: req.files.image ? req.files.image[0].filename : null,
     });
 
