@@ -39,6 +39,7 @@ exports.getAll = async (req, res, next) => {
         "image",
       ],
     ],
+    order: [["order"]],
   })
     .then((categories) => {
       return res.status(200).json({ results: categories });
