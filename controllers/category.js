@@ -6,11 +6,12 @@ const Product = require("../models/product");
 const ProductImage = require("../models/productImage");
 
 exports.createCategory = async (req, res, next) => {
-  const { name } = req.body;
+  const { name, order } = req.body;
 
   try {
     const category = await Category.create({
       name,
+      order,
       image: req.files.image ? req.files.image[0].filename : null,
     });
 
@@ -29,6 +30,7 @@ exports.getAll = async (req, res, next) => {
   Category.findAll({
     attributes: [
       "id",
+      "order",
       "name",
       [
         Sequelize.literal(
@@ -117,6 +119,7 @@ exports.getVendorCategories = async (req, res) => {
       attributes: [
         "id",
         "name",
+        "order",
         [
           Sequelize.literal(
             `CONCAT("http://${req.get("host")}/uploads/", category.image)`
@@ -146,6 +149,7 @@ exports.getVendorCategories = async (req, res) => {
         },
       ],
       where: filter,
+      order: [["order"]],
     });
 
     return res.status(200).json({ results: categories });
