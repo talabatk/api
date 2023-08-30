@@ -59,7 +59,7 @@ exports.getUserCart = async (req, res) => {
 };
 
 exports.addToCart = async (req, res) => {
-  const { productId, quantity, notes, options, vendorId } = req.body;
+  const { productId, quantity, notes, options } = req.body;
   try {
     let subtotal = 0;
 
@@ -102,7 +102,7 @@ exports.addToCart = async (req, res) => {
       subtotal,
       total,
       cartId: cart.id,
-      vendorId,
+      vendorId: product.vendorId,
     });
 
     cart.total = +cart.total + total;

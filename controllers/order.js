@@ -459,6 +459,101 @@ exports.assignDelivery = async (req, res) => {
   }
 };
 
+exports.getVendorOrder = async (req, res) => {
+  const { size, page, status, vendorId } = req.query;
+
+  try {
+    const limit = parseInt(size);
+    const offset = (parseInt(page) - 1) * limit;
+
+    let orders = null;
+
+    let filters = {};
+
+    if (status) {
+      filters.status = status;
+    }
+
+    if (page) {
+      orders = await Order.findAll({
+        limit: limit,
+        offset: offset,
+        attributes: [
+          "id",
+          "status",
+          "name",
+          "phone",
+          "total",
+          "createdAt",
+          "notes",
+        ],
+        include: [
+          { model: User, attributes: ["id", "name", "phone", "address"] },
+          {
+            model: CartProduct,
+            required: true,
+            include: [
+              {
+                model: Product,
+              },
+              Option,
+            ],
+            where: { ordered: true, vendorId },
+          },
+        ],
+        where: filters,
+        order: [["createdAt", "DESC"]],
+      });
+    } else {
+      orders = await Order.findAll({
+        attributes: [
+          "id",
+          "status",
+          "name",
+          "phone",
+          "total",
+          "createdAt",
+          "notes",
+        ],
+        include: [
+          { model: User, attributes: ["id", "name", "phone", "address"] },
+          {
+            model: CartProduct,
+            required: true,
+            include: [
+              {
+                model: Product,
+              },
+              Option,
+            ],
+            where: { ordered: true, vendorId },
+          },
+        ],
+        where: filters,
+        order: [["createdAt", "DESC"]],
+      });
+    }
+
+    orders = orders.map((order) => {
+      let total = 0;
+      order.cart_products.forEach((e) => {
+        total = total + +e.total;
+      });
+      return { ...order.toJSON(), total: total };
+    });
+    const count = await Order.count({
+      where: filters,
+    }); // Get total number of products
+
+    const numOfPages = Math.ceil(count / limit); // Calculate number of pages
+
+    return res.status(200).json({ results: orders });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
 exports.getOne = async (req, res) => {
   const { id } = req.params;
 

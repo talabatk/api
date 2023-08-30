@@ -8,6 +8,8 @@ router.post("/order", orderController.createOrder);
 
 router.get("/order", orderController.getAllOrders);
 
+router.get("/vendor-orders", orderController.getVendorOrder);
+
 router.get("/order/:id", orderController.getOne);
 
 router.patch("/order/:id", orderController.updateOrder);

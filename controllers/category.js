@@ -101,20 +101,10 @@ exports.getVendorCategories = async (req, res) => {
   const { vendorId } = req.query;
 
   try {
-    let vendorCategories = null;
-
-    let categoriesId = null;
-
     let filter = {};
 
     if (vendorId) {
-      vendorCategories = await VendorCategory.findAll({
-        where: { userId: vendorId },
-      });
-
-      categoriesId = vendorCategories.map((item) => item.categoryId);
-
-      filter = { id: { [Op.in]: categoriesId } };
+      filter = { vendorId };
     }
 
     const categories = await Category.findAll({
@@ -148,9 +138,9 @@ exports.getVendorCategories = async (req, res) => {
               ],
             },
           ],
+          where: filter,
         },
       ],
-      where: filter,
       order: [["order"]],
     });
 
