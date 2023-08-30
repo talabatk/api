@@ -85,6 +85,7 @@ const Cart = require("./models/cart");
 const CartProduct = require("./models/cartProduct");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
+const VendorOrder = require("./models/vendorOrders");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -102,7 +103,6 @@ const deliverCostRoutes = require("./routes/deliverCosts");
 const optionGroupRoutes = require("./routes/optionsGroup");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
-const { log } = require("console");
 
 //--------relations---------------------------
 
@@ -125,6 +125,10 @@ CartProduct.belongsTo(Cart);
 //assign cart product to user order
 Order.hasMany(CartProduct);
 CartProduct.belongsTo(Order);
+
+// define associations between cartProduct and Option
+Vendor.belongsToMany(Order, { through: VendorOrder });
+Order.belongsToMany(Vendor, { through: VendorOrder });
 
 //assign cart product to user order
 User.hasMany(Order);

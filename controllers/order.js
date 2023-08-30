@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const Vendor = require("../models/vendor");
 const Option = require("../models/option");
 const { io } = require("../app");
+const VendorOrder = require("../models/vendorOrders");
 
 let deliveryId = null;
 
@@ -22,6 +23,8 @@ exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 
   try {
+    let vendors = [];
+
     let shippingDirections = [];
 
     let shipping = 0;
@@ -54,6 +57,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "no items in cart" });
     }
 
+    // calculate shipping cost
     cart.cart_products.forEach(async (e) => {
       const area = e.product.user.areas.find((item) => item.id === +areaId);
 
@@ -83,12 +87,21 @@ exports.createOrder = async (req, res) => {
         { orders: +e.product.orders + +e.quantity },
         { where: { id: e.product.id } }
       );
+
+      const vendorIndex = vendors.findIndex(
+        (item) => +item.vendorId === +e.product.user.vendor.id
+      );
+
+      if (vendorIndex < 0) {
+        vendors.push({ vendorId: +e.product.user.vendor.id });
+      }
     });
 
     shippingDirections.forEach((e) => {
       shipping = shipping + e.cost;
     });
 
+    //save order
     const order = await Order.create({
       address,
       total_quantity: cart.total_quantity,
@@ -102,6 +115,17 @@ exports.createOrder = async (req, res) => {
       userId: decodedToken.userId,
     });
 
+    //save vendor orders
+    await VendorOrder.bulkCreate(
+      vendors.map((item) => {
+        return {
+          vendorId: item.vendorId,
+          orderId: order.id,
+        };
+      })
+    );
+
+    //assign order id to cart product
     await CartProduct.update(
       {
         ordered: true,
@@ -306,69 +330,13 @@ exports.updateOrder = async (req, res) => {
   try {
     const order = await Order.update(req.body, { where: { id } });
 
-    const orders = await Order.findAll({
-      include: [
-        { model: User, attributes: ["id", "name", "phone", "address"] },
-        {
-          model: CartProduct,
-          required: false,
-          include: [
-            {
-              model: Product,
-              include: [
-                {
-                  model: User,
-                  attributes: ["id", "name", "email", "phone", "address"],
-                  include: {
-                    model: Vendor,
-                    attributes: ["id", "direction", "distance"],
-                  },
-                },
-              ],
-            },
-            Option,
-          ],
-          where: { ordered: true },
-        },
-      ],
-      where: { status: "not started" },
-      order: [["createdAt", "DESC"]],
-    });
-
-    io.emit("pending-orders", { results: orders });
-
-    if (deliveryId) {
-      const deliveryOrders = await Order.findAll({
-        include: [
-          { model: User, attributes: ["id", "name", "phone", "address"] },
-          {
-            model: CartProduct,
-            required: false,
-            include: [
-              {
-                model: Product,
-                include: [
-                  {
-                    model: User,
-                    attributes: ["id", "name", "email", "phone", "address"],
-                    include: {
-                      model: Vendor,
-                      attributes: ["id", "direction", "distance"],
-                    },
-                  },
-                ],
-              },
-              Option,
-            ],
-            where: { ordered: true },
-          },
-        ],
-        where: { deliveryId },
-        order: [["createdAt", "DESC"]],
-      });
-
-      io.emit("delivery-orders", { results: deliveryOrders });
+    if (req.body.status) {
+      await VendorOrder.update(
+        { status: req.body.status },
+        { where: { orderId: id } }
+      );
     }
+
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     console.log(error);
@@ -463,7 +431,10 @@ exports.getVendorOrder = async (req, res) => {
   const { size, page, status, vendorId } = req.query;
 
   try {
+    const vendor = await Vendor.findOne({ where: { userId: vendorId } });
+
     const limit = parseInt(size);
+
     const offset = (parseInt(page) - 1) * limit;
 
     let orders = null;
@@ -488,7 +459,6 @@ exports.getVendorOrder = async (req, res) => {
           "notes",
         ],
         include: [
-          { model: User, attributes: ["id", "name", "phone", "address"] },
           {
             model: CartProduct,
             required: true,
@@ -516,7 +486,6 @@ exports.getVendorOrder = async (req, res) => {
           "notes",
         ],
         include: [
-          { model: User, attributes: ["id", "name", "phone", "address"] },
           {
             model: CartProduct,
             required: true,
@@ -541,13 +510,12 @@ exports.getVendorOrder = async (req, res) => {
       });
       return { ...order.toJSON(), total: total };
     });
-    const count = await Order.count({
-      where: filters,
-    }); // Get total number of products
+
+    const count = await VendorOrder.count({ where: { vendorId: vendor.id } }); // Get total number of products
 
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
-    return res.status(200).json({ results: orders });
+    return res.status(200).json({ count, pages: numOfPages, results: orders });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
