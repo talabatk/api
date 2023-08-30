@@ -33,5 +33,9 @@ const CartProduct = sequelize.define("cart_product", {
     allowNull: false,
     defaultValue: false,
   },
+  vendorId: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
 });
 module.exports = CartProduct;

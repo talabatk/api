@@ -111,40 +111,10 @@ exports.createOrder = async (req, res) => {
     );
 
     cart.total_quantity = 0;
+
     cart.total = 0;
 
     await cart.save();
-
-    const orders = await Order.findAll({
-      include: [
-        { model: User, attributes: ["id", "name", "phone", "address"] },
-        {
-          model: CartProduct,
-          required: false,
-          include: [
-            {
-              model: Product,
-              include: [
-                {
-                  model: User,
-                  attributes: ["id", "name", "email", "phone", "address"],
-                  include: {
-                    model: Vendor,
-                    attributes: ["id", "direction", "distance"],
-                  },
-                },
-              ],
-            },
-            Option,
-          ],
-          where: { ordered: true },
-        },
-      ],
-      where: { status: "not started" },
-      order: [["createdAt", "DESC"]],
-    });
-
-    io.emit("pending-orders", { results: orders });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
@@ -205,6 +175,8 @@ exports.calculateShipping = async (req, res) => {
               vendor: +e.product.user.vendor.id,
               cost: +area.delivery_cost.cost,
               direction: e.product.user.vendor.direction,
+              distance: +e.product.user.vendor.distance,
+              time: +e.product.user.vendor.delivery_time,
             };
           }
         } else {
@@ -212,8 +184,8 @@ exports.calculateShipping = async (req, res) => {
             vendor: +e.product.user.vendor.id,
             cost: +area.delivery_cost.cost,
             direction: e.product.user.vendor.direction,
-            time: e.product.user.vendor.delivery_time,
-            distance: e.product.user.vendor.distance,
+            time: +e.product.user.vendor.delivery_time,
+            distance: +e.product.user.vendor.distance,
           });
         }
       });
