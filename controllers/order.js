@@ -62,24 +62,15 @@ exports.createOrder = async (req, res) => {
       const area = e.product.user.areas.find((item) => item.id === +areaId);
 
       const directionIndex = shippingDirections.findIndex(
-        (item) => item.direction === e.product.user.vendor.direction
+        (item) => item.vendor === e.product.vendorId
       );
 
-      if (directionIndex >= 0) {
-        const direction = shippingDirections[directionIndex];
-
-        if (direction.cost < +area.delivery_cost.cost) {
-          shippingDirections[directionIndex] = {
-            vendor: +e.product.user.vendor.id,
-            cost: +area.delivery_cost.cost,
-            direction: e.product.user.vendor.direction,
-          };
-        }
-      } else {
+      if (directionIndex < 0) {
         shippingDirections.push({
-          vendor: +e.product.user.vendor.id,
+          vendor: +e.product.vendorId,
           cost: +area.delivery_cost.cost,
-          direction: e.product.user.vendor.direction,
+          time: +e.product.user.vendor.delivery_time,
+          distance: +e.product.user.vendor.distance,
         });
       }
 
@@ -188,26 +179,13 @@ exports.calculateShipping = async (req, res) => {
         const area = e.product.user.areas.find((item) => item.id === +areaId);
 
         const directionIndex = shippingDirections.findIndex(
-          (item) => item.direction === e.product.user.vendor.direction
+          (item) => item.vendor === e.product.vendorId
         );
 
-        if (directionIndex >= 0) {
-          const direction = shippingDirections[directionIndex];
-
-          if (direction.cost < +area.delivery_cost.cost) {
-            shippingDirections[directionIndex] = {
-              vendor: +e.product.user.vendor.id,
-              cost: +area.delivery_cost.cost,
-              direction: e.product.user.vendor.direction,
-              distance: +e.product.user.vendor.distance,
-              time: +e.product.user.vendor.delivery_time,
-            };
-          }
-        } else {
+        if (directionIndex < 0) {
           shippingDirections.push({
-            vendor: +e.product.user.vendor.id,
+            vendor: +e.product.vendorId,
             cost: +area.delivery_cost.cost,
-            direction: e.product.user.vendor.direction,
             time: +e.product.user.vendor.delivery_time,
             distance: +e.product.user.vendor.distance,
           });
