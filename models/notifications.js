@@ -22,6 +22,10 @@ const Notification = sequelize.define("notification", {
     allowNull: false,
     defaultValue: false,
   },
+  orderId: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
 });
 
 module.exports = Notification;

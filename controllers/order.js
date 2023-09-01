@@ -140,6 +140,7 @@ exports.createOrder = async (req, res) => {
           userId: user.id,
           title: "طلب جديد",
           description: `${name} هناك طلب جديد من`,
+          orderId: order.id,
         };
       })
     );
@@ -180,6 +181,7 @@ exports.createOrder = async (req, res) => {
           userId: user.userId,
           title: "طلب جديد",
           description: `${name} هناك طلب جديد من`,
+          orderId: order.id,
         };
       })
     );
