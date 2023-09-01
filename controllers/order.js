@@ -9,15 +9,9 @@ const Vendor = require("../models/vendor");
 const Option = require("../models/option");
 const { io } = require("../app");
 const VendorOrder = require("../models/vendorOrders");
-
-let deliveryId = null;
-
-io.on("connection", (socket) => {
-  socket.on("delivery-id", (message) => {
-    console.log(message);
-    deliveryId = message;
-  });
-});
+const admin = require("firebase-admin");
+const Notification = require("../models/notifications");
+const { Op } = require("sequelize");
 
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
@@ -43,7 +37,7 @@ exports.createOrder = async (req, res) => {
               model: Product,
               include: {
                 model: User,
-                attributes: ["id"],
+                attributes: ["id", "fcm"],
                 include: [{ model: Area }, Vendor],
               },
             },
@@ -60,6 +54,12 @@ exports.createOrder = async (req, res) => {
     // calculate shipping cost
     cart.cart_products.forEach(async (e) => {
       const area = e.product.user.areas.find((item) => item.id === +areaId);
+
+      if (!area) {
+        return res
+          .status(400)
+          .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
+      }
 
       const directionIndex = shippingDirections.findIndex(
         (item) => item.vendor === e.product.vendorId
@@ -84,7 +84,11 @@ exports.createOrder = async (req, res) => {
       );
 
       if (vendorIndex < 0) {
-        vendors.push({ vendorId: +e.product.user.vendor.id });
+        vendors.push({
+          userId: +e.product.user.id,
+          vendorId: +e.product.user.vendor.id,
+          fcm: e.product.user.vendor.fcm,
+        });
       }
     });
 
@@ -123,6 +127,61 @@ exports.createOrder = async (req, res) => {
         orderId: order.id,
       },
       { where: { ordered: false, cartId: cart.id } }
+    );
+
+    const deliveriesAndAdmins = await User.findAll({
+      attributes: ["id"],
+      where: { role: { [Op.in]: ["delivery", "admin"] } },
+    });
+
+    const notifications = await Notification.bulkCreate(
+      deliveriesAndAdmins.map((user) => {
+        return {
+          userId: user.id,
+          title: "طلب جديد",
+          description: `${name} هناك طلب جديد من`,
+        };
+      })
+    );
+
+    const messaging = admin.messaging();
+
+    await messaging.send({
+      notification: {
+        title: "طلب جديد",
+        body: `هناك طلب جديد من ${name}`,
+      },
+      topic: "delivery",
+    });
+
+    await messaging.send({
+      notification: {
+        title: "طلب جديد",
+        body: `هناك طلب جديد من ${name}`,
+      },
+      topic: "admin",
+    });
+
+    vendors.forEach(async (e) => {
+      if (e.fcm) {
+        await messaging.send({
+          token: e.fcm,
+          notification: {
+            title: "طلب جديد",
+            body: `هناك طلب جديد من ${name}`,
+          },
+        });
+      }
+    });
+
+    const vendorNotifications = await Notification.bulkCreate(
+      vendors.map((user) => {
+        return {
+          userId: user.userId,
+          title: "طلب جديد",
+          description: `${name} هناك طلب جديد من`,
+        };
+      })
     );
 
     cart.total_quantity = 0;
@@ -177,6 +236,12 @@ exports.calculateShipping = async (req, res) => {
     if (cart?.cart_products) {
       cart.cart_products.forEach((e) => {
         const area = e.product.user.areas.find((item) => item.id === +areaId);
+
+        if (!area) {
+          return res
+            .status(400)
+            .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
+        }
 
         const directionIndex = shippingDirections.findIndex(
           (item) => item.vendor === e.product.vendorId
@@ -305,15 +370,42 @@ exports.getAllOrders = async (req, res) => {
 
 exports.updateOrder = async (req, res) => {
   const { id } = req.params;
-  try {
-    const order = await Order.update(req.body, { where: { id } });
 
-    if (req.body.status) {
+  try {
+    const order = await Order.findByPk(id, {
+      include: User,
+    });
+
+    if (req.body.status !== order.status) {
       await VendorOrder.update(
         { status: req.body.status },
         { where: { orderId: id } }
       );
+
+      const messaging = admin.messaging();
+
+      if (order.user.fcm) {
+        await messaging
+          .send({
+            token: order.user.fcm,
+            notification: {
+              title: "تحديث للطلب",
+              body: `${req.body.status} تم تغيير حاله طلبك الي`,
+            },
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      await Notification.create({
+        userId: order.user.id,
+        title: "تحديث للطلب",
+        description: `${req.body.status} تم تغيير حاله طلبك الي`,
+      });
     }
+
+    await order.update(req.body);
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
@@ -329,74 +421,37 @@ exports.assignDelivery = async (req, res) => {
 
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
-    const order = await Order.update(
-      { status: "started", deliveryId: decodedToken.userId },
-      { where: { id } }
-    );
-
-    const orders = await Order.findAll({
-      include: [
-        { model: User, attributes: ["id", "name", "phone", "address"] },
-        {
-          model: CartProduct,
-          required: false,
-          include: [
-            {
-              model: Product,
-              include: [
-                {
-                  model: User,
-                  attributes: ["id", "name", "email", "phone", "address"],
-                  include: {
-                    model: Vendor,
-                    attributes: ["id", "direction", "distance"],
-                  },
-                },
-              ],
-            },
-            Option,
-          ],
-          where: { ordered: true },
-        },
-      ],
-      where: { status: "not started" },
-      order: [["createdAt", "DESC"]],
+    const order = await Order.findByPk(id, {
+      include: User,
     });
 
-    io.emit("pending-orders", { results: orders });
+    if (order.status === "not started") {
+      const messaging = admin.messaging();
 
-    if (deliveryId) {
-      const deliveryOrders = await Order.findAll({
-        include: [
-          { model: User, attributes: ["id", "name", "phone", "address"] },
-          {
-            model: CartProduct,
-            required: false,
-            include: [
-              {
-                model: Product,
-                include: [
-                  {
-                    model: User,
-                    attributes: ["id", "name", "email", "phone", "address"],
-                    include: {
-                      model: Vendor,
-                      attributes: ["id", "direction", "distance"],
-                    },
-                  },
-                ],
-              },
-              Option,
-            ],
-            where: { ordered: true },
-          },
-        ],
-        where: { deliveryId },
-        order: [["createdAt", "DESC"]],
+      if (order.user.fcm) {
+        await messaging
+          .send({
+            token: order.user.fcm,
+            notification: {
+              title: "تحديث للطلب",
+              body: `${req.body.status} تم تغيير حاله طلبك الي`,
+            },
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      await Notification.create({
+        userId: order.user.id,
+        title: "تحديث للطلب",
+        description: `${"started"} تم تغيير حاله طلبك الي`,
       });
-
-      io.emit("delivery-orders", { results: deliveryOrders });
     }
+
+    await order.update({ status: "started", deliveryId: decodedToken.userId });
+
+    await VendorOrder.update({ status: "stated" }, { where: { orderId: id } });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {

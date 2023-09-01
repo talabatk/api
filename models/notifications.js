@@ -17,9 +17,11 @@ const Notification = sequelize.define("notification", {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  topic: {
-    type: Sequelize.STRING,
-    allowNull: true,
+  seen: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 });
+
 module.exports = Notification;

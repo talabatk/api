@@ -92,7 +92,6 @@ const adminRoutes = require("./routes/admin");
 const deliveryRoutes = require("./routes/delivery");
 const vendorRoutes = require("./routes/vendor");
 const Notification = require("./models/notifications");
-const UserNotification = require("./models/userNotification");
 const notificationsRouts = require("./routes//notification");
 const categoryRoutes = require("./routes/category");
 const sliderRoutes = require("./routes/slider");
@@ -182,8 +181,8 @@ Slider.belongsTo(User, {
 });
 
 // define associations between the models
-User.belongsToMany(Notification, { through: UserNotification });
-Notification.belongsToMany(User, { through: UserNotification });
+User.hasMany(Notification);
+Notification.belongsTo(User);
 
 // define associations between vendor and category
 User.belongsToMany(Category, { through: VendorCategory });

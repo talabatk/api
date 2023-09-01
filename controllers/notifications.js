@@ -77,6 +77,7 @@ exports.sentNotificationToUser = async (req, res) => {
       res.status(400).json(error);
     });
 };
+
 exports.unsubscribe = async (req, res) => {
   const data = req.body;
   admin
@@ -113,23 +114,21 @@ exports.getUserNotification = async (req, res) => {
       return res.status(404).json({ message: "المستخدم غير موجود" });
     }
 
-    const userNotifications = await UserNotification.findAll({
-      attributes: ["notificationId"],
-      where: { userId: decodedToken.userId },
-    });
-
-    let results = [];
-
-    userNotifications.forEach((n) => {
-      results.push(n.notificationId);
-    });
-
     const notifications = await Notification.findAll({
       where: {
-        [Op.or]: [{ topic: "all" }, { id: { [Op.in]: results } }],
+        userId: decodedToken.userId,
       },
       order: [["createdAt", "DESC"]],
     });
+
+    await Notification.update(
+      { seen: true },
+      {
+        where: {
+          userId: decodedToken.userId,
+        },
+      }
+    );
 
     return res.status(200).json({ results: notifications });
   } catch (error) {
