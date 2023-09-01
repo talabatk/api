@@ -2,17 +2,22 @@ const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 
 exports.createGroup = async (req, res) => {
-  const { productId, groups } = req.body;
+  const { products, groups } = req.body;
+
   try {
-    const groupsRes = await OptionGroup.bulkCreate(
-      groups.map((group) => {
-        return {
-          productId,
+    let groupsList = [];
+
+    groups.forEach((group) => {
+      for (let i = 0; i < products.length; i++) {
+        groupsList.push({
+          productId: products[i],
           name: group.name,
           type: group.type,
-        };
-      })
-    );
+        });
+      }
+    });
+
+    const groupsRes = await OptionGroup.bulkCreate(groupsList);
 
     let options = [];
 
@@ -48,6 +53,7 @@ exports.createGroup = async (req, res) => {
 exports.editGroup = async (req, res) => {
   const id = req.params.id;
   const { name, type, options } = req.body;
+
   try {
     const group = await OptionGroup.findByPk(id, { include: Option });
 

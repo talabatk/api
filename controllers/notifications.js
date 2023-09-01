@@ -12,46 +12,22 @@ admin.initializeApp({
 });
 
 exports.sendNotification = async (req, res) => {
-  const message = req.body.message;
-  const tokens = req.body.tokens;
+  const [title, description, topic, fcmTokens] = req.body;
 
-  const notification = await Notification.create({
-    title: message.notification.title,
-    description: message.notification.body,
-    topic: message.topic,
-  });
-
-  if (message.topic === "selected") {
-    const users = await User.findAll({
-      attributes: ["id"],
-      where: {
-        fcm: {
-          [Op.in]: tokens,
-        },
-      },
-    });
-
-    let userNotifications = [];
-
-    users.forEach((user) => {
-      userNotifications.push({
-        userId: user.id,
-        notificationId: notification.id,
-      });
-    });
-    console.log(userNotifications);
-    const results = await UserNotification.bulkCreate(userNotifications);
+  try {
+  } catch (error) {
+    return res.status(400).json(error);
   }
 
-  admin
-    .messaging()
-    .send(message)
-    .then(function (response) {
-      return res.status(200).json({ message: "success", response });
-    })
-    .catch(function (error) {
-      res.status(400).json(error);
-    });
+  // admin
+  //   .messaging()
+  //   .send(message)
+  //   .then(function (response) {
+  //     return res.status(200).json({ message: "success", response });
+  //   })
+  //   .catch(function (error) {
+  //     res.status(400).json(error);
+  //   });
 };
 
 exports.sentNotificationToUser = async (req, res) => {
