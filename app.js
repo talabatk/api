@@ -230,7 +230,7 @@ app.use("/api", orderRoutes);
 sequelize
   .sync()
   .then((result) => {
-    server.listen(3000);
+    server.listen(80);
   })
   .catch((err) => {
     console.log(err);
