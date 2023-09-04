@@ -232,6 +232,7 @@ exports.getAllUsers = async (req, res, next) => {
   const size = req.query.size;
 
   const role = req.query.role;
+  const search = req.query.search;
   try {
     const limit = parseInt(size);
     const offset = (parseInt(page) - 1) * limit;
@@ -240,6 +241,10 @@ exports.getAllUsers = async (req, res, next) => {
 
     if (role) {
       filters.role = role;
+    }
+
+    if (search) {
+      filters.name = search;
     }
 
     let users = null;
