@@ -227,6 +227,38 @@ exports.getUserByToken = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res, next) => {
+  const page = req.query.page ? req.query.page : 1;
+  const size = req.query.size ? req.query.size : 10;
+  const role = req.query.role;
+  try {
+    const limit = parseInt(size);
+    const offset = (parseInt(page) - 1) * limit;
+
+    let filters = {};
+
+    if (role) {
+      filters.role = role;
+    }
+
+    const users = await User.findAll({
+      limit: limit,
+      offset: offset,
+      where: filters,
+    });
+
+    const count = await User.count({ where: filters }); // Get total number of users
+    const numOfPages = Math.ceil(count / limit); // Calculate number of pages
+
+    return res
+      .status(200)
+      .json({ count: count, pages: numOfPages, results: users });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   const { id } = req.body;
 
