@@ -12,7 +12,7 @@ admin.initializeApp({
 });
 
 exports.sendNotification = async (req, res) => {
-  const [title, description, topic, fcmTokens] = req.body;
+  const [title, description, topic, usersIds] = req.body;
 
   try {
     const messaging = admin.messaging();
@@ -41,10 +41,12 @@ exports.sendNotification = async (req, res) => {
       await Notification.bulkCreate(notification);
     } else {
       const users = await User.findAll({
-        where: { fcm: { [Op.in]: fcmTokens } },
+        where: { id: { [Op.in]: usersIds } },
       });
 
       const notification = [];
+
+      const fcms = [];
 
       users.forEach(async (user) => {
         notification.push({
@@ -52,11 +54,14 @@ exports.sendNotification = async (req, res) => {
           title,
           description,
         });
+        if (user.fcm) {
+          fcms.push(user.fcm);
+        }
       });
 
       await Notification.bulkCreate(notification);
 
-      await messaging.subscribeToTopic(fcmTokens, "custom");
+      await messaging.subscribeToTopic(fcms, "custom");
 
       await messaging.send({
         notification: {
