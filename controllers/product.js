@@ -156,7 +156,9 @@ exports.getAll = async (req, res) => {
               "name",
               [
                 Sequelize.literal(
-                  `CONCAT("http://${req.get("host")}/uploads/", category.image)`
+                  `CONCAT("https://${req.get(
+                    "host"
+                  )}/uploads/", category.image)`
                 ),
                 "image",
               ],
@@ -210,7 +212,9 @@ exports.getAll = async (req, res) => {
               "name",
               [
                 Sequelize.literal(
-                  `CONCAT("http://${req.get("host")}/uploads/", category.image)`
+                  `CONCAT("https://${req.get(
+                    "host"
+                  )}/uploads/", category.image)`
                 ),
                 "image",
               ],
