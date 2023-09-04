@@ -195,11 +195,11 @@ exports.getAllVendors = async (req, res) => {
 
     const results = users.map((user) => {
       if (user.image) {
-        user.image = "http://" + req.get("host") + "/uploads/" + user.image;
+        user.image = "https://" + req.get("host") + "/uploads/" + user.image;
       }
       if (user.vendor.cover) {
         user.vendor.cover =
-          "http://" + req.get("host") + "/uploads/" + user.vendor.cover;
+          "https://" + req.get("host") + "/uploads/" + user.vendor.cover;
       }
       const { id, name, email, phone, address, fcm } = user;
 

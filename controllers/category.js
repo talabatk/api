@@ -35,7 +35,7 @@ exports.getAll = async (req, res, next) => {
       "name",
       [
         Sequelize.literal(
-          `CONCAT("http://${req.get("host")}/uploads/", image)`
+          `CONCAT("https://${req.get("host")}/uploads/", image)`
         ),
         "image",
       ],
@@ -56,7 +56,7 @@ exports.getOne = async (req, res) => {
       res.json({
         ...category.toJSON(),
         image: category.image
-          ? "http://" + req.get("host") + "/uploads/" + category.image
+          ? "https://" + req.get("host") + "/uploads/" + category.image
           : null,
       })
     )
@@ -129,7 +129,7 @@ exports.getVendorCategories = async (req, res) => {
                 "id",
                 [
                   Sequelize.literal(
-                    `CONCAT("http://${req.get(
+                    `CONCAT("https://${req.get(
                       "host"
                     )}/uploads/",\`products->productImages\`.\`image\`)`
                   ),

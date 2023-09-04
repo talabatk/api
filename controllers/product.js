@@ -61,7 +61,7 @@ exports.createProduct = async (req, res) => {
     const imagesWithUrl = images.map((image) => {
       return {
         ...image.toJSON(),
-        image: "http://" + req.get("host") + "/uploads/" + image.image,
+        image: "https://" + req.get("host") + "/uploads/" + image.image,
       };
     });
 
@@ -121,7 +121,7 @@ exports.getAll = async (req, res) => {
               "id",
               [
                 Sequelize.literal(
-                  `CONCAT("http://${req.get(
+                  `CONCAT("https://${req.get(
                     "host"
                   )}/uploads/", productImages.image)`
                 ),
@@ -143,7 +143,7 @@ exports.getAll = async (req, res) => {
               "phone",
               [
                 Sequelize.literal(
-                  `CONCAT("http://${req.get("host")}/uploads/", user.image)`
+                  `CONCAT("https://${req.get("host")}/uploads/", user.image)`
                 ),
                 "image",
               ],
@@ -175,7 +175,7 @@ exports.getAll = async (req, res) => {
               "id",
               [
                 Sequelize.literal(
-                  `CONCAT("http://${req.get(
+                  `CONCAT("https://${req.get(
                     "host"
                   )}/uploads/", productImages.image)`
                 ),
@@ -197,7 +197,7 @@ exports.getAll = async (req, res) => {
               "phone",
               [
                 Sequelize.literal(
-                  `CONCAT("http://${req.get("host")}/uploads/", user.image)`
+                  `CONCAT("https://${req.get("host")}/uploads/", user.image)`
                 ),
                 "image",
               ],
@@ -245,7 +245,7 @@ exports.getOne = async (req, res) => {
             "id",
             [
               Sequelize.literal(
-                `CONCAT("http://${req.get(
+                `CONCAT("https://${req.get(
                   "host"
                 )}/uploads/", productImages.image)`
               ),
@@ -267,7 +267,7 @@ exports.getOne = async (req, res) => {
             "phone",
             [
               Sequelize.literal(
-                `CONCAT("http://${req.get("host")}/uploads/", user.image)`
+                `CONCAT("https://${req.get("host")}/uploads/", user.image)`
               ),
               "image",
             ],

@@ -24,7 +24,7 @@ exports.getAll = async (req, res) => {
     const results = sliders.map((slider) => {
       return {
         ...slider.toJSON(),
-        image: "http://" + req.get("host") + "/uploads/" + slider.image,
+        image: "https://" + req.get("host") + "/uploads/" + slider.image,
       };
     });
 
