@@ -5,6 +5,7 @@ const User = require("../models/user");
 const Vendor = require("../models/vendor");
 const Admin = require("../models/admin");
 const AdminRole = require("../models/adminRole");
+const { Op } = require("sequelize");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -244,7 +245,7 @@ exports.getAllUsers = async (req, res, next) => {
     }
 
     if (search) {
-      filters.name = search;
+      filters.name = { [Op.like]: `%${search}%` };
     }
 
     let users = null;
