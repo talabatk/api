@@ -228,8 +228,9 @@ exports.getUserByToken = async (req, res) => {
 };
 
 exports.getAllUsers = async (req, res, next) => {
-  const page = req.query.page ? req.query.page : 1;
-  const size = req.query.size ? req.query.size : 10;
+  const page = req.query.page;
+  const size = req.query.size;
+
   const role = req.query.role;
   try {
     const limit = parseInt(size);
@@ -241,11 +242,19 @@ exports.getAllUsers = async (req, res, next) => {
       filters.role = role;
     }
 
-    const users = await User.findAll({
-      limit: limit,
-      offset: offset,
-      where: filters,
-    });
+    let users = null;
+
+    if (page) {
+      users = await User.findAll({
+        limit: limit,
+        offset: offset,
+        where: filters,
+      });
+    } else {
+      users = await User.findAll({
+        where: filters,
+      });
+    }
 
     const count = await User.count({ where: filters }); // Get total number of users
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
