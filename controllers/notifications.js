@@ -15,69 +15,64 @@ exports.sendNotification = async (req, res) => {
   const [title, description, topic, fcmTokens] = req.body;
 
   try {
+    const messaging = admin.messaging();
+
+    if (topic) {
+      const users = await User.findAll({ where: { role: topic } });
+
+      await messaging.send({
+        notification: {
+          title: title,
+          body: description,
+        },
+        topic: topic,
+      });
+
+      const notification = [];
+
+      users.forEach(async (user) => {
+        notification.push({
+          userId: user.id,
+          title,
+          description,
+        });
+      });
+
+      await Notification.bulkCreate(notification);
+    } else {
+      const users = await User.findAll({
+        where: { fcm: { [Op.in]: fcmTokens } },
+      });
+
+      const notification = [];
+
+      users.forEach(async (user) => {
+        notification.push({
+          userId: user.id,
+          title,
+          description,
+        });
+      });
+
+      await Notification.bulkCreate(notification);
+
+      await messaging.subscribeToTopic(fcmTokens, "custom");
+
+      await messaging.send({
+        notification: {
+          title: title,
+          body: description,
+        },
+        topic: "custom",
+      });
+
+      await messaging.unsubscribeFromTopic(fcmTokens, "custom");
+    }
+
+    return res.status(200).json({ message: "success" });
   } catch (error) {
     return res.status(400).json(error);
   }
-
-  // admin
-  //   .messaging()
-  //   .send(message)
-  //   .then(function (response) {
-  //     return res.status(200).json({ message: "success", response });
-  //   })
-  //   .catch(function (error) {
-  //     res.status(400).json(error);
-  //   });
-};
-
-exports.sentNotificationToUser = async (req, res) => {
-  const title = req.body.title;
-  const body = req.body.body;
-  const token = req.body.fcm;
-
-  const message = {
-    token: token,
-    notification: {
-      title,
-      body,
-    },
-  };
-
-  admin
-    .messaging()
-    .send(message)
-    .then(function (response) {
-      return res.status(200).json({ message: "success", response });
-    })
-    .catch(function (error) {
-      res.status(400).json(error);
-    });
-};
-
-exports.unsubscribe = async (req, res) => {
-  const data = req.body;
-  admin
-    .messaging()
-    .unsubscribeFromTopic(data.tokens, data.topic)
-    .then((response) => {
-      return res.json(response);
-    })
-    .catch((error) => res.json(error));
-};
-
-exports.subscribe = async (req, res) => {
-  const data = req.body;
-  admin
-    .messaging()
-    .subscribeToTopic(data.tokens, data.topic)
-    .then((response) => {
-      console.log(response);
-      return res.json(response);
-    })
-    .catch((error) => {
-      console.log(error);
-      res.json(error);
-    });
 };
 
 exports.getUserNotification = async (req, res) => {
