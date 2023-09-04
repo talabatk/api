@@ -114,7 +114,7 @@ exports.getVendorCategories = async (req, res) => {
         "order",
         [
           Sequelize.literal(
-            `CONCAT("http://${req.get("host")}/uploads/", category.image)`
+            `CONCAT("https://${req.get("host")}/uploads/", category.image)`
           ),
           "image",
         ],
