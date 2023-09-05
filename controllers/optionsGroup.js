@@ -1,5 +1,6 @@
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
+const ProductGroup = require("../models/productGroup");
 
 exports.createGroup = async (req, res) => {
   const { products, groups } = req.body;
@@ -7,19 +8,29 @@ exports.createGroup = async (req, res) => {
   try {
     let groupsList = [];
 
+    let options = [];
+
+    let productGroups = [];
+
     groups.forEach((group) => {
-      for (let i = 0; i < products.length; i++) {
-        groupsList.push({
-          productId: products[i],
-          name: group.name,
-          type: group.type,
-        });
-      }
+      groupsList.push({
+        name: group.name,
+        type: group.type,
+      });
     });
 
     const groupsRes = await OptionGroup.bulkCreate(groupsList);
 
-    let options = [];
+    groupsRes.forEach((group) => {
+      for (let i = 0; i < products.length; i++) {
+        productGroups.push({
+          productId: products[i],
+          optionsGroupId: group.id,
+        });
+      }
+    });
+
+    const productGroupRes = await ProductGroup.bulkCreate(productGroups);
 
     for (let i = 0; i < groups.length; i++) {
       for (let j = 0; j < groups[i].options.length; j++) {
