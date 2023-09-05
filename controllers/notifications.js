@@ -46,7 +46,7 @@ exports.sendNotification = async (req, res) => {
 
       const notification = [];
 
-      const fcms = [];
+      let fcms = [];
 
       users.forEach(async (user) => {
         notification.push({
