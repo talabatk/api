@@ -12,7 +12,7 @@ admin.initializeApp({
 });
 
 exports.sendNotification = async (req, res) => {
-  const [title, description, topic, usersIds] = req.body;
+  const { title, description, topic, usersIds } = req.body;
 
   try {
     const messaging = admin.messaging();
