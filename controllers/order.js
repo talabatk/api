@@ -418,6 +418,7 @@ exports.updateOrder = async (req, res) => {
 
 exports.assignDelivery = async (req, res) => {
   const { id } = req.params;
+
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -427,33 +428,35 @@ exports.assignDelivery = async (req, res) => {
       include: User,
     });
 
-    if (order.status === "not started") {
-      const messaging = admin.messaging();
-
-      if (order.user.fcm) {
-        await messaging
-          .send({
-            token: order.user.fcm,
-            notification: {
-              title: "تحديث للطلب",
-              body: `${req.body.status} تم تغيير حاله طلبك الي`,
-            },
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-
-      await Notification.create({
-        userId: order.user.id,
-        title: "تحديث للطلب",
-        description: `${"started"} تم تغيير حاله طلبك الي`,
-      });
+    if (!order.deliveryId) {
+      return res.status(400).json({ message: "order was taken" });
     }
+
+    const messaging = admin.messaging();
+
+    if (order.user.fcm) {
+      await messaging
+        .send({
+          token: order.user.fcm,
+          notification: {
+            title: "تحديث للطلب",
+            body: `تم بدء طلبك`,
+          },
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+
+    await Notification.create({
+      userId: order.user.id,
+      title: "تحديث للطلب",
+      description: `${"started"} تم تغيير حاله طلبك الي`,
+    });
 
     await order.update({ status: "started", deliveryId: decodedToken.userId });
 
-    await VendorOrder.update({ status: "stated" }, { where: { orderId: id } });
+    await VendorOrder.update({ status: "started" }, { where: { orderId: id } });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
