@@ -428,7 +428,7 @@ exports.assignDelivery = async (req, res) => {
       include: User,
     });
 
-    if (!order.deliveryId) {
+    if (order.deliveryId) {
       return res.status(400).json({ message: "order was taken" });
     }
 

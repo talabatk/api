@@ -1,7 +1,5 @@
 const Category = require("../models/category");
 const Sequelize = require("sequelize");
-const VendorCategory = require("../models/vendorCategories");
-const { Op } = require("sequelize");
 const Product = require("../models/product");
 const ProductImage = require("../models/productImage");
 
