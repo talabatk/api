@@ -10,7 +10,6 @@ const Sequelize = require("sequelize");
 const VendorCategory = require("../models/vendorCategories");
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
-const ProductGroup = require("../models/productGroup");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -51,21 +50,6 @@ exports.createProduct = async (req, res) => {
       categoryId,
       show_price,
     });
-
-    const vendorOptionGroups = await OptionGroup.findAll({
-      where: { vendorId },
-    });
-
-    if (vendorOptionGroups) {
-      await ProductGroup.bulkCreate(
-        vendorOptionGroups.map((group) => {
-          return {
-            productId: product.id,
-            optionsGroupId: group.id,
-          };
-        })
-      );
-    }
 
     const images = await ProductImage.bulkCreate(
       req.files.image.map((file) => ({

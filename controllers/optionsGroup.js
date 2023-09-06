@@ -1,69 +1,49 @@
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
-const ProductGroup = require("../models/productGroup");
-const Product = require("../models/product");
 
 exports.createGroup = async (req, res) => {
-  const { products, vendorId, groups } = req.body;
+  const { products, groups } = req.body;
 
   try {
-    const groupsList = groups.map((group) => ({
-      name: group.name,
-      type: group.type,
-      vendorId,
-    }));
+    let groupsList = [];
+
+    let options = [];
+
+    groups.forEach((group) => {
+      for (let i = 0; i < products.length; i++) {
+        groupsList.push({
+          productId: products[i],
+          name: group.name,
+          type: group.type,
+          options: group.options,
+        });
+      }
+    });
 
     const groupsRes = await OptionGroup.bulkCreate(groupsList);
 
-    const productGroups = [];
-    const options = [];
-
-    if (vendorId) {
-      const vendorProducts = await Product.findAll({ where: { vendorId } });
-
-      groupsRes.forEach((group) => {
-        vendorProducts.forEach((product) => {
-          productGroups.push({
-            productId: product.id,
-            optionsGroupId: group.id,
-          });
-        });
-      });
-    } else {
-      groupsRes.forEach((group) => {
-        products.forEach((productId) => {
-          productGroups.push({
-            productId,
-            optionsGroupId: group.id,
-          });
-        });
-      });
-    }
-
-    await ProductGroup.bulkCreate(productGroups);
-
-    groups.forEach((group, i) => {
-      group.options.forEach((option) => {
+    for (let i = 0; i < groupsList.length; i++) {
+      for (let j = 0; j < groupsList[i].options.length; j++) {
         options.push({
-          name: option.name,
-          value: option.value,
+          name: groupsList[i].options[j].name,
+          value: groupsList[i].options[j].value,
           optionsGroupId: groupsRes[i].id,
         });
-      });
-    });
+      }
+    }
 
     const optionsRes = await Option.bulkCreate(options);
 
-    const responseGroups = groupsRes.map((group) => ({
-      ...group.toJSON(),
-      options: optionsRes.filter(
-        (option) => option.optionsGroupId === group.id
-      ),
-    }));
-
     return res.status(200).json({
       message: "success",
-      groups: responseGroups,
+      groups: groupsRes.map((group) => {
+        return {
+          ...group.toJSON(),
+          options: optionsRes.filter(
+            (option) => option.optionsGroupId === group.id
+          ),
+        };
+      }),
     });
   } catch (error) {
     console.log(error);

@@ -86,7 +86,6 @@ const CartProduct = require("./models/cartProduct");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
 const VendorOrder = require("./models/vendorOrders");
-const ProductGroup = require("./models/productGroup");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -151,6 +150,9 @@ Vendor.belongsTo(User);
 Product.hasMany(Slider);
 Slider.belongsTo(Product);
 
+Product.hasMany(OptionGroup);
+OptionGroup.belongsTo(Product);
+
 Product.hasMany(ProductImage);
 ProductImage.belongsTo(Product);
 
@@ -192,9 +194,6 @@ Category.belongsToMany(User, { through: VendorCategory });
 // define associations between vendor and area
 User.belongsToMany(Area, { through: DeliveryCost });
 Area.belongsToMany(User, { through: DeliveryCost });
-
-Product.belongsToMany(OptionGroup, { through: ProductGroup });
-OptionGroup.belongsToMany(Product, { through: ProductGroup });
 
 OptionGroup.hasMany(Option);
 Option.belongsTo(OptionGroup);
