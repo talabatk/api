@@ -19,5 +19,9 @@ const OptionGroup = sequelize.define("options_group", {
     allowNull: false,
     defaultValue: "single",
   },
+  vendorId: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
 });
 module.exports = OptionGroup;
