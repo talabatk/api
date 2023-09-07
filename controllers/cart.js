@@ -86,7 +86,6 @@ exports.addToCart = async (req, res) => {
 
     const optionsRes = await Option.findAll({
       where: { id: { [Op.in]: options } },
-      include: OptionGroup,
     });
 
     optionsRes.forEach((option) => {
