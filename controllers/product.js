@@ -10,6 +10,7 @@ const Sequelize = require("sequelize");
 const VendorCategory = require("../models/vendorCategories");
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
+const Order = require("../models/order");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -420,7 +421,7 @@ exports.dataAnalysis = async (req, res) => {
 
     const customers = await User.count({ where: { role: "customer" } }); // Get total number of customers
 
-    const orders = 0;
+    const orders = await Order.count();
 
     return res.status(200).json({ products, customers, orders });
   } catch (error) {
