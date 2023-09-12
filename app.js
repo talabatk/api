@@ -21,6 +21,7 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
+
 const upload = multer({ storage: storage });
 
 const app = express();
@@ -86,12 +87,12 @@ const CartProduct = require("./models/cartProduct");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
 const VendorOrder = require("./models/vendorOrders");
+const Notification = require("./models/notifications");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
 const deliveryRoutes = require("./routes/delivery");
 const vendorRoutes = require("./routes/vendor");
-const Notification = require("./models/notifications");
 const notificationsRouts = require("./routes//notification");
 const categoryRoutes = require("./routes/category");
 const sliderRoutes = require("./routes/slider");

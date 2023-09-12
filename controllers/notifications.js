@@ -3,12 +3,30 @@ const jwt = require("jsonwebtoken");
 
 const Notification = require("../models/notifications");
 const User = require("../models/user");
-const UserNotification = require("../models/userNotification");
 const { Op } = require("sequelize");
 const serviceAccount = require("../talabatek-firebase.json");
+const cron = require("node-cron");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+});
+
+cron.schedule("0 0 * * *", async () => {
+  // Call your function to delete old notifications here
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 3);
+
+    const deletedRows = await Notification.destroy({
+      where: {
+        created_at: {
+          [Op.lt]: cutoffDate,
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 exports.sendNotification = async (req, res) => {

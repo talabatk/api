@@ -150,7 +150,7 @@ exports.createOrder = async (req, res) => {
     await messaging.send({
       notification: {
         title: "طلب جديد",
-        body: `هناك طلب جديد من ${name}`,
+        body: `${name} هناك طلب جديد من`,
       },
       topic: "delivery",
     });
@@ -158,7 +158,7 @@ exports.createOrder = async (req, res) => {
     await messaging.send({
       notification: {
         title: "طلب جديد",
-        body: `هناك طلب جديد من ${name}`,
+        body: `${name} هناك طلب جديد من`,
       },
       topic: "admin",
     });
@@ -392,7 +392,12 @@ exports.updateOrder = async (req, res) => {
             token: order.user.fcm,
             notification: {
               title: "تحديث للطلب",
-              body: `${req.body.status} تم تغيير حاله طلبك الي`,
+              body:
+                req.body.status === "in the way"
+                  ? "تم بدء توصيل طلبك , في الطريق اليك"
+                  : req.body.status === "complete"
+                  ? "تم توصيل طلبك ,شكرا لك"
+                  : "تم بدء تحضير طلبك",
             },
           })
           .catch((error) => {
@@ -451,7 +456,7 @@ exports.assignDelivery = async (req, res) => {
     await Notification.create({
       userId: order.user.id,
       title: "تحديث للطلب",
-      description: `${"started"} تم تغيير حاله طلبك الي`,
+      description: `تم بدء طلبك`,
     });
 
     await order.update({ status: "started", deliveryId: decodedToken.userId });
