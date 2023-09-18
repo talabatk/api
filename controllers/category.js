@@ -2,6 +2,7 @@ const Category = require("../models/category");
 const Sequelize = require("sequelize");
 const Product = require("../models/product");
 const ProductImage = require("../models/productImage");
+const Vendor = require("../models/vendor");
 
 exports.createCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -134,6 +135,11 @@ exports.getVendorCategories = async (req, res) => {
                   "image",
                 ],
               ],
+            },
+            {
+              model: User,
+              attributes: ["id"],
+              include: Vendor,
             },
           ],
           where: filter,

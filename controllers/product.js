@@ -11,6 +11,7 @@ const VendorCategory = require("../models/vendorCategories");
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 const Order = require("../models/order");
+const Vendor = require("../models/vendor");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -149,6 +150,7 @@ exports.getAll = async (req, res) => {
                 "image",
               ],
             ],
+            include: Vendor,
           },
           {
             model: Category,
@@ -205,6 +207,7 @@ exports.getAll = async (req, res) => {
                 "image",
               ],
             ],
+            include: Vendor,
           },
           {
             model: Category,
@@ -277,6 +280,7 @@ exports.getOne = async (req, res) => {
               "image",
             ],
           ],
+          include: Vendor,
         },
         {
           model: Category,
