@@ -74,6 +74,7 @@ exports.login = async (req, res) => {
         direction: user.vendor.direction,
         distance: user.vendor.distance,
         delivery_time: user.vendor.delivery_time,
+        free_delivery_limit: user.vendor.free_delivery_limit,
         image: user.image
           ? "http://" + req.get("host") + "/uploads/" + user.image
           : null,
@@ -102,6 +103,7 @@ exports.createVendor = async (req, res) => {
     status,
     description,
     delivery_time,
+    free_delivery_limit,
     direction,
     distance,
   } = req.body;
@@ -130,6 +132,7 @@ exports.createVendor = async (req, res) => {
       userId: user.id,
       cover: req.files.cover ? req.files.cover[0].filename : null,
       status,
+      free_delivery_limit,
       delivery_time,
       direction,
       distance,
@@ -167,6 +170,7 @@ exports.createVendor = async (req, res) => {
         status,
         direction,
         distance,
+        free_delivery_limit,
         delivery_time,
         role: "vendor",
       },
@@ -216,6 +220,7 @@ exports.getAllVendors = async (req, res) => {
         direction: user.vendor.direction,
         distance: user.vendor.distance,
         delivery_time: user.vendor.delivery_time,
+        free_delivery_limit: user.vendor.free_delivery_limit,
         image: user.image,
         cover: user.vendor.cover,
         areas: user.areas,

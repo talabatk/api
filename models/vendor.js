@@ -31,6 +31,10 @@ const Vendor = sequelize.define("vendor", {
     type: Sequelize.STRING,
     allowNull: true,
   },
+  free_delivery_limit: {
+    type: Sequelize.DECIMAL(10, 2),
+    allowNull: true,
+  },
   distance: {
     type: Sequelize.STRING,
     allowNull: true,
