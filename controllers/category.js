@@ -3,6 +3,7 @@ const Sequelize = require("sequelize");
 const Product = require("../models/product");
 const ProductImage = require("../models/productImage");
 const Vendor = require("../models/vendor");
+const User = require("../models/user");
 
 exports.createCategory = async (req, res, next) => {
   const { name, order } = req.body;
