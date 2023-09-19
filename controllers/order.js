@@ -644,7 +644,13 @@ exports.getUserOrders = async (req, res) => {
 exports.deleteOrder = async (req, res) => {
   const { id } = req.params;
 
-  Order.destroy({ where: { id } })
-    .then(() => res.json({ message: "order deleted" }))
-    .catch((error) => res.status(400).json({ error }));
+  try {
+    await Order.destroy({ where: { id } });
+
+    await Notification.destroy({ where: { orderId: id } });
+
+    return res.status(200).json({ message: "order deleted" });
+  } catch (error) {
+    return res.status(400).json({ error });
+  }
 };
