@@ -12,6 +12,8 @@ const http = require("http");
 
 const cors = require("cors");
 
+const cron = require("node-cron");
+
 //-------settings-----------------------------
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -227,6 +229,24 @@ app.use("/api", optionGroupRoutes);
 app.use("/api", cartRoutes);
 
 app.use("/api", orderRoutes);
+
+cron.schedule("0 0 * * *", async () => {
+  // Call your function to delete old notifications here
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 3);
+
+    const deletedRows = await Notification.destroy({
+      where: {
+        created_at: {
+          [Op.lt]: cutoffDate,
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 sequelize
   .sync()
