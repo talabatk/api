@@ -628,7 +628,9 @@ exports.getVendorOrderById = async (req, res) => {
 
     return res
       .status(200)
-      .json({ ...orders.toJSON(), total: total, shipping: areaCost.cost });
+      .json({
+        order: { ...orders.toJSON(), total: total, shipping: areaCost.cost },
+      });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
