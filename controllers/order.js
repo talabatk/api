@@ -629,7 +629,7 @@ exports.getVendorOrderById = async (req, res) => {
     return res.status(200).json({
       order: {
         ...orders.toJSON(),
-        total: total + +shipping,
+        total: total + +areaCost.cost,
         shipping: areaCost.cost,
       },
     });
