@@ -626,11 +626,13 @@ exports.getVendorOrderById = async (req, res) => {
 
     const areaCost = costs.find((cost) => +cost.areaId === +orders.area.id);
 
-    return res
-      .status(200)
-      .json({
-        order: { ...orders.toJSON(), total: total, shipping: areaCost.cost },
-      });
+    return res.status(200).json({
+      order: {
+        ...orders.toJSON(),
+        total: total + +shipping,
+        shipping: areaCost.cost,
+      },
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
