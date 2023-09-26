@@ -619,9 +619,10 @@ exports.getVendorOrderById = async (req, res) => {
     });
 
     let total = 0;
-
+    let total_quantity = 0;
     orders.cart_products.forEach((e) => {
       total = total + +e.total;
+      total_quantity = total_quantity + +e.quantity;
     });
 
     const areaCost = costs.find((cost) => +cost.areaId === +orders.area.id);
@@ -632,6 +633,7 @@ exports.getVendorOrderById = async (req, res) => {
         subtotal: total,
         total: total + +areaCost.cost,
         shipping: areaCost.cost,
+        total_quantity,
       },
     });
   } catch (error) {
