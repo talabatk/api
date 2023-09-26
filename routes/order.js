@@ -10,6 +10,8 @@ router.get("/order", orderController.getAllOrders);
 
 router.get("/vendor-orders", orderController.getVendorOrder);
 
+router.get("/vendor-orders/:id", orderController.getVendorOrderById);
+
 router.get("/order/:id", orderController.getOne);
 
 router.patch("/order/:id", orderController.updateOrder);

@@ -128,6 +128,9 @@ CartProduct.belongsTo(Cart);
 Order.hasMany(CartProduct);
 CartProduct.belongsTo(Order);
 
+Area.hasMany(Order);
+Order.belongsTo(Area);
+
 // define associations between cartProduct and Option
 Vendor.belongsToMany(Order, { through: VendorOrder });
 Order.belongsToMany(Vendor, { through: VendorOrder });

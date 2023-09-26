@@ -12,6 +12,7 @@ const VendorOrder = require("../models/vendorOrders");
 const admin = require("firebase-admin");
 const Notification = require("../models/notifications");
 const { Op } = require("sequelize");
+const DeliveryCost = require("../models/delivery_cost");
 
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
@@ -108,6 +109,7 @@ exports.createOrder = async (req, res) => {
       notes,
       total: shipping + +cart.total,
       userId: decodedToken.userId,
+      areaId,
     });
 
     //save vendor orders
@@ -325,6 +327,7 @@ exports.getAllOrders = async (req, res) => {
             ],
             where: { ordered: true },
           },
+          Area,
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
@@ -354,6 +357,7 @@ exports.getAllOrders = async (req, res) => {
             ],
             where: { ordered: true },
           },
+          Area,
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
@@ -498,6 +502,7 @@ exports.getVendorOrder = async (req, res) => {
           "name",
           "phone",
           "total",
+          "shipping",
           "createdAt",
           "notes",
         ],
@@ -513,6 +518,7 @@ exports.getVendorOrder = async (req, res) => {
             ],
             where: { ordered: true, vendorId },
           },
+          Area,
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
@@ -524,6 +530,7 @@ exports.getVendorOrder = async (req, res) => {
           "status",
           "name",
           "phone",
+          "shipping",
           "total",
           "createdAt",
           "notes",
@@ -540,18 +547,28 @@ exports.getVendorOrder = async (req, res) => {
             ],
             where: { ordered: true, vendorId },
           },
+          Area,
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
       });
     }
 
+    const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
+
     orders = orders.map((order) => {
       let total = 0;
       order.cart_products.forEach((e) => {
         total = total + +e.total;
       });
-      return { ...order.toJSON(), total: total };
+
+      const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
+
+      return {
+        ...order.toJSON(),
+        total: total,
+        shipping: areaCost.cost,
+      };
     });
 
     const count = await VendorOrder.count({ where: { vendorId: vendor.id } }); // Get total number of products
@@ -559,6 +576,56 @@ exports.getVendorOrder = async (req, res) => {
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
     return res.status(200).json({ count, pages: numOfPages, results: orders });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
+exports.getVendorOrderById = async (req, res) => {
+  const { vendorId } = req.query;
+  const { id } = req.params;
+  try {
+    const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
+
+    let orders = await Order.findByPk(id, {
+      attributes: [
+        "id",
+        "status",
+        "name",
+        "phone",
+        "shipping",
+        "total",
+        "createdAt",
+        "notes",
+      ],
+      include: [
+        {
+          model: CartProduct,
+          required: true,
+          include: [
+            {
+              model: Product,
+            },
+            Option,
+          ],
+          where: { ordered: true, vendorId },
+        },
+        Area,
+      ],
+    });
+
+    let total = 0;
+
+    orders.cart_products.forEach((e) => {
+      total = total + +e.total;
+    });
+
+    const areaCost = costs.find((cost) => +cost.areaId === +orders.area.id);
+
+    return res
+      .status(200)
+      .json({ ...orders.toJSON(), total: total, shipping: areaCost.cost });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "internal server error" });
