@@ -69,10 +69,21 @@ exports.createOrder = async (req, res) => {
       if (directionIndex < 0) {
         shippingDirections.push({
           vendor: +e.product.vendorId,
+          free_limit: +e.product.user.vendor.free_delivery_limit,
           cost: +area.delivery_cost.cost,
           time: +e.product.user.vendor.delivery_time,
           distance: +e.product.user.vendor.distance,
+          total: +e.total,
         });
+      } else {
+        shippingDirections[directionIndex] = {
+          vendor: +e.product.vendorId,
+          free_limit: +e.product.user.vendor.free_delivery_limit,
+          cost: +area.delivery_cost.cost,
+          time: +e.product.user.vendor.delivery_time,
+          distance: +e.product.user.vendor.distance,
+          total: +e.total + +shippingDirections[directionIndex].total,
+        };
       }
 
       await Product.update(
@@ -94,7 +105,9 @@ exports.createOrder = async (req, res) => {
     });
 
     shippingDirections.forEach((e) => {
-      shipping = shipping + e.cost;
+      if (!e.free_limit || e.free_limit > e.total) {
+        shipping = shipping + e.cost;
+      }
     });
 
     //save order
@@ -254,16 +267,29 @@ exports.calculateShipping = async (req, res) => {
         if (directionIndex < 0) {
           shippingDirections.push({
             vendor: +e.product.vendorId,
+            free_limit: +e.product.user.vendor.free_delivery_limit,
             cost: +area.delivery_cost.cost,
             time: +e.product.user.vendor.delivery_time,
             distance: +e.product.user.vendor.distance,
+            total: +e.total,
           });
+        } else {
+          shippingDirections[directionIndex] = {
+            vendor: +e.product.vendorId,
+            free_limit: +e.product.user.vendor.free_delivery_limit,
+            cost: +area.delivery_cost.cost,
+            time: +e.product.user.vendor.delivery_time,
+            distance: +e.product.user.vendor.distance,
+            total: +e.total + +shippingDirections[directionIndex].total,
+          };
         }
       });
     }
 
     shippingDirections.forEach((e) => {
-      shipping = shipping + e.cost;
+      if (!e.free_limit || e.free_limit > e.total) {
+        shipping = shipping + e.cost;
+      }
       time = time + e.time;
       distance = distance + e.distance;
     });
@@ -275,6 +301,7 @@ exports.calculateShipping = async (req, res) => {
       total: +cart.total + shipping,
       time: time,
       distance: distance,
+      shippingDirections,
     });
   } catch (error) {
     console.log(error);
