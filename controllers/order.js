@@ -391,7 +391,7 @@ exports.getAllOrders = async (req, res) => {
       });
     }
 
-    const count = await Order.count(); // Get total number of products
+    const count = await Order.count({ where: filters }); // Get total number of products
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
     return res.status(200).json({ count, pages: numOfPages, results: orders });
