@@ -11,7 +11,14 @@ const Order = sequelize.define("order", {
   },
   status: {
     type: Sequelize.ENUM,
-    values: ["not started", "started", "preparing", "in the way", "complete"],
+    values: [
+      "not started",
+      "started",
+      "preparing",
+      "finished",
+      "in the way",
+      "complete",
+    ],
     defaultValue: "not started",
   },
   name: {

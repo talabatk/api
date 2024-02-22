@@ -428,7 +428,9 @@ exports.updateOrder = async (req, res) => {
                   ? "تم بدء توصيل طلبك , في الطريق اليك"
                   : req.body.status === "complete"
                   ? "تم توصيل طلبك ,شكرا لك"
-                  : "تم بدء تحضير طلبك",
+                  : req.body.status === "preparing"
+                  ? "تم بدء تحضير طلبك"
+                  : "تم الانتهاء من طلبك",
             },
           })
           .catch((error) => {
@@ -476,7 +478,7 @@ exports.assignDelivery = async (req, res) => {
           token: order.user.fcm,
           notification: {
             title: "تحديث للطلب",
-            body: `تم بدء طلبك`,
+            body: `تم بدء توصيل طلبك`,
           },
         })
         .catch((error) => {
@@ -487,12 +489,18 @@ exports.assignDelivery = async (req, res) => {
     await Notification.create({
       userId: order.user.id,
       title: "تحديث للطلب",
-      description: `تم بدء طلبك`,
+      description: `تم بدء توصيل طلبك`,
     });
 
-    await order.update({ status: "started", deliveryId: decodedToken.userId });
+    await order.update({
+      status: "in the way",
+      deliveryId: decodedToken.userId,
+    });
 
-    await VendorOrder.update({ status: "started" }, { where: { orderId: id } });
+    await VendorOrder.update(
+      { status: "in the way" },
+      { where: { orderId: id } }
+    );
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
