@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize({
-  host: "talabatek.cataddxqm8fj.eu-north-1.rds.amazonaws.com",
+  host: "talabatekdb.cataddxqm8fj.eu-north-1.rds.amazonaws.com",
   port: "3306",
   database: "talabatek",
   username: "admin",
