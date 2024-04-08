@@ -144,13 +144,13 @@ exports.createOrder = async (req, res) => {
       { where: { ordered: false, cartId: cart.id } }
     );
 
-    const deliveriesAndAdmins = await User.findAll({
+    const admins = await User.findAll({
       attributes: ["id"],
-      where: { role: { [Op.in]: ["delivery", "admin"] } },
+      where: { role: { [Op.in]: ["admin"] } },
     });
 
     const notifications = await Notification.bulkCreate(
-      deliveriesAndAdmins.map((user) => {
+      admins.map((user) => {
         return {
           userId: user.id,
           title: "طلب جديد",
@@ -161,14 +161,6 @@ exports.createOrder = async (req, res) => {
     );
 
     const messaging = admin.messaging();
-
-    await messaging.send({
-      notification: {
-        title: "طلب جديد",
-        body: `${name} هناك طلب جديد من`,
-      },
-      topic: "delivery",
-    });
 
     await messaging.send({
       notification: {
@@ -436,6 +428,33 @@ exports.updateOrder = async (req, res) => {
           .catch((error) => {
             console.log(error);
           });
+      }
+      if (req.body.status === "finished") {
+        const deliveries = await User.findAll({
+          attributes: ["id"],
+          where: { role: { [Op.in]: ["delivery"] } },
+        });
+
+        const notifications = await Notification.bulkCreate(
+          deliveries.map((user) => {
+            return {
+              userId: user.id,
+              title: "طلب جديد",
+              description: `هناك طلب جديد `,
+              orderId: id,
+            };
+          })
+        );
+
+        const messaging = admin.messaging();
+
+        await messaging.send({
+          notification: {
+            title: "طلب جديد",
+            body: `${name} هناك طلب جديد من`,
+          },
+          topic: "delivery",
+        });
       }
 
       await Notification.create({
