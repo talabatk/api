@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 //models===============================
 const User = require("../models/user");
 const Vendor = require("../models/vendor");
-const DeliveryCost = require("../models/delivery_cost");
 const Area = require("../models/area");
 
 //generate token=======================
