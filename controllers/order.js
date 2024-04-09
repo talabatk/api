@@ -14,6 +14,69 @@ const Notification = require("../models/notifications");
 const { Op } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 
+let vendorSockets = {};
+
+io.on("connection", (socket) => {
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+
+    // Remove disconnected vendor from vendorSockets
+    for (const vendorId in vendorSockets) {
+      if (vendorSockets[vendorId] === socket) {
+        delete vendorSockets[vendorId];
+        break;
+      }
+    }
+  });
+
+  socket.on("registerVendor", (vendorId) => {
+    vendorSockets[vendorId] = socket;
+  });
+});
+
+const getVendorOrder = async (vendorId, id) => {
+  const order = await Order.findByPk(id, {
+    attributes: [
+      "id",
+      "status",
+      "name",
+      "phone",
+      "total",
+      "shipping",
+      "address",
+      "createdAt",
+      "notes",
+    ],
+    include: [
+      {
+        model: CartProduct,
+        required: true,
+        include: [
+          {
+            model: Product,
+          },
+          Option,
+        ],
+        where: { ordered: true, vendorId },
+      },
+      Area,
+    ],
+  });
+
+  let total = 0;
+  order.cart_products.forEach((e) => {
+    total = total + +e.total;
+  });
+
+  const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
+
+  return {
+    ...order.toJSON(),
+    total: total,
+    shipping: areaCost.cost,
+  };
+};
+
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 
@@ -123,6 +186,13 @@ exports.createOrder = async (req, res) => {
       areaId,
     });
 
+    vendors.forEach(async (vend) => {
+      const vendorOrder = await getVendorOrder(vend.userId, order.id);
+      const vendorSocket = vendorSockets[vend.userId];
+      if (vendorSocket) {
+        vendorSocket.emit("newOrder", vendorOrder);
+      }
+    });
     //save vendor orders
     await VendorOrder.bulkCreate(
       vendors.map((item) => {
