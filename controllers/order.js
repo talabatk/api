@@ -432,7 +432,6 @@ exports.updateOrder = async (req, res) => {
           attributes: ["id"],
           where: { role: { [Op.in]: ["delivery"] } },
         });
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         const notifications = await Notification.bulkCreate(
           deliveries.map((user) => {
             return {
