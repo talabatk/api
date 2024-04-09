@@ -51,6 +51,10 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user.id);
 
+    if (req.body.fcm) {
+      user.fcm = req.body.fcm;
+    }
+
     user.token = token;
 
     if (req.body.fcm) {
