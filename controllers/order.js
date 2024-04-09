@@ -18,11 +18,9 @@ exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 
   try {
-    let vendors = [];
-
-    let shippingDirections = [];
-
-    let shipping = 0;
+    let vendors = [],
+      shippingDirections = [],
+      shipping = 0;
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -99,7 +97,7 @@ exports.createOrder = async (req, res) => {
         vendors.push({
           userId: +e.product.user.id,
           vendorId: +e.product.user.vendor.id,
-          fcm: e.product.user.vendor.fcm,
+          fcm: e.product.user.fcm,
         });
       }
     });
@@ -176,7 +174,7 @@ exports.createOrder = async (req, res) => {
           token: e.fcm,
           notification: {
             title: "طلب جديد",
-            body: `هناك طلب جديد من ${name}`,
+            body: `هناك طلب جديد`,
           },
         });
       }
@@ -451,7 +449,7 @@ exports.updateOrder = async (req, res) => {
         await messaging.send({
           notification: {
             title: "طلب جديد",
-            body: `${name} هناك طلب جديد من`,
+            body: `هناك طلب جديد`,
           },
           topic: "delivery",
         });
