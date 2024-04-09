@@ -35,6 +35,8 @@ io.on("connection", (socket) => {
 });
 
 const getVendorOrder = async (vendorId, id) => {
+  const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
+
   const order = await Order.findByPk(id, {
     attributes: [
       "id",
@@ -50,20 +52,21 @@ const getVendorOrder = async (vendorId, id) => {
     include: [
       {
         model: CartProduct,
-        required: true,
         include: [
           {
             model: Product,
           },
           Option,
         ],
-        where: { ordered: true, vendorId },
+        where: { vendorId },
       },
       Area,
     ],
   });
 
   let total = 0;
+  console.log(order);
+
   order.cart_products.forEach((e) => {
     total = total + +e.total;
   });
@@ -72,7 +75,8 @@ const getVendorOrder = async (vendorId, id) => {
 
   return {
     ...order.toJSON(),
-    total: total,
+    subtotal: total,
+    total: +total + +areaCost.cost,
     shipping: areaCost.cost,
   };
 };
@@ -186,6 +190,15 @@ exports.createOrder = async (req, res) => {
       areaId,
     });
 
+    //assign order id to cart product
+    await CartProduct.update(
+      {
+        ordered: true,
+        orderId: order.id,
+      },
+      { where: { ordered: false, cartId: cart.id } }
+    );
+
     vendors.forEach(async (vend) => {
       const vendorOrder = await getVendorOrder(vend.userId, order.id);
       const vendorSocket = vendorSockets[vend.userId];
@@ -201,15 +214,6 @@ exports.createOrder = async (req, res) => {
           orderId: order.id,
         };
       })
-    );
-
-    //assign order id to cart product
-    await CartProduct.update(
-      {
-        ordered: true,
-        orderId: order.id,
-      },
-      { where: { ordered: false, cartId: cart.id } }
     );
 
     const admins = await User.findAll({
