@@ -46,12 +46,7 @@ app.options("*", cors()); // include before other routes
 
 app.use(cors());
 
-const io = socketIO(server, {
-  transports: ["polling"],
-  cors: {
-    origin: "*",
-  },
-});
+const io = socketIO(server);
 
 io.on("connection", (socket) => {
   console.log("A user is connected");
