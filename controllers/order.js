@@ -226,7 +226,7 @@ exports.createOrder = async (req, res) => {
         return {
           userId: user.id,
           title: "طلب جديد",
-          description: `${name} هناك طلب جديد من`,
+          description: `هناك طلب جديد من ${name}`,
           orderId: order.id,
         };
       })
@@ -237,7 +237,7 @@ exports.createOrder = async (req, res) => {
     await messaging.send({
       notification: {
         title: "طلب جديد",
-        body: `${name} هناك طلب جديد من`,
+        body: `هناك طلب جديد من ${name}`,
       },
       topic: "admin",
     });
@@ -248,7 +248,7 @@ exports.createOrder = async (req, res) => {
           token: e.fcm,
           notification: {
             title: "طلب جديد",
-            body: `هناك طلب جديد`,
+            body: `هناك طلب جديد من ${name}`,
           },
         });
       }
@@ -259,7 +259,7 @@ exports.createOrder = async (req, res) => {
         return {
           userId: user.userId,
           title: "طلب جديد",
-          description: `${name} هناك طلب جديد من`,
+          description: `هناك طلب جديد من ${name}`,
           orderId: order.id,
         };
       })
@@ -531,7 +531,14 @@ exports.updateOrder = async (req, res) => {
       await Notification.create({
         userId: order.user.id,
         title: "تحديث للطلب",
-        description: `${req.body.status} تم تغيير حاله طلبك الي`,
+        description:
+          req.body.status === "in the way"
+            ? "تم بدء توصيل طلبك , في الطريق اليك"
+            : req.body.status === "complete"
+            ? "تم توصيل طلبك ,شكرا لك"
+            : req.body.status === "preparing"
+            ? "تم بدء تحضير طلبك"
+            : "تم الانتهاء من طلبك",
       });
     }
 
