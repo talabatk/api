@@ -470,7 +470,7 @@ exports.updateOrder = async (req, res) => {
 
   try {
     const order = await Order.findByPk(id, {
-      include: User,
+      include: [User, Vendor],
     });
 
     if (req.body.status !== order.status) {
@@ -543,6 +543,14 @@ exports.updateOrder = async (req, res) => {
     }
 
     await order.update(req.body);
+
+    order.vendors.forEach(async (vend) => {
+      const vendorOrder = await getVendorOrder(vend.userId, order.id);
+      const vendorSocket = vendorSockets[vend.userId];
+      if (vendorSocket) {
+        vendorSocket.emit("updatedOrder", vendorOrder);
+      }
+    });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
