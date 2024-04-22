@@ -568,7 +568,7 @@ exports.assignDelivery = async (req, res) => {
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
     const order = await Order.findByPk(id, {
-      include: User,
+      include: [User, Vendor],
     });
 
     if (order.deliveryId) {
@@ -606,6 +606,14 @@ exports.assignDelivery = async (req, res) => {
       { status: "in the way" },
       { where: { orderId: id } }
     );
+
+    order.vendors.forEach(async (vend) => {
+      const vendorOrder = await getVendorOrder(vend.userId, order.id);
+      const vendorSocket = vendorSockets[vend.userId];
+      if (vendorSocket) {
+        vendorSocket.emit("updatedOrder", vendorOrder);
+      }
+    });
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
