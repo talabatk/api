@@ -11,8 +11,9 @@ const { io } = require("../app");
 const VendorOrder = require("../models/vendorOrders");
 const admin = require("firebase-admin");
 const Notification = require("../models/notifications");
-const { Op } = require("sequelize");
+const { Op, or } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
+const Delivery = require("../models/delivery");
 
 let vendorSockets = {};
 
@@ -33,6 +34,22 @@ io.on("connection", (socket) => {
     vendorSockets[vendorId] = socket;
   });
 });
+
+function getCurrentDateTimeInPalestine() {
+  const date = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Gaza", // or 'Asia/Hebron'
+    hour12: true,
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  return date;
+}
 
 const getVendorOrder = async (vendorId, id) => {
   const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
@@ -61,6 +78,7 @@ const getVendorOrder = async (vendorId, id) => {
         where: { vendorId },
       },
       Area,
+      { model: Delivery, include: User },
     ],
   });
 
@@ -470,7 +488,7 @@ exports.updateOrder = async (req, res) => {
 
   try {
     const order = await Order.findByPk(id, {
-      include: [User, Vendor],
+      include: [User, Vendor, { model: Delivery, include: User }],
     });
 
     if (req.body.status !== order.status) {
@@ -542,7 +560,14 @@ exports.updateOrder = async (req, res) => {
       });
     }
 
-    await order.update(req.body);
+    order.status = req.body.status;
+
+    if (+req.body.time && +order.time < +req.body.time) {
+      order.time = req.body.time;
+      order.updatedTime = getCurrentDateTimeInPalestine();
+    }
+
+    await order.save();
 
     order.vendors.forEach(async (vend) => {
       const vendorOrder = await getVendorOrder(vend.userId, order.id);
@@ -568,7 +593,7 @@ exports.assignDelivery = async (req, res) => {
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
     const order = await Order.findByPk(id, {
-      include: [User, Vendor],
+      include: [User, Vendor, { model: Delivery, include: User }],
     });
 
     if (order.deliveryId) {
@@ -668,6 +693,7 @@ exports.getVendorOrder = async (req, res) => {
             where: { ordered: true, vendorId },
           },
           Area,
+          { model: Delivery, include: User },
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
@@ -698,6 +724,7 @@ exports.getVendorOrder = async (req, res) => {
             where: { ordered: true, vendorId },
           },
           Area,
+          { model: Delivery, include: User },
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
@@ -763,6 +790,7 @@ exports.getVendorOrderById = async (req, res) => {
           where: { ordered: true, vendorId },
         },
         Area,
+        { model: Delivery, include: User },
       ],
     });
 
@@ -855,6 +883,7 @@ exports.getUserOrders = async (req, res) => {
           ],
           where: { ordered: true },
         },
+        { model: Delivery, include: User },
       ],
       where: { userId: decodedToken.userId },
     });

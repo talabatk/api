@@ -136,6 +136,9 @@ Order.belongsToMany(Vendor, { through: VendorOrder });
 User.hasMany(Order);
 Order.belongsTo(User);
 
+Delivery.hasMany(Order);
+Order.belongsTo(Delivery);
+
 Product.hasMany(CartProduct);
 CartProduct.belongsTo(Product);
 

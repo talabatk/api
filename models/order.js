@@ -46,6 +46,16 @@ const Order = sequelize.define("order", {
     allowNull: false,
     defaultValue: 0,
   },
+  time: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  updatedTime: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
   subtotal: {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,
@@ -60,10 +70,6 @@ const Order = sequelize.define("order", {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,
     defaultValue: 0,
-  },
-  deliveryId: {
-    type: Sequelize.INTEGER,
-    allowNull: true,
   },
 });
 module.exports = Order;
