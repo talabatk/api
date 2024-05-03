@@ -188,7 +188,7 @@ exports.createOrder = async (req, res) => {
     });
 
     shippingDirections.forEach((e) => {
-      if (!e.free_limit || e.free_limit > e.total) {
+      if (e.free_limit !== 0 && e.free_limit > e.total) {
         shipping = shipping + e.cost;
       }
     });
@@ -739,12 +739,21 @@ exports.getVendorOrder = async (req, res) => {
         total = total + +e.total;
       });
 
+      let shipping = 0;
+
       const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
+
+      if (
+        +vendor.free_delivery_limit !== 0 &&
+        +vendor.free_delivery_limit > +total
+      ) {
+        shipping = areaCost.cost;
+      }
 
       return {
         ...order.toJSON(),
         total: total,
-        shipping: areaCost.cost,
+        shipping: shipping,
       };
     });
 
