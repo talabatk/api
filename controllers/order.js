@@ -753,7 +753,7 @@ exports.getVendorOrder = async (req, res) => {
       return {
         ...order.toJSON(),
         total: total,
-        shipping: shipping,
+        shipping: shipping + "",
       };
     });
 
