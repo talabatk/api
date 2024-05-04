@@ -195,6 +195,7 @@ exports.createOrder = async (req, res) => {
       }
     });
 
+    const currentDate = getCurrentDateTimeInPalestine();
     //save order
     const order = await Order.create({
       address,
@@ -208,6 +209,7 @@ exports.createOrder = async (req, res) => {
       total: shipping + +cart.total,
       userId: decodedToken.userId,
       areaId,
+      updatedTime: currentDate,
     });
 
     //assign order id to cart product
@@ -441,7 +443,7 @@ exports.getAllOrders = async (req, res) => {
           Area,
         ],
         where: filters,
-        order: [["createdAt", "DESC"]],
+        order: [["updatedTime", "DESC"]],
       });
     } else {
       orders = await Order.findAll({
@@ -471,7 +473,7 @@ exports.getAllOrders = async (req, res) => {
           Area,
         ],
         where: filters,
-        order: [["createdAt", "DESC"]],
+        order: [["updatedTime", "DESC"]],
       });
     }
 
@@ -698,7 +700,7 @@ exports.getVendorOrder = async (req, res) => {
           { model: Delivery, include: User },
         ],
         where: filters,
-        order: [["createdAt", "DESC"]],
+        order: [["updatedTime", "DESC"]],
       });
     } else {
       orders = await Order.findAll({
@@ -729,7 +731,7 @@ exports.getVendorOrder = async (req, res) => {
           { model: Delivery, include: User },
         ],
         where: filters,
-        order: [["createdAt", "DESC"]],
+        order: [["updatedTime", "DESC"]],
       });
     }
 
