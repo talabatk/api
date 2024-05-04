@@ -47,6 +47,11 @@ const User = sequelize.define("user", {
     unique: true,
     allowNull: true,
   },
+  online: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 });
 
 module.exports = User;

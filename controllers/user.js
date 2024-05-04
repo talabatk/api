@@ -371,3 +371,26 @@ exports.deleteUser = async (req, res) => {
     .then(() => res.json({ message: "deleted" }))
     .catch((error) => res.status(400).json({ error }));
 };
+
+exports.changeStatus = async (req, res) => {
+  const { online } = req.body;
+  try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+
+    user.online = online;
+
+    await user.save();
+    return res.status(200).json("success");
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
