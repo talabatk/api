@@ -4,7 +4,6 @@ const CartProduct = require("../models/cartProduct");
 const Product = require("../models/product");
 const Option = require("../models/option");
 const { Op } = require("sequelize");
-const OptionGroup = require("../models/optionGroup");
 const CartProductOption = require("../models/cartProductOption");
 const ProductImage = require("../models/productImage");
 const Sequelize = require("sequelize");
