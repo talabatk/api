@@ -16,7 +16,7 @@ router.post("/reset-password", userController.resetPassword);
 
 router.patch("/update", userController.updateProfile);
 
-router.patch("/status", userController.changeStatus);
+router.post("/status", userController.changeStatus);
 
 router.delete("/delete/:id", userController.deleteUser);
 
