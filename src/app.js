@@ -1,27 +1,20 @@
 const express = require("express");
-
 const multer = require("multer");
-
 const bodyParser = require("body-parser");
-
 const sequelize = require("./util/database");
-
 const socketIO = require("socket.io");
-
-const http = require("http");
-
+const http = require("node:http");
 const cors = require("cors");
-
 const cron = require("node-cron");
 
 //-------settings-----------------------------
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+    destination: (req, file, cb) => {
+        cb(null, "uploads/");
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
 });
 
 const upload = multer({ storage: storage });
@@ -34,10 +27,10 @@ const server = http.createServer(app);
 app.use(bodyParser.json());
 
 app.use(
-  upload.fields([
-    { name: "image", maxCount: 3 },
-    { name: "cover", maxCount: 1 },
-  ])
+    upload.fields([
+        { name: "image", maxCount: 3 },
+        { name: "cover", maxCount: 1 }
+    ])
 );
 
 app.use("/uploads", express.static("uploads"));
@@ -47,19 +40,19 @@ app.options("*", cors()); // include before other routes
 app.use(cors());
 
 const io = socketIO(server, {
-  cors: "*",
+    cors: "*"
 });
 
 io.on("connection", (socket) => {
-  console.log("A user is connected");
+    console.log("A user is connected");
 
-  socket.on("message", (message) => {
-    console.log(`message from ${socket.id} : ${message}`);
-  });
+    socket.on("message", (message) => {
+        console.log(`message from ${socket.id} : ${message}`);
+    });
 
-  socket.on("disconnect", () => {
-    console.log(`socket ${socket.id} disconnected`);
-  });
+    socket.on("disconnect", () => {
+        console.log(`socket ${socket.id} disconnected`);
+    });
 });
 
 module.exports = { io };
@@ -166,27 +159,27 @@ Product.hasMany(UserFavoriteProduct);
 UserFavoriteProduct.belongsTo(Product);
 
 User.hasMany(UserFavoriteVendor, {
-  foreignKey: "vendorId",
+    foreignKey: "vendorId"
 });
 UserFavoriteVendor.belongsTo(User, {
-  foreignKey: "vendorId",
+    foreignKey: "vendorId"
 });
 
 User.hasMany(Product, {
-  foreignKey: "vendorId",
+    foreignKey: "vendorId"
 });
 Product.belongsTo(User, {
-  foreignKey: "vendorId",
+    foreignKey: "vendorId"
 });
 
 Category.hasMany(Product);
 Product.belongsTo(Category);
 
 User.hasMany(Slider, {
-  foreignKey: "vendorId",
+    foreignKey: "vendorId"
 });
 Slider.belongsTo(User, {
-  foreignKey: "vendorId",
+    foreignKey: "vendorId"
 });
 
 // define associations between the models
@@ -234,28 +227,28 @@ app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
 
 cron.schedule("0 0 * * *", async () => {
-  // Call your function to delete old notifications here
-  try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 3);
+    // Call your function to delete old notifications here
+    try {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 3);
 
-    const deletedRows = await Notification.destroy({
-      where: {
-        created_at: {
-          [Op.lt]: cutoffDate,
-        },
-      },
-    });
-  } catch (error) {
-    console.log(error);
-  }
+        const deletedRows = await Notification.destroy({
+            where: {
+                created_at: {
+                    [Op.lt]: cutoffDate
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 sequelize
-  .sync()
-  .then((result) => {
-    server.listen(3000);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+    .sync()
+    .then((result) => {
+        server.listen(3000);
+    })
+    .catch((err) => {
+        console.log(err);
+    });

@@ -7,9 +7,9 @@ router.post("/login", vendorController.login);
 
 router.post("/create-vendor", vendorController.createVendor);
 
-router.get('/get-vendors', vendorController.getAllVendors);
+router.get("/get-vendors", vendorController.getAllVendors);
 
-router.get('/get-vendor/:id', vendorController.getVendor);
+router.get("/get-vendor/:id", vendorController.getVendor);
 
 router.patch("/edit-vendor", vendorController.editVendor);
 
