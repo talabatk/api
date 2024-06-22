@@ -1,17 +1,11 @@
 {
-  "name": "talabatek",
-  "version": "1.0.0",
-  "description": "talabated app backend",
+  "name": "talabatk",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
-  },
-  "author": "omar mohamed",
-  "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^1.18.3"
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "biome:safe": "npx @biomejs/biome check --write src",
+    "biome:unsafe": "npx @biomejs/biome check --write --unsafe src"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -30,5 +24,8 @@
     "node-cron": "^3.0.2",
     "sequelize": "^6.32.1",
     "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.3"
   }
 }
