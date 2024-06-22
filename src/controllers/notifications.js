@@ -29,13 +29,13 @@ exports.sendNotification = async (req, res) => {
 
             const notification = [];
 
-            users.forEach(async (user) => {
+            for (const user of users) {
                 notification.push({
                     userId: user.id,
                     title,
                     description
                 });
-            });
+            }
 
             await Notification.bulkCreate(notification);
         } else {
@@ -47,7 +47,7 @@ exports.sendNotification = async (req, res) => {
 
             const fcms = [];
 
-            users.forEach(async (user) => {
+            for (const user of users) {
                 notification.push({
                     userId: user.id,
                     title,
@@ -56,7 +56,7 @@ exports.sendNotification = async (req, res) => {
                 if (user.fcm) {
                     fcms.push(user.fcm);
                 }
-            });
+            }
 
             await Notification.bulkCreate(notification);
 
