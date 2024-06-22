@@ -2,8 +2,8 @@
   "name": "talabatk",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon app.js",
-    "start": "node app.js",
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
     "biome:safe": "npx @biomejs/biome check --write src",
     "biome:unsafe": "npx @biomejs/biome check --write --unsafe src"
   },
