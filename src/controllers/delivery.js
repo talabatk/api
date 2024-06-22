@@ -64,12 +64,12 @@ exports.login = async (req, res) => {
                 email: user.email,
                 phone: user.phone,
                 role: user.role,
-                image: user.image ? "http://" + req.get("host") + "/uploads/" + user.image : null,
+                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
                 token
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -113,14 +113,14 @@ exports.createDelivery = async (req, res) => {
                 phone,
                 fcm,
                 image: req.files.image
-                    ? "http://" + req.get("host") + "/uploads/" + req.files.image[0].filename
+                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
                     : null,
                 token,
                 role: "delivery"
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -138,7 +138,7 @@ exports.getAllDeliveries = async (req, res) => {
         const results = users.map((user) => {
             return {
                 ...user.toJSON(),
-                image: user.image ? "http://" + req.get("host") + "/uploads/" + user.image : null
+                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null
             };
         });
 

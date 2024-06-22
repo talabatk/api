@@ -66,13 +66,12 @@ exports.login = async (req, res) => {
                 phone: user.phone,
                 role: user.role,
                 super_admin: user.admin.super_admin,
-                image: user.image ? "http://" + req.get("host") + "/uploads/" + user.image : null,
+                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
                 roles: !user.admin.super_admin ? user.admin.adminRole : null,
                 token
             }
         });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -98,7 +97,7 @@ exports.createAdmin = async (req, res) => {
         });
 
         const admin = await Admin.create({
-            super_admin: super_admin ? true : false,
+            super_admin: !!super_admin,
             userId: user.id
         });
 
@@ -124,7 +123,7 @@ exports.createAdmin = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 image: req.files.image
-                    ? "http://" + req.get("host") + "/uploads/" + req.files.image[0].filename
+                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
                     : null,
                 phone,
                 fcm: user.fcm,
@@ -135,7 +134,6 @@ exports.createAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -153,7 +151,7 @@ exports.getAllAdmins = async (req, res) => {
         const results = users.map((user) => {
             return {
                 ...user.toJSON(),
-                image: user.image ? "http://" + req.get("host") + "/uploads/" + user.image : null
+                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null
             };
         });
 
@@ -223,7 +221,7 @@ exports.editAdmin = async (req, res) => {
                 image: req.files.image[0].filename
             });
 
-            updatedAdmin.image = "http://" + req.get("host") + "/uploads/" + updatedAdmin.image;
+            updatedAdmin.image = `http://${req.get("host")}/uploads/${updatedAdmin.image}`;
         }
 
         return res.status(200).json(updatedAdmin);

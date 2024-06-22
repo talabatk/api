@@ -54,7 +54,7 @@ exports.createProduct = async (req, res) => {
         const imagesWithUrl = images.map((image) => {
             return {
                 ...image.toJSON(),
-                image: "https://" + req.get("host") + "/uploads/" + image.image
+                image: `https://${req.get("host")}/uploads/${image.image}`
             };
         });
 
@@ -63,7 +63,7 @@ exports.createProduct = async (req, res) => {
             product: { ...product.toJSON(), images: imagesWithUrl }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -216,7 +216,7 @@ exports.getAll = async (req, res) => {
 
         return res.status(200).json({ count: count, pages: numOfPages, results: products });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -274,7 +274,7 @@ exports.getOne = async (req, res) => {
 
         return res.status(200).json({ message: "success", product });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -336,7 +336,7 @@ exports.editOne = async (req, res) => {
             imagesWithUrl = images.map((image) => {
                 return {
                     ...image.toJSON(),
-                    image: "http://" + req.get("host") + "/uploads/" + image.image
+                    image: `http://${req.get("host")}/uploads/${image.image}`
                 };
             });
         }
@@ -349,7 +349,7 @@ exports.editOne = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -372,7 +372,7 @@ exports.deleteOne = async (req, res) => {
 
         Product.destroy({ where: { id } }).then(() => res.json({ message: "deleted" }));
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -395,7 +395,7 @@ exports.dataAnalysis = async (req, res) => {
 
         return res.status(200).json({ products, customers, orders });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

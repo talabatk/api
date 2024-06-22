@@ -12,7 +12,7 @@ exports.createSlider = async (req, res) => {
         });
         return res.status(201).json({ message: "slider created", slider });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -24,13 +24,13 @@ exports.getAll = async (req, res) => {
         const results = sliders.map((slider) => {
             return {
                 ...slider.toJSON(),
-                image: "https://" + req.get("host") + "/uploads/" + slider.image
+                image: `https://${req.get("host")}/uploads/${slider.image}`
             };
         });
 
         return res.status(201).json({ results: results });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -68,7 +68,7 @@ exports.editOne = async (req, res) => {
 
         return res.status(201).json({ message: "updated successfully", slider });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

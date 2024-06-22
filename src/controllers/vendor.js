@@ -76,14 +76,14 @@ exports.login = async (req, res) => {
                 distance: user.vendor.distance,
                 delivery_time: user.vendor.delivery_time,
                 free_delivery_limit: user.vendor.free_delivery_limit,
-                image: user.image ? "http://" + req.get("host") + "/uploads/" + user.image : null,
-                cover: user.vendor.cover ? "http://" + req.get("host") + "/uploads/" + user.cover : null,
+                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
+                cover: user.vendor.cover ? `http://${req.get("host")}/uploads/${user.cover}` : null,
                 token,
                 areas: user.areas
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -110,7 +110,6 @@ exports.createVendor = async (req, res) => {
     }
 
     try {
-        console.log(req.files);
         const hashedPassword = await bcrypt.hash(password, 12);
 
         const user = await User.create({
@@ -151,10 +150,10 @@ exports.createVendor = async (req, res) => {
                 phone,
                 description,
                 image: req.files.image
-                    ? "http://" + req.get("host") + "/uploads/" + req.files.image[0].filename
+                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
                     : null,
                 cover: req.files.cover
-                    ? "http://" + req.get("host") + "/uploads/" + req.files.cover[0].filename
+                    ? `http://${req.get("host")}/uploads/${req.files.cover[0].filename}`
                     : null,
                 fcm,
                 token,
@@ -167,7 +166,7 @@ exports.createVendor = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -190,10 +189,10 @@ exports.getAllVendors = async (req, res) => {
 
         const results = users.map((user) => {
             if (user.image) {
-                user.image = "https://" + req.get("host") + "/uploads/" + user.image;
+                user.image = `https://${req.get("host")}/uploads/${user.image}`;
             }
             if (user.vendor.cover) {
-                user.vendor.cover = "https://" + req.get("host") + "/uploads/" + user.vendor.cover;
+                user.vendor.cover = `https://${req.get("host")}/uploads/${user.vendor.cover}`;
             }
             const { id, name, email, phone, address, fcm } = user;
 
@@ -243,10 +242,10 @@ exports.getVendor = async (req, res) => {
 
         const results = users.map((user) => {
             if (user.image) {
-                user.image = "https://" + req.get("host") + "/uploads/" + user.image;
+                user.image = `https://${req.get("host")}/uploads/${user.image}`;
             }
             if (user.vendor.cover) {
-                user.vendor.cover = "https://" + req.get("host") + "/uploads/" + user.vendor.cover;
+                user.vendor.cover = `https://${req.get("host")}/uploads/${user.vendor.cover}`;
             }
             const { id, name, email, phone, address, fcm } = user;
 
@@ -311,14 +310,13 @@ exports.editVendor = async (req, res) => {
                 image: req.files.image[0].filename
             });
 
-            updatedVendor.image = "http://" + req.get("host") + "/uploads/" + updatedVendor.image;
+            updatedVendor.image = `http://${req.get("host")}/uploads/${updatedVendor.image}`;
         }
 
         if (req.files.cover) {
             await vendor.vendor.update({ cover: req.files.cover[0].filename });
 
-            updatedVendor.vendor.cover =
-                "http://" + req.get("host") + "/uploads/" + req.files.cover[0].filename;
+            updatedVendor.vendor.cover = `http://${req.get("host")}/uploads/${req.files.cover[0].filename}`;
         }
 
         await vendor.vendor.update(req.body);

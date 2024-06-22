@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
         cb(null, "uploads/");
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
+        cb(null, `${Date.now()}-${file.originalname}`);
     }
 });
 
@@ -44,14 +44,12 @@ const io = socketIO(server, {
 });
 
 io.on("connection", (socket) => {
-    console.log("A user is connected");
-
+    console.info("A user is connected");
     socket.on("message", (message) => {
-        console.log(`message from ${socket.id} : ${message}`);
+        console.info(`message from ${socket.id} : ${message}`);
     });
-
     socket.on("disconnect", () => {
-        console.log(`socket ${socket.id} disconnected`);
+        console.info(`socket ${socket.id} disconnected`);
     });
 });
 
@@ -240,7 +238,7 @@ cron.schedule("0 0 * * *", async () => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 });
 
@@ -250,5 +248,5 @@ sequelize
         server.listen(3000);
     })
     .catch((err) => {
-        console.log(err);
+        console.error(err);
     });

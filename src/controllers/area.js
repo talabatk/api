@@ -43,7 +43,7 @@ exports.editOne = async (req, res) => {
 
         return res.status(200).json(area);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

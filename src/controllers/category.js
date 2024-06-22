@@ -16,7 +16,7 @@ exports.createCategory = async (req, res, next) => {
             image: req.files.image ? req.files.image[0].filename : null
         });
 
-        category.image = "http://" + req.get("host") + "/uploads/" + category.image;
+        category.image = `http://${req.get("host")}/uploads/${category.image}`;
 
         return res.status(201).json({ message: "Category created!", category });
     } catch (err) {
@@ -50,7 +50,7 @@ exports.getOne = async (req, res) => {
         .then((category) =>
             res.json({
                 ...category.toJSON(),
-                image: category.image ? "https://" + req.get("host") + "/uploads/" + category.image : null
+                image: category.image ? `https://${req.get("host")}/uploads/${category.image}` : null
             })
         )
         .catch((error) => res.status(400).json({ error }));
@@ -72,10 +72,10 @@ exports.editOne = async (req, res) => {
 
         return res.status(200).json({
             ...category.toJSON(),
-            image: category.image ? "http://" + req.get("host") + "/uploads/" + category.image : null
+            image: category.image ? `http://${req.get("host")}/uploads/${category.image}` : null
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -137,7 +137,7 @@ exports.getVendorCategories = async (req, res) => {
 
         return res.status(200).json({ results: categories });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

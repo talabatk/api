@@ -4,8 +4,8 @@ const validateUser = async (req, res, next) => {
     const { email, phone } = req.body;
 
     // Check if email or phone already exists in the database
-    let userWithPhone = null,
-        userWithEmail = null;
+    let userWithPhone = null;
+    let userWithEmail = null;
 
     if (email) {
         userWithEmail = await User.findOne({ where: { email } });

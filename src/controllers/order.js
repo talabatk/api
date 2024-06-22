@@ -19,7 +19,7 @@ const vendorSockets = {};
 
 io.on("connection", (socket) => {
     socket.on("disconnect", () => {
-        console.log("User disconnected");
+        console.info("User disconnected");
 
         // Remove disconnected vendor from vendorSockets
         for (const vendorId in vendorSockets) {
@@ -73,11 +73,10 @@ const getVendorOrder = async (vendorId, id) => {
     });
 
     let total = 0;
-    console.log(order);
 
-    order.cart_products.forEach((e) => {
+    for (const e of order.cart_products) {
         total = total + +e.total;
-    });
+    }
 
     const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
 
@@ -93,9 +92,9 @@ exports.createOrder = async (req, res) => {
     const { areaId, address, name, phone, location, notes } = req.body;
 
     try {
-        let vendors = [],
-            shippingDirections = [],
-            shipping = 0;
+        const vendors = [];
+        const shippingDirections = [];
+        let shipping = 0;
 
         const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -126,7 +125,7 @@ exports.createOrder = async (req, res) => {
         }
 
         // calculate shipping cost
-        cart.cart_products.forEach(async (e) => {
+        for (const e of cart.cart_products) {
             const area = e.product.user.areas.find((item) => item.id === +areaId);
 
             if (!area) {
@@ -169,15 +168,15 @@ exports.createOrder = async (req, res) => {
                     fcm: e.product.user.fcm
                 });
             }
-        });
+        }
 
-        shippingDirections.forEach((e) => {
+        for (const e of shippingDirections) {
             if (e.free_limit === 0) {
                 shipping = shipping + e.cost;
             } else if (e.free_limit !== 0 && e.free_limit > e.total) {
                 shipping = shipping + e.cost;
             }
-        });
+        }
 
         const currentDate = getCurrentDateTimeInPalestine();
         //save order
@@ -205,13 +204,14 @@ exports.createOrder = async (req, res) => {
             { where: { ordered: false, cartId: cart.id } }
         );
 
-        vendors.forEach(async (vend) => {
+        for (const vend of vendors) {
             const vendorOrder = await getVendorOrder(vend.userId, order.id);
             const vendorSocket = vendorSockets[vend.userId];
             if (vendorSocket) {
                 vendorSocket.emit("newOrder", vendorOrder);
             }
-        });
+        }
+
         //save vendor orders
         await VendorOrder.bulkCreate(
             vendors.map((item) => {
@@ -248,7 +248,7 @@ exports.createOrder = async (req, res) => {
             topic: "admin"
         });
 
-        vendors.forEach(async (e) => {
+        for (const e of vendors) {
             if (e.fcm) {
                 await messaging.send({
                     token: e.fcm,
@@ -258,7 +258,7 @@ exports.createOrder = async (req, res) => {
                     }
                 });
             }
-        });
+        }
 
         const vendorNotifications = await Notification.bulkCreate(
             vendors.map((user) => {
@@ -279,7 +279,7 @@ exports.createOrder = async (req, res) => {
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -321,7 +321,7 @@ exports.calculateShipping = async (req, res) => {
         });
 
         if (cart?.cart_products) {
-            cart.cart_products.forEach((e) => {
+            for (const e of cart.cart_products) {
                 const area = e.product.user.areas.find((item) => item.id === +areaId);
 
                 if (!area) {
@@ -351,16 +351,16 @@ exports.calculateShipping = async (req, res) => {
                         total: +e.total + +shippingDirections[directionIndex].total
                     };
                 }
-            });
+            }
         }
 
-        shippingDirections.forEach((e) => {
+        for (const e of shippingDirections) {
             if (!e.free_limit || e.free_limit > e.total) {
                 shipping = shipping + e.cost;
             }
             time = time + e.time;
             distance = distance + e.distance;
-        });
+        }
 
         return res.status(200).json({
             message: "success",
@@ -372,7 +372,7 @@ exports.calculateShipping = async (req, res) => {
             shippingDirections
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -464,7 +464,7 @@ exports.getAllOrders = async (req, res) => {
 
         return res.status(200).json({ count, pages: numOfPages, results: orders });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -498,9 +498,7 @@ exports.updateOrder = async (req, res) => {
                                         : "تم الانتهاء من طلبك"
                         }
                     })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+                    .catch((error) => {});
             }
             if (req.body.status === "finished") {
                 const deliveries = await User.findAll({
@@ -512,7 +510,7 @@ exports.updateOrder = async (req, res) => {
                         return {
                             userId: user.id,
                             title: "طلب جديد",
-                            description: `هناك طلب جديد `,
+                            description: "هناك طلب جديد ",
                             orderId: id
                         };
                     })
@@ -523,7 +521,7 @@ exports.updateOrder = async (req, res) => {
                 await messaging.send({
                     notification: {
                         title: "طلب جديد",
-                        body: `هناك طلب جديد`
+                        body: "هناك طلب جديد"
                     },
                     topic: "delivery"
                 });
@@ -552,17 +550,17 @@ exports.updateOrder = async (req, res) => {
 
         await order.save();
 
-        order.vendors.forEach(async (vend) => {
+        for (const vend of order.vendors) {
             const vendorOrder = await getVendorOrder(vend.userId, order.id);
             const vendorSocket = vendorSockets[vend.userId];
             if (vendorSocket) {
                 vendorSocket.emit("updatedOrder", vendorOrder);
             }
-        });
+        }
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -591,18 +589,16 @@ exports.assignDelivery = async (req, res) => {
                     token: order.user.fcm,
                     notification: {
                         title: "تحديث للطلب",
-                        body: `تم بدء توصيل طلبك`
+                        body: "تم بدء توصيل طلبك"
                     }
                 })
-                .catch((error) => {
-                    console.log(error);
-                });
+                .catch((error) => {});
         }
 
         await Notification.create({
             userId: order.user.id,
             title: "تحديث للطلب",
-            description: `تم بدء توصيل طلبك`
+            description: "تم بدء توصيل طلبك"
         });
 
         await order.update({
@@ -612,17 +608,17 @@ exports.assignDelivery = async (req, res) => {
 
         await VendorOrder.update({ status: "in the way" }, { where: { orderId: id } });
 
-        order.vendors.forEach(async (vend) => {
+        for (const vend of order.vendors) {
             const vendorOrder = await getVendorOrder(vend.userId, order.id);
             const vendorSocket = vendorSockets[vend.userId];
             if (vendorSocket) {
                 vendorSocket.emit("updatedOrder", vendorOrder);
             }
-        });
+        }
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -715,9 +711,9 @@ exports.getVendorOrder = async (req, res) => {
 
         orders = orders.map((order) => {
             let total = 0;
-            order.cart_products.forEach((e) => {
+            for (const e of order.cart_products) {
                 total = total + +e.total;
-            });
+            }
 
             let shipping = 0;
 
@@ -732,7 +728,7 @@ exports.getVendorOrder = async (req, res) => {
             return {
                 ...order.toJSON(),
                 total: total,
-                shipping: shipping + ""
+                shipping: `${shipping}`
             };
         });
 
@@ -742,7 +738,7 @@ exports.getVendorOrder = async (req, res) => {
 
         return res.status(200).json({ count, pages: numOfPages, results: orders });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -785,10 +781,10 @@ exports.getVendorOrderById = async (req, res) => {
         let total = 0;
         let total_quantity = 0;
 
-        orders.cart_products.forEach((e) => {
+        for (const e of orders.cart_products) {
             total = total + +e.total;
             total_quantity = total_quantity + +e.quantity;
-        });
+        }
 
         const areaCost = costs.find((cost) => +cost.areaId === +orders.area.id);
 
@@ -802,7 +798,7 @@ exports.getVendorOrderById = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -839,7 +835,7 @@ exports.getOne = async (req, res) => {
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -879,7 +875,7 @@ exports.getUserOrders = async (req, res) => {
 
         return res.status(200).json({ message: "success", results: orders });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

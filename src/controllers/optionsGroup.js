@@ -9,25 +9,25 @@ exports.createGroup = async (req, res) => {
 
         const options = [];
 
-        groups.forEach((group) => {
-            for (let i = 0; i < products.length; i++) {
+        for (const group of groups) {
+            for (const product of products) {
                 groupsList.push({
-                    productId: products[i],
+                    productId: product,
                     name: group.name,
                     type: group.type,
                     options: group.options
                 });
             }
-        });
+        }
 
         const groupsRes = await OptionGroup.bulkCreate(groupsList);
 
-        for (let i = 0; i < groupsList.length; i++) {
-            for (let j = 0; j < groupsList[i].options.length; j++) {
+        for (const [index, group] of groupsList.entries()) {
+            for (const option of group.options) {
                 options.push({
-                    name: groupsList[i].options[j].name,
-                    value: groupsList[i].options[j].value,
-                    optionsGroupId: groupsRes[i].id
+                    name: option.name,
+                    value: option.value,
+                    optionsGroupId: groupsRes[index].id
                 });
             }
         }
@@ -44,7 +44,7 @@ exports.createGroup = async (req, res) => {
             })
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error!" });
     }
 };
@@ -80,7 +80,7 @@ exports.editGroup = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error!" });
     }
 };
@@ -98,7 +98,7 @@ exports.editOption = async (req, res) => {
             option
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "internal server error!" });
     }
 };
