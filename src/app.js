@@ -6,6 +6,9 @@ const socketIO = require("socket.io");
 const http = require("node:http");
 const cors = require("cors");
 const cron = require("node-cron");
+const { configDotenv } = require("dotenv");
+
+configDotenv();
 
 //-------settings-----------------------------
 const storage = multer.diskStorage({
@@ -245,7 +248,7 @@ cron.schedule("0 0 * * *", async () => {
 sequelize
     .sync()
     .then((result) => {
-        server.listen(3000);
+        server.listen(process.env.PORT || 3000);
     })
     .catch((err) => {
         console.error(err);
