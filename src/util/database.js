@@ -1,13 +1,16 @@
 const Sequelize = require("sequelize");
+const { configDotenv } = require("dotenv");
+
+configDotenv();
 
 const sequelize = new Sequelize({
-    host: "talabatekdb2.cataddxqm8fj.eu-north-1.rds.amazonaws.com",
-    port: "3306",
-    database: "talabatek",
-    username: "admin",
-    password: "talabatek",
-    dialect: "mysql",
-    timezone: "+03:00"
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    dialect: process.env.DB_DIALECT,
+    timezone: process.env.DB_TIMEZONE
 });
 
 module.exports = sequelize;
