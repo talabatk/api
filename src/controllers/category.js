@@ -13,10 +13,8 @@ exports.createCategory = async (req, res, next) => {
         const category = await Category.create({
             name,
             order: order ? order : +maxOrder + 1,
-            image: req.files.image ? req.files.image[0].filename : null
+            image: req.files.image ? req.files.image[0].location : null
         });
-
-        category.image = `http://${req.get("host")}/uploads/${category.image}`;
 
         return res.status(201).json({ message: "Category created!", category });
     } catch (err) {
@@ -33,7 +31,8 @@ exports.getAll = async (req, res, next) => {
             "id",
             "order",
             "name",
-            [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
+            "image"
+            // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
         ],
         order: [["order"]]
     })
@@ -50,7 +49,7 @@ exports.getOne = async (req, res) => {
         .then((category) =>
             res.json({
                 ...category.toJSON(),
-                image: category.image ? `https://${req.get("host")}/uploads/${category.image}` : null
+                image: category.image ? category.image : null
             })
         )
         .catch((error) => res.status(400).json({ error }));
@@ -66,13 +65,12 @@ exports.editOne = async (req, res) => {
 
         if (req.files.image) {
             await category.update({
-                image: req.files.image[0].filename
+                image: req.files.image[0].location
             });
         }
 
         return res.status(200).json({
-            ...category.toJSON(),
-            image: category.image ? `http://${req.get("host")}/uploads/${category.image}` : null
+            ...category.toJSON()
         });
     } catch (error) {
         console.error(error);
@@ -103,7 +101,8 @@ exports.getVendorCategories = async (req, res) => {
                 "id",
                 "name",
                 "order",
-                [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", category.image)`), "image"]
+                "image"
+                // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", category.image)`), "image"]
             ],
             include: [
                 {

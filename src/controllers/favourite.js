@@ -149,10 +149,12 @@ exports.getUserfavoriteVendors = async (req, res) => {
                         "name",
                         "email",
                         "phone",
-                        [
-                            Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", user.image)`),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", user.image)`),
+                        //     "image"
+                        // ]
+
                     ]
                 }
             ],

@@ -76,8 +76,8 @@ exports.login = async (req, res) => {
                 distance: user.vendor.distance,
                 delivery_time: user.vendor.delivery_time,
                 free_delivery_limit: user.vendor.free_delivery_limit,
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
-                cover: user.vendor.cover ? `http://${req.get("host")}/uploads/${user.cover}` : null,
+                image: user.image ? user.image : null,
+                cover: user.vendor.cover ? user.vendor.cover : null,
                 token,
                 areas: user.areas
             }
@@ -118,7 +118,7 @@ exports.createVendor = async (req, res) => {
             phone,
             fcm,
             address,
-            image: req.files.image ? req.files.image[0].filename : null,
+            image: req.files.image ? req.files.image[0].location : null,
             role: "vendor",
             password: hashedPassword
         });
@@ -126,7 +126,7 @@ exports.createVendor = async (req, res) => {
         const vendor = await Vendor.create({
             description,
             userId: user.id,
-            cover: req.files.cover ? req.files.cover[0].filename : null,
+            cover: req.files.cover ? req.files.cover[0].location : null,
             status,
             free_delivery_limit,
             delivery_time,
@@ -149,12 +149,8 @@ exports.createVendor = async (req, res) => {
                 address,
                 phone,
                 description,
-                image: req.files.image
-                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
-                    : null,
-                cover: req.files.cover
-                    ? `http://${req.get("host")}/uploads/${req.files.cover[0].filename}`
-                    : null,
+                image: user.image ? user.image : null,
+                cover: vendor.cover ? vendor.cover : null,
                 fcm,
                 token,
                 status,
@@ -188,12 +184,6 @@ exports.getAllVendors = async (req, res) => {
         }); // Get total number of admins
 
         const results = users.map((user) => {
-            if (user.image) {
-                user.image = `https://${req.get("host")}/uploads/${user.image}`;
-            }
-            if (user.vendor.cover) {
-                user.vendor.cover = `https://${req.get("host")}/uploads/${user.vendor.cover}`;
-            }
             const { id, name, email, phone, address, fcm } = user;
 
             return {
@@ -241,12 +231,6 @@ exports.getVendor = async (req, res) => {
         }); // Get total number of admins
 
         const results = users.map((user) => {
-            if (user.image) {
-                user.image = `https://${req.get("host")}/uploads/${user.image}`;
-            }
-            if (user.vendor.cover) {
-                user.vendor.cover = `https://${req.get("host")}/uploads/${user.vendor.cover}`;
-            }
             const { id, name, email, phone, address, fcm } = user;
 
             return {
@@ -307,16 +291,12 @@ exports.editVendor = async (req, res) => {
 
         if (req.files.image) {
             const updateUser = await vendor.update({
-                image: req.files.image[0].filename
+                image: req.files.image[0].location
             });
-
-            updatedVendor.image = `http://${req.get("host")}/uploads/${updatedVendor.image}`;
         }
 
         if (req.files.cover) {
-            await vendor.vendor.update({ cover: req.files.cover[0].filename });
-
-            updatedVendor.vendor.cover = `http://${req.get("host")}/uploads/${req.files.cover[0].filename}`;
+            await vendor.vendor.update({ cover: req.files.cover[0].location });
         }
 
         await vendor.vendor.update(req.body);

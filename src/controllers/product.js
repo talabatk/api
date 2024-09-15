@@ -47,14 +47,14 @@ exports.createProduct = async (req, res) => {
         const images = await ProductImage.bulkCreate(
             req.files.image.map((file) => ({
                 productId: product.id,
-                image: file.filename
+                image: file.location
             }))
         );
 
         const imagesWithUrl = images.map((image) => {
             return {
                 ...image.toJSON(),
-                image: `https://${req.get("host")}/uploads/${image.image}`
+                image: image.image
             };
         });
 
@@ -111,12 +111,13 @@ exports.getAll = async (req, res) => {
                         model: ProductImage,
                         attributes: [
                             "id",
-                            [
-                                Sequelize.literal(
-                                    `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
-                                ),
-                                "image"
-                            ]
+                            "image"
+                            // [
+                            //     Sequelize.literal(
+                            //         `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
+                            //     ),
+                            //     "image"
+                            // ]
                         ]
                     },
                     {
@@ -131,12 +132,13 @@ exports.getAll = async (req, res) => {
                             "name",
                             "email",
                             "phone",
-                            [
-                                Sequelize.literal(
-                                    `CONCAT("https://${req.get("host")}/uploads/", user.image)`
-                                ),
-                                "image"
-                            ]
+                            "image"
+                            // [
+                            //     Sequelize.literal(
+                            //         `CONCAT("https://${req.get("host")}/uploads/", user.image)`
+                            //     ),
+                            //     "image"
+                            // ]
                         ],
                         include: Vendor
                     },
@@ -145,12 +147,13 @@ exports.getAll = async (req, res) => {
                         attributes: [
                             "id",
                             "name",
-                            [
-                                Sequelize.literal(
-                                    `CONCAT("https://${req.get("host")}/uploads/", category.image)`
-                                ),
-                                "image"
-                            ]
+                            "image"
+                            // [
+                            //     Sequelize.literal(
+                            //         `CONCAT("https://${req.get("host")}/uploads/", category.image)`
+                            //     ),
+                            //     "image"
+                            // ]
                         ]
                     }
                 ],
@@ -164,12 +167,13 @@ exports.getAll = async (req, res) => {
                         model: ProductImage,
                         attributes: [
                             "id",
-                            [
-                                Sequelize.literal(
-                                    `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
-                                ),
-                                "image"
-                            ]
+                            "image"
+                            // [
+                            //     Sequelize.literal(
+                            //         `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
+                            //     ),
+                            //     "image"
+                            // ]
                         ]
                     },
                     {
@@ -184,12 +188,13 @@ exports.getAll = async (req, res) => {
                             "name",
                             "email",
                             "phone",
-                            [
-                                Sequelize.literal(
-                                    `CONCAT("https://${req.get("host")}/uploads/", user.image)`
-                                ),
-                                "image"
-                            ]
+                            "image"
+                            // [
+                            //     Sequelize.literal(
+                            //         `CONCAT("https://${req.get("host")}/uploads/", user.image)`
+                            //     ),
+                            //     "image"
+                            // ]
                         ],
                         include: Vendor
                     },
@@ -198,12 +203,13 @@ exports.getAll = async (req, res) => {
                         attributes: [
                             "id",
                             "name",
-                            [
-                                Sequelize.literal(
-                                    `CONCAT("https://${req.get("host")}/uploads/", category.image)`
-                                ),
-                                "image"
-                            ]
+                            "image"
+                            // [
+                            //     Sequelize.literal(
+                            //         `CONCAT("https://${req.get("host")}/uploads/", category.image)`
+                            //     ),
+                            //     "image"
+                            // ]
                         ]
                     }
                 ],
@@ -231,12 +237,13 @@ exports.getOne = async (req, res) => {
                     model: ProductImage,
                     attributes: [
                         "id",
-                        [
-                            Sequelize.literal(
-                                `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
-                            ),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(
+                        //         `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
+                        //     ),
+                        //     "image"
+                        // ]
                     ]
                 },
                 {
@@ -251,10 +258,11 @@ exports.getOne = async (req, res) => {
                         "name",
                         "email",
                         "phone",
-                        [
-                            Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", user.image)`),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", user.image)`),
+                        //     "image"
+                        // ]
                     ],
                     include: Vendor
                 },
@@ -263,10 +271,11 @@ exports.getOne = async (req, res) => {
                     attributes: [
                         "id",
                         "name",
-                        [
-                            Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", category.image)`),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", category.image)`),
+                        //     "image"
+                        // ]
                     ]
                 }
             ]
@@ -288,12 +297,13 @@ exports.editOne = async (req, res) => {
                     model: ProductImage,
                     attributes: [
                         "id",
-                        [
-                            Sequelize.literal(
-                                `CONCAT("http://${req.get("host")}/uploads/", productImages.image)`
-                            ),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(
+                        //         `CONCAT("http://${req.get("host")}/uploads/", productImages.image)`
+                        //     ),
+                        //     "image"
+                        // ]
                     ]
                 },
                 {
@@ -301,10 +311,11 @@ exports.editOne = async (req, res) => {
                     attributes: [
                         "id",
                         "name",
-                        [
-                            Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", user.image)`),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", user.image)`),
+                        //     "image"
+                        // ]
                     ]
                 },
                 {
@@ -312,10 +323,11 @@ exports.editOne = async (req, res) => {
                     attributes: [
                         "id",
                         "name",
-                        [
-                            Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", category.image)`),
-                            "image"
-                        ]
+                        "image"
+                        // [
+                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", category.image)`),
+                        //     "image"
+                        // ]
                     ]
                 }
             ]
@@ -329,14 +341,14 @@ exports.editOne = async (req, res) => {
             const images = await ProductImage.bulkCreate(
                 req.files.image?.map((file) => ({
                     productId: product.id,
-                    image: file.filename
+                    image: file.location
                 }))
             );
 
             imagesWithUrl = images.map((image) => {
                 return {
                     ...image.toJSON(),
-                    image: `http://${req.get("host")}/uploads/${image.image}`
+                    image: image.image
                 };
             });
         }

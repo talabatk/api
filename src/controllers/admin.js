@@ -66,7 +66,7 @@ exports.login = async (req, res) => {
                 phone: user.phone,
                 role: user.role,
                 super_admin: user.admin.super_admin,
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
+                image: user.image ? user.image : null,
                 roles: !user.admin.super_admin ? user.admin.adminRole : null,
                 token
             }
@@ -90,7 +90,7 @@ exports.createAdmin = async (req, res) => {
             name,
             email,
             phone,
-            image: req.files.image ? req.files.image[0].filename : null,
+            image: req.files.image ? req.files.image[0].location : null,
             fcm,
             role: "admin",
             password: hashedPassword
@@ -122,9 +122,7 @@ exports.createAdmin = async (req, res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                image: req.files.image
-                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
-                    : null,
+                image: user.image ? user.image : null,
                 phone,
                 fcm: user.fcm,
                 super_admin: admin.super_admin,
@@ -151,7 +149,7 @@ exports.getAllAdmins = async (req, res) => {
         const results = users.map((user) => {
             return {
                 ...user.toJSON(),
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null
+                image: user.image ? user.image : null
             };
         });
 
@@ -218,10 +216,8 @@ exports.editAdmin = async (req, res) => {
 
         if (req.files.image) {
             const updateUser = await admin.update({
-                image: req.files.image[0].filename
+                image: req.files.image[0].location
             });
-
-            updatedAdmin.image = `http://${req.get("host")}/uploads/${updatedAdmin.image}`;
         }
 
         return res.status(200).json(updatedAdmin);

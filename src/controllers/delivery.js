@@ -64,7 +64,7 @@ exports.login = async (req, res) => {
                 email: user.email,
                 phone: user.phone,
                 role: user.role,
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
+                image: user.image ? user.image : null,
                 token
             }
         });
@@ -89,7 +89,7 @@ exports.createDelivery = async (req, res) => {
             email,
             phone,
             fcm,
-            image: req.files.image ? req.files.image[0].filename : null,
+            image: req.files.image ? req.files.image[0].location : null,
             role: "delivery",
             password: hashedPassword
         });
@@ -112,9 +112,7 @@ exports.createDelivery = async (req, res) => {
                 email,
                 phone,
                 fcm,
-                image: req.files.image
-                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
-                    : null,
+                image: user.image ? user.image : null,
                 token,
                 role: "delivery"
             }
@@ -138,7 +136,7 @@ exports.getAllDeliveries = async (req, res) => {
         const results = users.map((user) => {
             return {
                 ...user.toJSON(),
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null
+                image: user.image ? user.image : null
             };
         });
 

@@ -30,7 +30,7 @@ exports.register = async (req, res) => {
             address,
             email,
             password: hashedPassword,
-            image: req.files.image[0] ? req.files.image[0].filename : null,
+            image: req.files.image[0] ? req.files.image[0].location : null,
             role: "customer",
             phone,
             fcm
@@ -50,9 +50,7 @@ exports.register = async (req, res) => {
                 address,
                 email,
                 role: "customer",
-                image: req.files.image
-                    ? `http://${req.get("host")}/uploads/${req.files.image[0].filename}`
-                    : null,
+                image: user.image ? user.image : null,
                 phone,
                 fcm,
                 token
@@ -109,7 +107,7 @@ exports.login = async (req, res) => {
                 email: user.email,
                 phone: user.phone,
                 address: user.address,
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
+                image: user.image ? user.image : null,
                 token,
                 role: "customer"
             }
@@ -181,7 +179,7 @@ exports.getUserByToken = async (req, res) => {
                 fcm,
                 role: "vendor",
                 description: user.vendor.description,
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null,
+                image: user.image ? user.image : null,
                 open: user.vendor.open
             });
         }
@@ -195,7 +193,7 @@ exports.getUserByToken = async (req, res) => {
                 fcm,
                 role: "admin",
                 super_admin: user.admin.super_admin,
-                image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null
+                image: user.image ? user.image : null
             });
         }
         return res.status(200).json({
@@ -206,7 +204,7 @@ exports.getUserByToken = async (req, res) => {
             phone,
             fcm,
             role: user.role,
-            image: user.image ? `http://${req.get("host")}/uploads/${user.image}` : null
+            image: user.image ? user.image : null
         });
     } catch (error) {
         console.error(error);
@@ -290,10 +288,8 @@ exports.updateProfile = async (req, res) => {
 
         if (req.files.image) {
             const updateUser = await user.update({
-                image: req.files.image[0].filename
+                image: req.files.image[0].location
             });
-
-            updatedUser.image = `http://${req.get("host")}/uploads/${updatedUser.image}`;
         }
 
         return res.status(200).json(updatedUser);

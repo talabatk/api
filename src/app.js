@@ -7,20 +7,21 @@ const http = require("node:http");
 const cors = require("cors");
 const cron = require("node-cron");
 const { configDotenv } = require("dotenv");
+const { upload } = require("./middlewares/upload");
 
 configDotenv();
 
 //-------settings-----------------------------
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, "uploads/");
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, `${Date.now()}-${file.originalname}`);
+//     }
+// });
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
 const app = express();
 

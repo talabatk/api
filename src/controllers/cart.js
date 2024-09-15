@@ -28,14 +28,15 @@ exports.getUserCart = async (req, res) => {
                                     model: ProductImage,
                                     attributes: [
                                         "id",
-                                        [
-                                            Sequelize.literal(
-                                                `CONCAT("http://${req.get(
-                                                    "host"
-                                                )}/uploads/", \`cart_products->product->productImages\`.\`image\`)`
-                                            ),
-                                            "image"
-                                        ]
+                                        "image"
+                                        // [
+                                        //     Sequelize.literal(
+                                        //         `CONCAT("http://${req.get(
+                                        //             "host"
+                                        //         )}/uploads/", \`cart_products->product->productImages\`.\`image\`)`
+                                        //     ),
+                                        //     "image"
+                                        // ]
                                     ]
                                 }
                             ]

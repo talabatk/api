@@ -8,7 +8,7 @@ exports.createSlider = async (req, res) => {
             title,
             productId,
             vendorId,
-            image: req.files.image[0].filename
+            image: req.files.image[0].location
         });
         return res.status(201).json({ message: "slider created", slider });
     } catch (error) {
@@ -24,7 +24,7 @@ exports.getAll = async (req, res) => {
         const results = sliders.map((slider) => {
             return {
                 ...slider.toJSON(),
-                image: `https://${req.get("host")}/uploads/${slider.image}`
+                image: slider.image ? slider.image : null
             };
         });
 
@@ -41,7 +41,7 @@ exports.editOne = async (req, res) => {
         const slider = await Slider.findByPk(id);
 
         if (req.files.image[0]) {
-            slider.image = req.files.image[0].filename;
+            slider.image = req.files.image[0].location;
         }
 
         if (req.body.title) {
