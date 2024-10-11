@@ -8,6 +8,9 @@ const cors = require("cors");
 const cron = require("node-cron");
 const { configDotenv } = require("dotenv");
 const { upload } = require("./middlewares/upload");
+const { morganMiddlewareImmediate, morganMiddleware } = require("./middlewares/morgan");
+const morganBody = require("morgan-body");
+const Logger = require("./util/logger");
 
 configDotenv();
 
@@ -30,6 +33,20 @@ const server = http.createServer(app);
 // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(morganMiddlewareImmediate);
+morganBody(app, {
+    stream: {
+        // @ts-expect-error Fix later
+        write: (message) => Logger.info(message.replace(/\n$/, ""))
+    },
+    maxBodyLength: 200,
+    immediateReqLog: true,
+    // theme: "lightened",
+    noColors: true,
+    prettify: false
+});
+app.use(morganMiddleware);
+
 app.use(
     upload.fields([
         { name: "image", maxCount: 3 },
@@ -38,6 +55,7 @@ app.use(
 );
 
 app.use("/uploads", express.static("uploads"));
+app.use("/logs", express.static("logs"));
 
 app.options("*", cors()); // include before other routes
 
