@@ -4,6 +4,7 @@ const Product = require("../models/product");
 const ProductImage = require("../models/productImage");
 const Vendor = require("../models/vendor");
 const User = require("../models/user");
+const Logger = require("../util/logger");
 
 exports.createCategory = async (req, res, next) => {
     const { name, order } = req.body;
@@ -73,7 +74,7 @@ exports.editOne = async (req, res) => {
             ...category.toJSON()
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -137,7 +138,7 @@ exports.getVendorCategories = async (req, res) => {
 
         return res.status(200).json({ results: categories });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

@@ -14,12 +14,13 @@ const Notification = require("../models/notifications");
 const { Op, or } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
+const Logger = require("../util/logger");
 
 const vendorSockets = {};
 
 io.on("connection", (socket) => {
     socket.on("disconnect", () => {
-        console.info("User disconnected");
+        Logger.info("User disconnected");
 
         // Remove disconnected vendor from vendorSockets
         for (const vendorId in vendorSockets) {
@@ -279,7 +280,7 @@ exports.createOrder = async (req, res) => {
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -372,7 +373,7 @@ exports.calculateShipping = async (req, res) => {
             shippingDirections
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -464,7 +465,7 @@ exports.getAllOrders = async (req, res) => {
 
         return res.status(200).json({ count, pages: numOfPages, results: orders });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -560,7 +561,7 @@ exports.updateOrder = async (req, res) => {
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -618,7 +619,7 @@ exports.assignDelivery = async (req, res) => {
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -738,7 +739,7 @@ exports.getVendorOrder = async (req, res) => {
 
         return res.status(200).json({ count, pages: numOfPages, results: orders });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -798,7 +799,7 @@ exports.getVendorOrderById = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -835,7 +836,7 @@ exports.getOne = async (req, res) => {
 
         return res.status(200).json({ message: "success", order });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -875,7 +876,7 @@ exports.getUserOrders = async (req, res) => {
 
         return res.status(200).json({ message: "success", results: orders });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

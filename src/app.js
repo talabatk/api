@@ -66,12 +66,12 @@ const io = socketIO(server, {
 });
 
 io.on("connection", (socket) => {
-    console.info("A user is connected");
+    Logger.info("A user is connected");
     socket.on("message", (message) => {
-        console.info(`message from ${socket.id} : ${message}`);
+        Logger.info(`message from ${socket.id} : ${message}`);
     });
     socket.on("disconnect", () => {
-        console.info(`socket ${socket.id} disconnected`);
+        Logger.info(`socket ${socket.id} disconnected`);
     });
 });
 
@@ -246,6 +246,35 @@ app.use("/api", cartRoutes);
 
 app.use("/api", orderRoutes);
 
+app.route("/").get((_req, res) => {
+    // #swagger.ignore = true
+    res.send("<h1>Hello, World! 🌍 [From Root]</h1>");
+});
+
+app.route("/api").get((_req, res) => {
+    // #swagger.ignore = true
+    res.send("<h1>Hello, World! 🌍 [From API]</h1>");
+});
+
+app.all("*", (req, _res, next) => {
+    // #swagger.ignore = true
+    // Logger.error(`Can't find ${req.originalUrl} on this server!`);
+    next(new Error(`Can't find ${req.originalUrl} on this server!`));
+});
+
+// Global Error Handler
+
+app.use((err, _req, res, _next) => {
+    // #swagger.ignore = true
+    if (!err.statusCode) {
+        err.statusCode = 500;
+    }
+    res.status(err.statusCode).json({ message: err.message });
+    Logger.error(err);
+});
+
+// cron job to delete old notifications
+
 cron.schedule("0 0 * * *", async () => {
     // Call your function to delete old notifications here
     try {
@@ -260,15 +289,40 @@ cron.schedule("0 0 * * *", async () => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
     }
 });
+
+const address = `http://localhost:${process.env.PORT}`;
 
 sequelize
     .sync()
     .then((result) => {
-        server.listen(process.env.PORT || 3000);
+        server.listen(process.env.PORT || 3000, () => {
+            console.info(
+                "------------------------------------------------------------------------------------------\n"
+            );
+            Logger.debug(`Starting APP On -> ${address}`);
+        });
     })
     .catch((err) => {
-        console.error(err);
+        Logger.error(err);
     });
+
+process.on("uncaughtException", (err) => {
+    // console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+    // console.log(err.name, "\n", err.message);
+    Logger.error("💥 UNCAUGHT EXCEPTION! 💥 Shutting down... 💥");
+    Logger.error(`${err.name}\n${err.message}`);
+    process.exit(1);
+});
+
+process.on("unhandledRejection", (err) => {
+    // console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+    // console.log(err.name, err.message);
+    Logger.error("💥 UNHANDLED REJECTION! 💥 Shutting down... 💥");
+    Logger.error(`${err.name}\n${err.message}`);
+    server.close(() => {
+        process.exit(1);
+    });
+});

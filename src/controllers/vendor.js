@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Vendor = require("../models/vendor");
 const Area = require("../models/area");
+const Logger = require("../util/logger");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -83,7 +84,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -162,7 +163,7 @@ exports.createVendor = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -208,7 +209,7 @@ exports.getAllVendors = async (req, res) => {
 
         return res.status(200).json({ count: count, results: results });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -255,7 +256,7 @@ exports.getVendor = async (req, res) => {
 
         return res.status(200).json({ result: results[0] });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -303,7 +304,7 @@ exports.editVendor = async (req, res) => {
 
         return res.status(200).json(updatedVendor);
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

@@ -1,5 +1,6 @@
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
+const Logger = require("../util/logger");
 
 exports.createGroup = async (req, res) => {
     const { products, groups } = req.body;
@@ -44,7 +45,7 @@ exports.createGroup = async (req, res) => {
             })
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error!" });
     }
 };
@@ -80,7 +81,7 @@ exports.editGroup = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error!" });
     }
 };
@@ -98,7 +99,7 @@ exports.editOption = async (req, res) => {
             option
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error!" });
     }
 };

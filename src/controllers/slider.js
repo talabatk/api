@@ -1,4 +1,5 @@
 const Slider = require("../models/slider");
+const Logger = require("../util/logger");
 
 exports.createSlider = async (req, res) => {
     const { title, productId, vendorId } = req.body;
@@ -12,7 +13,7 @@ exports.createSlider = async (req, res) => {
         });
         return res.status(201).json({ message: "slider created", slider });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -30,7 +31,7 @@ exports.getAll = async (req, res) => {
 
         return res.status(201).json({ results: results });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -68,7 +69,7 @@ exports.editOne = async (req, res) => {
 
         return res.status(201).json({ message: "updated successfully", slider });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

@@ -7,6 +7,7 @@ const { Op } = require("sequelize");
 const CartProductOption = require("../models/cartProductOption");
 const ProductImage = require("../models/productImage");
 const Sequelize = require("sequelize");
+const Logger = require("../util/logger");
 
 exports.getUserCart = async (req, res) => {
     try {
@@ -53,7 +54,7 @@ exports.getUserCart = async (req, res) => {
 
         return res.status(200).json({ message: "success", cart });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -120,7 +121,7 @@ exports.addToCart = async (req, res) => {
 
         return res.status(201).json({ message: "success", cart, cartProduct, cartProductOption });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -156,7 +157,7 @@ exports.updateCartProduct = async (req, res) => {
 
         return res.status(200).json({ message: "success" });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -181,7 +182,7 @@ exports.deleteCartProduct = async (req, res) => {
 
         CartProduct.destroy({ where: { id } }).then(() => res.json({ message: "cart product deleted" }));
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const Logger = require("../util/logger");
 
 const UserFavoriteProduct = require("../models/UserFavoriteproduct");
 const User = require("../models/user");
@@ -46,7 +47,7 @@ exports.toggleFavoriteProduct = async (req, res) => {
 
         return res.status(200).json({ message: "تم الاضافه الى المفضله" });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -86,7 +87,7 @@ exports.getUserFavoriteProducts = async (req, res) => {
 
         return res.status(200).json({ results: results });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -128,7 +129,7 @@ exports.toggleFavoriteVendor = async (req, res) => {
 
         return res.status(200).json({ message: "تم الاضافه الى المفضله" });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -154,7 +155,6 @@ exports.getUserfavoriteVendors = async (req, res) => {
                         //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", user.image)`),
                         //     "image"
                         // ]
-
                     ]
                 }
             ],
@@ -166,7 +166,7 @@ exports.getUserfavoriteVendors = async (req, res) => {
 
         return res.status(200).json({ results: results });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Logger = require("../util/logger");
 
 //models===============================
 const User = require("../models/user");
@@ -69,7 +70,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -118,7 +119,7 @@ exports.createDelivery = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -148,7 +149,7 @@ exports.getAllDeliveries = async (req, res) => {
 
         return res.status(200).json({ count: count, results: results });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

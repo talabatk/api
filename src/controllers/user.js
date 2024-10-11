@@ -6,6 +6,7 @@ const Vendor = require("../models/vendor");
 const Admin = require("../models/admin");
 const AdminRole = require("../models/adminRole");
 const { Op } = require("sequelize");
+const Logger = require("../util/logger");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -57,7 +58,7 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -113,7 +114,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -148,7 +149,7 @@ exports.smsLogin = async (req, res) => {
             user
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -207,7 +208,7 @@ exports.getUserByToken = async (req, res) => {
             image: user.image ? user.image : null
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -251,7 +252,7 @@ exports.getAllUsers = async (req, res, next) => {
 
         return res.status(200).json({ count: count, pages: numOfPages, results: users });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -294,7 +295,7 @@ exports.updateProfile = async (req, res) => {
 
         return res.status(200).json(updatedUser);
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -330,7 +331,7 @@ exports.resetPassword = async (req, res) => {
         // send email with new password
         return res.status(200).json({ message: "password reset successfully" });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -361,7 +362,7 @@ exports.changeStatus = async (req, res) => {
         await user.save();
         return res.status(200).json("success");
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

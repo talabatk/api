@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Logger = require("../util/logger");
 
 //models===================
 const User = require("../models/user");
@@ -161,7 +162,7 @@ exports.getAllAdmins = async (req, res) => {
 
         return res.status(200).json({ count: count, results: results });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -177,7 +178,7 @@ exports.updateRoles = async (req, res) => {
 
         return res.status(200).json({ message: "roles updated successfully" });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -222,7 +223,7 @@ exports.editAdmin = async (req, res) => {
 
         return res.status(200).json(updatedAdmin);
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

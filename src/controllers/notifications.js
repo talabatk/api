@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const jwt = require("jsonwebtoken");
+const Logger = require("../util/logger");
 
 const Notification = require("../models/notifications");
 const User = require("../models/user");
@@ -107,7 +108,7 @@ exports.getUserNotification = async (req, res) => {
 
         return res.status(200).json({ results: notifications });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "Invalid token" });
     }
 };

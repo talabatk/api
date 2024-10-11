@@ -12,6 +12,7 @@ const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 const Order = require("../models/order");
 const Vendor = require("../models/vendor");
+const Logger = require("../util/logger");
 
 exports.createProduct = async (req, res) => {
     const { title, description, price, featured, available, vendorId, categoryId, show_price } = req.body;
@@ -63,7 +64,7 @@ exports.createProduct = async (req, res) => {
             product: { ...product.toJSON(), images: imagesWithUrl }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -222,7 +223,7 @@ exports.getAll = async (req, res) => {
 
         return res.status(200).json({ count: count, pages: numOfPages, results: products });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -283,7 +284,7 @@ exports.getOne = async (req, res) => {
 
         return res.status(200).json({ message: "success", product });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -361,7 +362,7 @@ exports.editOne = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -384,7 +385,7 @@ exports.deleteOne = async (req, res) => {
 
         Product.destroy({ where: { id } }).then(() => res.json({ message: "deleted" }));
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
@@ -407,7 +408,7 @@ exports.dataAnalysis = async (req, res) => {
 
         return res.status(200).json({ products, customers, orders });
     } catch (error) {
-        console.error(error);
+        Logger.error(error);
         return res.status(500).json({ message: "internal server error" });
     }
 };
