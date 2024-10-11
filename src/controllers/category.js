@@ -112,14 +112,15 @@ exports.getVendorCategories = async (req, res) => {
                             model: ProductImage,
                             attributes: [
                                 "id",
-                                [
-                                    Sequelize.literal(
-                                        `CONCAT("https://${req.get(
-                                            "host"
-                                        )}/uploads/",\`products->productImages\`.\`image\`)`
-                                    ),
-                                    "image"
-                                ]
+                                "image"
+                                // [
+                                //     Sequelize.literal(
+                                //         `CONCAT("https://${req.get(
+                                //             "host"
+                                //         )}/uploads/",\`products->productImages\`.\`image\`)`
+                                //     ),
+                                //     "image"
+                                // ]
                             ]
                         },
                         {
