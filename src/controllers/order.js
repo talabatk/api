@@ -472,13 +472,38 @@ exports.getAllOrders = async (req, res) => {
 
 exports.updateOrder = async (req, res) => {
     const { id } = req.params;
+    const { status, time } = req.body;
 
     try {
+        // Validate order status
+        const validOrderStatuses = [
+            "not started",
+            "started",
+            "preparing",
+            "finished",
+            "in the way",
+            "complete"
+        ];
+        if (!validOrderStatuses.includes(status)) {
+            return res.status(400).json({ message: "Invalid order status value" });
+        }
+
         const order = await Order.findByPk(id, {
             include: [User, Vendor, { model: Delivery, include: User }]
         });
 
-        if (req.body.status !== order.status) {
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        if (status !== order.status) {
+            // Map the order status to a valid VendorOrder status
+            const vendorOrderStatus = mapOrderStatusToVendorOrderStatus(status);
+
+            if (vendorOrderStatus) {
+                await VendorOrder.update({ status: vendorOrderStatus }, { where: { orderId: id } });
+            }
+
             await VendorOrder.update({ status: req.body.status }, { where: { orderId: id } });
 
             const messaging = admin.messaging();
@@ -542,10 +567,10 @@ exports.updateOrder = async (req, res) => {
             });
         }
 
-        order.status = req.body.status;
+        order.status = status;
 
-        if (+req.body.time && +order.time < +req.body.time) {
-            order.time = req.body.time;
+        if (+time && +order.time < +time) {
+            order.time = time;
             order.updatedTime = getCurrentDateTimeInPalestine();
         }
 
@@ -562,9 +587,21 @@ exports.updateOrder = async (req, res) => {
         return res.status(200).json({ message: "success", order });
     } catch (error) {
         Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
+        return res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
+function mapOrderStatusToVendorOrderStatus(orderStatus) {
+    const mapping = {
+        "not started": "not started",
+        started: "started",
+        preparing: "preparing",
+        finished: "preparing", // Map "finished" to "preparing" for VendorOrder
+        "in the way": "in the way",
+        complete: "complete"
+    };
+    return mapping[orderStatus];
+}
 
 exports.assignDelivery = async (req, res) => {
     const { id } = req.params;
