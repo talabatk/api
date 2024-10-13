@@ -504,8 +504,6 @@ exports.updateOrder = async (req, res) => {
                 await VendorOrder.update({ status: vendorOrderStatus }, { where: { orderId: id } });
             }
 
-            await VendorOrder.update({ status: req.body.status }, { where: { orderId: id } });
-
             const messaging = admin.messaging();
 
             if (order.user.fcm) {
