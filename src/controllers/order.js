@@ -251,13 +251,17 @@ exports.createOrder = async (req, res) => {
 
         for (const e of vendors) {
             if (e.fcm) {
-                await messaging.send({
-                    token: e.fcm,
-                    notification: {
-                        title: "طلب جديد",
-                        body: `هناك طلب جديد من ${name}`
-                    }
-                });
+                try {
+                    await messaging.send({
+                        token: e.fcm,
+                        notification: {
+                            title: "طلب جديد",
+                            body: `هناك طلب جديد من ${name}`
+                        }
+                    });
+                } catch (error) {
+                    Logger.error(error);
+                }
             }
         }
 
