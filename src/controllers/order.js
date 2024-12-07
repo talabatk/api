@@ -429,28 +429,28 @@ exports.getAllOrders = async (req, res) => {
         limit: limit,
         offset: offset,
         include: [
-          //   { model: User, attributes: ["id", "name", "phone", "address"] },
-          //   {
-          //     model: CartProduct,
-          //     required: false,
-          //     include: [
-          //       {
-          //         model: Product,
-          //         include: [
-          //           {
-          //             model: User,
-          //             attributes: ["id", "name", "email", "phone", "address"],
-          //             include: {
-          //               model: Vendor,
-          //               attributes: ["id", "direction", "distance"],
-          //             },
-          //           },
-          //         ],
-          //       },
-          //       Option,
-          //     ],
-          //     where: { ordered: true },
-          //   },
+          { model: User, attributes: ["id", "name", "phone", "address"] },
+          {
+            model: CartProduct,
+            required: false,
+            include: [
+              {
+                model: Product,
+                include: [
+                  {
+                    model: User,
+                    attributes: ["id", "name", "email", "phone", "address"],
+                    include: {
+                      model: Vendor,
+                      attributes: ["id", "direction", "distance"],
+                    },
+                  },
+                ],
+              },
+              Option,
+            ],
+            where: { ordered: true },
+          },
           Delivery,
           Area,
         ],
