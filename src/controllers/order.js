@@ -429,28 +429,29 @@ exports.getAllOrders = async (req, res) => {
         limit: limit,
         offset: offset,
         include: [
-          { model: User, attributes: ["id", "name", "phone", "address"] },
-          {
-            model: CartProduct,
-            required: false,
-            include: [
-              {
-                model: Product,
-                include: [
-                  {
-                    model: User,
-                    attributes: ["id", "name", "email", "phone", "address"],
-                    include: {
-                      model: Vendor,
-                      attributes: ["id", "direction", "distance"],
-                    },
-                  },
-                ],
-              },
-              Option,
-            ],
-            where: { ordered: true },
-          },
+          //   { model: User, attributes: ["id", "name", "phone", "address"] },
+          //   {
+          //     model: CartProduct,
+          //     required: false,
+          //     include: [
+          //       {
+          //         model: Product,
+          //         include: [
+          //           {
+          //             model: User,
+          //             attributes: ["id", "name", "email", "phone", "address"],
+          //             include: {
+          //               model: Vendor,
+          //               attributes: ["id", "direction", "distance"],
+          //             },
+          //           },
+          //         ],
+          //       },
+          //       Option,
+          //     ],
+          //     where: { ordered: true },
+          //   },
+          Delivery,
           Area,
         ],
         where: filters,
@@ -460,6 +461,7 @@ exports.getAllOrders = async (req, res) => {
       orders = await Order.findAll({
         include: [
           { model: User, attributes: ["id", "name", "phone", "address"] },
+          { model: Delivery, include: User },
           {
             model: CartProduct,
             required: false,
@@ -908,7 +910,15 @@ exports.getOne = async (req, res) => {
       ],
     });
 
-    return res.status(200).json({ message: "success", order });
+    let delivery = null;
+
+    if (order.deliveryId) {
+      delivery = await User.findByPk(order.deliveryId, {
+        attributes: ["id", "name", "phone", "email"],
+      });
+    }
+
+    return res.status(200).json({ message: "success", order, delivery });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
