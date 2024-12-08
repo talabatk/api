@@ -728,6 +728,7 @@ exports.getVendorOrder = async (req, res) => {
           "shipping",
           "address",
           "createdAt",
+          "updatedTime",
           "notes",
         ],
         include: [
@@ -759,6 +760,7 @@ exports.getVendorOrder = async (req, res) => {
           "address",
           "total",
           "createdAt",
+          "updatedTime",
           "notes",
         ],
         include: [
