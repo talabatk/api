@@ -17,18 +17,6 @@ const Logger = require("./util/logger");
 
 configDotenv();
 
-//-------settings-----------------------------
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, "uploads/");
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, `${Date.now()}-${file.originalname}`);
-//     }
-// });
-
-// const upload = multer({ storage: storage });
-
 const app = express();
 
 const server = http.createServer(app);
@@ -101,7 +89,6 @@ const Cart = require("./models/cart");
 const CartProduct = require("./models/cartProduct");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
-const VendorOrder = require("./models/vendorOrders");
 const Notification = require("./models/notifications");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
@@ -145,8 +132,8 @@ Area.hasMany(Order);
 Order.belongsTo(Area);
 
 // define associations between cartProduct and Option
-Vendor.belongsToMany(Order, { through: VendorOrder });
-Order.belongsToMany(Vendor, { through: VendorOrder });
+Vendor.hasMany(Order);
+Order.belongsTo(Vendor);
 
 //assign cart product to user order
 User.hasMany(Order);

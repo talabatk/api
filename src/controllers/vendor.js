@@ -276,7 +276,7 @@ exports.editVendor = async (req, res) => {
     } else {
       vendor = await User.findOne({
         where: { token },
-        include: [Vendor],
+        include: [Vendor, Area],
       });
     }
 

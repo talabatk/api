@@ -8,10 +8,9 @@ const jwt = require("jsonwebtoken");
 const Vendor = require("../models/vendor");
 const Option = require("../models/option");
 const { io } = require("../app");
-const VendorOrder = require("../models/vendorOrders");
 const admin = require("firebase-admin");
 const Notification = require("../models/notifications");
-const { Op, or } = require("sequelize");
+const { Op } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
@@ -52,9 +51,7 @@ function getCurrentDateTimeInPalestine() {
   return date;
 }
 
-const getVendorOrder = async (vendorId, id) => {
-  const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
-
+const getVendorOrder = async (id) => {
   const order = await Order.findByPk(id, {
     attributes: [
       "id",
@@ -76,35 +73,21 @@ const getVendorOrder = async (vendorId, id) => {
           },
           Option,
         ],
-        where: { vendorId },
       },
       Area,
       { model: Delivery, include: User },
     ],
   });
 
-  let total = 0;
-
-  for (const e of order.cart_products) {
-    total = total + +e.total;
-  }
-
-  const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
-
-  return {
-    ...order.toJSON(),
-    subtotal: total,
-    total: +total + +areaCost.cost,
-    shipping: areaCost.cost,
-  };
+  return order;
 };
 
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 
   try {
-    const vendors = [];
-    const shippingDirections = [];
+    let vendor = null;
+
     let shipping = 0;
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
@@ -145,32 +128,8 @@ exports.createOrder = async (req, res) => {
           .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
       }
 
-      const directionIndex = shippingDirections.findIndex(
-        (item) => item.vendor === e.product.vendorId
-      );
-
       if (e.product.user.vendor.status !== "open") {
         return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
-      }
-
-      if (directionIndex < 0) {
-        shippingDirections.push({
-          vendor: +e.product.vendorId,
-          free_limit: +e.product.user.vendor.free_delivery_limit,
-          cost: +area.delivery_cost.cost,
-          time: +e.product.user.vendor.delivery_time,
-          distance: +e.product.user.vendor.distance,
-          total: +e.total,
-        });
-      } else {
-        shippingDirections[directionIndex] = {
-          vendor: +e.product.vendorId,
-          free_limit: +e.product.user.vendor.free_delivery_limit,
-          cost: +area.delivery_cost.cost,
-          time: +e.product.user.vendor.delivery_time,
-          distance: +e.product.user.vendor.distance,
-          total: +e.total + +shippingDirections[directionIndex].total,
-        };
       }
 
       await Product.update(
@@ -178,31 +137,27 @@ exports.createOrder = async (req, res) => {
         { where: { id: e.product.id } }
       );
 
-      const vendorIndex = vendors.findIndex(
-        (item) => +item.vendorId === +e.product.user.vendor.id
-      );
-
-      if (vendorIndex < 0) {
-        vendors.push({
-          userId: +e.product.user.id,
-          vendorId: +e.product.user.vendor.id,
-          fcm: e.product.user.fcm,
-        });
+      if (vendor.userId && +e.product.user.userId !== +vendor.userId) {
+        return res
+          .status(400)
+          .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
+      } else {
+        vendor = { ...e.product.user };
       }
     }
 
-    if (vendors.length > 1) {
-      return res
-        .status(400)
-        .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
-    }
+    const costs = await DeliveryCost.findAll({
+      where: { userId: vendor.userId },
+    });
+    const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
 
-    for (const e of shippingDirections) {
-      if (e.free_limit === 0) {
-        shipping = shipping + e.cost;
-      } else if (e.free_limit !== 0 && e.free_limit > e.total) {
-        shipping = shipping + e.cost;
-      }
+    if (+vendor.free_delivery_limit === 0) {
+      shipping = +areaCost.cost;
+    } else if (
+      +vendor.free_delivery_limit !== 0 &&
+      +vendor.free_delivery_limit > +cart.total
+    ) {
+      shipping = +areaCost.cost;
     }
 
     const currentDate = getCurrentDateTimeInPalestine();
@@ -220,6 +175,7 @@ exports.createOrder = async (req, res) => {
       userId: decodedToken.userId,
       areaId,
       updatedTime: currentDate,
+      vendorId: vendor.vendor.vendorId,
     });
 
     //assign order id to cart product
@@ -231,30 +187,19 @@ exports.createOrder = async (req, res) => {
       { where: { ordered: false, cartId: cart.id } }
     );
 
-    for (const vend of vendors) {
-      const vendorOrder = await getVendorOrder(vend.userId, order.id);
-      const vendorSocket = vendorSockets[vend.userId];
-      if (vendorSocket) {
-        vendorSocket.emit("newOrder", vendorOrder);
-      }
+    //send order to vendor
+    const vendorOrder = await getVendorOrder(vendor.userId, order.id);
+    const vendorSocket = vendorSockets[vendor.userId];
+    if (vendorSocket) {
+      vendorSocket.emit("newOrder", vendorOrder);
     }
-
-    //save vendor orders
-    await VendorOrder.bulkCreate(
-      vendors.map((item) => {
-        return {
-          vendorId: item.vendorId,
-          orderId: order.id,
-        };
-      })
-    );
 
     const admins = await User.findAll({
       attributes: ["id"],
       where: { role: { [Op.in]: ["admin"] } },
     });
 
-    const notifications = await Notification.bulkCreate(
+    await Notification.bulkCreate(
       admins.map((user) => {
         return {
           userId: user.id,
@@ -275,32 +220,26 @@ exports.createOrder = async (req, res) => {
       topic: "admin",
     });
 
-    for (const e of vendors) {
-      if (e.fcm) {
-        try {
-          await messaging.send({
-            token: e.fcm,
-            notification: {
-              title: "طلب جديد",
-              body: `هناك طلب جديد من ${name}`,
-            },
-          });
-        } catch (error) {
-          Logger.error(error);
-        }
+    if (vendor.fcm) {
+      try {
+        await messaging.send({
+          token: vendor.fcm,
+          notification: {
+            title: "طلب جديد",
+            body: `هناك طلب جديد من ${name}`,
+          },
+        });
+      } catch (error) {
+        Logger.error(error);
       }
     }
 
-    const vendorNotifications = await Notification.bulkCreate(
-      vendors.map((user) => {
-        return {
-          userId: user.userId,
-          title: "طلب جديد",
-          description: `هناك طلب جديد من ${name}`,
-          orderId: order.id,
-        };
-      })
-    );
+    const vendorNotifications = await Notification.bulkCreate({
+      userId: vendor.userId,
+      title: "طلب جديد",
+      description: `هناك طلب جديد من ${name}`,
+      orderId: order.id,
+    });
 
     cart.total_quantity = 0;
 
@@ -517,13 +456,29 @@ exports.updateOrder = async (req, res) => {
       "finished",
       "in the way",
       "complete",
+      "cancel",
+      "deleted",
     ];
     if (!validOrderStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid order status value" });
     }
 
     const order = await Order.findByPk(id, {
-      include: [User, Vendor, { model: Delivery, include: User }],
+      include: [
+        User,
+        Vendor,
+        {
+          model: CartProduct,
+          include: [
+            {
+              model: Product,
+            },
+            Option,
+          ],
+        },
+        Area,
+        { model: Delivery, include: User },
+      ],
     });
 
     if (!order) {
@@ -532,15 +487,6 @@ exports.updateOrder = async (req, res) => {
 
     if (status !== order.status) {
       // Map the order status to a valid VendorOrder status
-      const vendorOrderStatus = mapOrderStatusToVendorOrderStatus(status);
-
-      if (vendorOrderStatus) {
-        await VendorOrder.update(
-          { status: vendorOrderStatus },
-          { where: { orderId: id } }
-        );
-      }
-
       const messaging = admin.messaging();
 
       if (order.user.fcm) {
@@ -560,32 +506,6 @@ exports.updateOrder = async (req, res) => {
             },
           })
           .catch((error) => {});
-      }
-      if (req.body.status === "finished") {
-        const deliveries = await User.findAll({
-          attributes: ["id"],
-          where: { role: { [Op.in]: ["delivery"] } },
-        });
-        const notifications = await Notification.bulkCreate(
-          deliveries.map((user) => {
-            return {
-              userId: user.id,
-              title: "طلب جديد",
-              description: "هناك طلب جديد ",
-              orderId: id,
-            };
-          })
-        );
-
-        const messaging = admin.messaging();
-
-        await messaging.send({
-          notification: {
-            title: "طلب جديد",
-            body: "هناك طلب جديد",
-          },
-          topic: "delivery",
-        });
       }
 
       await Notification.create({
@@ -611,12 +531,9 @@ exports.updateOrder = async (req, res) => {
 
     await order.save();
 
-    for (const vend of order.vendors) {
-      const vendorOrder = await getVendorOrder(vend.userId, order.id);
-      const vendorSocket = vendorSockets[vend.userId];
-      if (vendorSocket) {
-        vendorSocket.emit("updatedOrder", vendorOrder);
-      }
+    const vendorSocket = vendorSockets[order.vendor.userId];
+    if (vendorSocket) {
+      vendorSocket.emit("updatedOrder", order);
     }
 
     return res.status(200).json({ message: "success", order });
@@ -628,18 +545,6 @@ exports.updateOrder = async (req, res) => {
   }
 };
 
-function mapOrderStatusToVendorOrderStatus(orderStatus) {
-  const mapping = {
-    "not started": "not started",
-    started: "started",
-    preparing: "preparing",
-    finished: "preparing", // Map "finished" to "preparing" for VendorOrder
-    "in the way": "in the way",
-    complete: "complete",
-  };
-  return mapping[orderStatus];
-}
-
 exports.assignDelivery = async (req, res) => {
   const { id } = req.params;
 
@@ -649,7 +554,21 @@ exports.assignDelivery = async (req, res) => {
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
     const order = await Order.findByPk(id, {
-      include: [User, Vendor, { model: Delivery, include: User }],
+      include: [
+        User,
+        Vendor,
+        {
+          model: CartProduct,
+          include: [
+            {
+              model: Product,
+            },
+            Option,
+          ],
+        },
+        Area,
+        { model: Delivery, include: User },
+      ],
     });
 
     if (order.deliveryId) {
@@ -681,17 +600,10 @@ exports.assignDelivery = async (req, res) => {
       deliveryId: decodedToken.userId,
     });
 
-    await VendorOrder.update(
-      { status: "in the way" },
-      { where: { orderId: id } }
-    );
+    const vendorSocket = vendorSockets[order.vendor.userId];
 
-    for (const vend of order.vendors) {
-      const vendorOrder = await getVendorOrder(vend.userId, order.id);
-      const vendorSocket = vendorSockets[vend.userId];
-      if (vendorSocket) {
-        vendorSocket.emit("updatedOrder", vendorOrder);
-      }
+    if (vendorSocket) {
+      vendorSocket.emit("updatedOrder", order);
     }
 
     return res.status(200).json({ message: "success", order });
@@ -751,7 +663,7 @@ exports.getVendorOrder = async (req, res) => {
           { model: Delivery, include: User },
         ],
         where: filters,
-        order: [["updatedTime", "DESC"]],
+        order: [["createdAt", "DESC"]],
       });
     } else {
       orders = await Order.findAll({
@@ -783,39 +695,11 @@ exports.getVendorOrder = async (req, res) => {
           { model: Delivery, include: User },
         ],
         where: filters,
-        order: [["updatedTime", "DESC"]],
+        order: [["createdAt", "DESC"]],
       });
     }
 
-    const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
-
-    orders = orders.map((order) => {
-      let total = 0;
-      for (const e of order.cart_products) {
-        total = total + +e.total;
-      }
-
-      let shipping = 0;
-
-      const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
-
-      if (+vendor.free_delivery_limit === 0) {
-        shipping = areaCost.cost;
-      } else if (
-        +vendor.free_delivery_limit !== 0 &&
-        +vendor.free_delivery_limit > +total
-      ) {
-        shipping = areaCost.cost;
-      }
-
-      return {
-        ...order.toJSON(),
-        total: total,
-        shipping: `${shipping}`,
-      };
-    });
-
-    const count = await VendorOrder.count({ where: { vendorId: vendor.id } }); // Get total number of products
+    const count = await Order.count({ where: { vendorId: vendor.id } }); // Get total number of products
 
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
