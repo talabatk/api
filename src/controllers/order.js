@@ -149,6 +149,10 @@ exports.createOrder = async (req, res) => {
         (item) => item.vendor === e.product.vendorId
       );
 
+      if (e.product.user.vendor.status !== "open") {
+        return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
+      }
+
       if (directionIndex < 0) {
         shippingDirections.push({
           vendor: +e.product.vendorId,
@@ -455,7 +459,7 @@ exports.getAllOrders = async (req, res) => {
           Area,
         ],
         where: filters,
-        order: [["updatedTime", "DESC"]],
+        order: [["createdAt", "DESC"]],
       });
     } else {
       orders = await Order.findAll({
@@ -486,7 +490,7 @@ exports.getAllOrders = async (req, res) => {
           Area,
         ],
         where: filters,
-        order: [["updatedTime", "DESC"]],
+        order: [["createdAt", "DESC"]],
       });
     }
 

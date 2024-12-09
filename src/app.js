@@ -8,7 +8,10 @@ const cors = require("cors");
 const cron = require("node-cron");
 const { configDotenv } = require("dotenv");
 const { upload } = require("./middlewares/upload");
-const { morganMiddlewareImmediate, morganMiddleware } = require("./middlewares/morgan");
+const {
+  morganMiddlewareImmediate,
+  morganMiddleware,
+} = require("./middlewares/morgan");
 const morganBody = require("morgan-body");
 const Logger = require("./util/logger");
 
@@ -35,23 +38,23 @@ app.use(bodyParser.json());
 
 app.use(morganMiddlewareImmediate);
 morganBody(app, {
-    stream: {
-        // @ts-expect-error Fix later
-        write: (message) => Logger.info(message.replace(/\n$/, ""))
-    },
-    maxBodyLength: 200,
-    immediateReqLog: true,
-    // theme: "lightened",
-    noColors: true,
-    prettify: false
+  stream: {
+    // @ts-expect-error Fix later
+    write: (message) => Logger.info(message.replace(/\n$/, "")),
+  },
+  maxBodyLength: 200,
+  immediateReqLog: true,
+  // theme: "lightened",
+  noColors: true,
+  prettify: false,
 });
 app.use(morganMiddleware);
 
 app.use(
-    upload.fields([
-        { name: "image", maxCount: 3 },
-        { name: "cover", maxCount: 1 }
-    ])
+  upload.fields([
+    { name: "image", maxCount: 3 },
+    { name: "cover", maxCount: 1 },
+  ])
 );
 
 app.use("/uploads", express.static("uploads"));
@@ -62,17 +65,17 @@ app.options("*", cors()); // include before other routes
 app.use(cors());
 
 const io = socketIO(server, {
-    cors: "*"
+  cors: "*",
 });
 
 io.on("connection", (socket) => {
-    Logger.info("A user is connected");
-    socket.on("message", (message) => {
-        Logger.info(`message from ${socket.id} : ${message}`);
-    });
-    socket.on("disconnect", () => {
-        Logger.info(`socket ${socket.id} disconnected`);
-    });
+  Logger.info("A user is connected");
+  socket.on("message", (message) => {
+    Logger.info(`message from ${socket.id} : ${message}`);
+  });
+  socket.on("disconnect", () => {
+    Logger.info(`socket ${socket.id} disconnected`);
+  });
 });
 
 module.exports = { io };
@@ -179,27 +182,27 @@ Product.hasMany(UserFavoriteProduct);
 UserFavoriteProduct.belongsTo(Product);
 
 User.hasMany(UserFavoriteVendor, {
-    foreignKey: "vendorId"
+  foreignKey: "vendorId",
 });
 UserFavoriteVendor.belongsTo(User, {
-    foreignKey: "vendorId"
+  foreignKey: "vendorId",
 });
 
 User.hasMany(Product, {
-    foreignKey: "vendorId"
+  foreignKey: "vendorId",
 });
 Product.belongsTo(User, {
-    foreignKey: "vendorId"
+  foreignKey: "vendorId",
 });
 
 Category.hasMany(Product);
 Product.belongsTo(Category);
 
 User.hasMany(Slider, {
-    foreignKey: "vendorId"
+  foreignKey: "vendorId",
 });
 Slider.belongsTo(User, {
-    foreignKey: "vendorId"
+  foreignKey: "vendorId",
 });
 
 // define associations between the models
@@ -247,82 +250,82 @@ app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
 
 app.route("/").get((_req, res) => {
-    // #swagger.ignore = true
-    res.send("<h1>Hello, World! 🌍 [From Root]</h1>");
+  // #swagger.ignore = true
+  res.send("<h1>Hello, World! 🌍 [From Root]</h1>");
 });
 
 app.route("/api").get((_req, res) => {
-    // #swagger.ignore = true
-    res.send("<h1>Hello, World! 🌍 [From API]</h1>");
+  // #swagger.ignore = true
+  res.send("<h1>Hello, World! 🌍 [From API]</h1>");
 });
 
 app.all("*", (req, _res, next) => {
-    // #swagger.ignore = true
-    // Logger.error(`Can't find ${req.originalUrl} on this server!`);
-    next(new Error(`Can't find ${req.originalUrl} on this server!`));
+  // #swagger.ignore = true
+  // Logger.error(`Can't find ${req.originalUrl} on this server!`);
+  next(new Error(`Can't find ${req.originalUrl} on this server!`));
 });
 
 // Global Error Handler
 
 app.use((err, _req, res, _next) => {
-    // #swagger.ignore = true
-    if (!err.statusCode) {
-        err.statusCode = 500;
-    }
-    res.status(err.statusCode).json({ message: err.message });
-    Logger.error(err);
+  // #swagger.ignore = true
+  if (!err.statusCode) {
+    err.statusCode = 500;
+  }
+  res.status(err.statusCode).json({ message: err.message });
+  Logger.error(err);
 });
 
 // cron job to delete old notifications
 
 cron.schedule("0 0 * * *", async () => {
-    // Call your function to delete old notifications here
-    try {
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - 3);
+  // Call your function to delete old notifications here
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 3);
 
-        const deletedRows = await Notification.destroy({
-            where: {
-                created_at: {
-                    [Op.lt]: cutoffDate
-                }
-            }
-        });
-    } catch (error) {
-        Logger.error(error);
-    }
+    const deletedRows = await Notification.destroy({
+      where: {
+        created_at: {
+          [Op.lt]: cutoffDate,
+        },
+      },
+    });
+  } catch (error) {
+    Logger.error(error);
+  }
 });
 
 const address = `http://localhost:${process.env.PORT}`;
 
 sequelize
-    .sync()
-    .then((result) => {
-        server.listen(process.env.PORT || 3000, () => {
-            console.info(
-                "------------------------------------------------------------------------------------------\n"
-            );
-            Logger.debug(`Starting APP On -> ${address}`);
-        });
-    })
-    .catch((err) => {
-        Logger.error(err);
+  .sync()
+  .then((result) => {
+    server.listen(process.env.PORT || 3000, () => {
+      console.info(
+        "------------------------------------------------------------------------------------------\n"
+      );
+      Logger.debug(`Starting APP On -> ${address}`);
     });
+  })
+  .catch((err) => {
+    Logger.error(err);
+  });
 
 process.on("uncaughtException", (err) => {
-    // console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
-    // console.log(err.name, "\n", err.message);
-    Logger.error("💥 UNCAUGHT EXCEPTION! 💥 Shutting down... 💥");
-    Logger.error(`${err.name}\n${err.message}`);
-    process.exit(1);
+  // console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+  // console.log(err.name, "\n", err.message);
+  Logger.error("💥 UNCAUGHT EXCEPTION! 💥 Shutting down... 💥");
+  Logger.error(`${err.name}\n${err.message}`);
+  process.exit(1);
 });
 
 process.on("unhandledRejection", (err) => {
-    // console.log("UNHANDLED REJECTION! 💥 Shutting down...");
-    // console.log(err.name, err.message);
-    Logger.error("💥 UNHANDLED REJECTION! 💥 Shutting down... 💥");
-    Logger.error(`${err.name}\n${err.message}`);
-    server.close(() => {
-        process.exit(1);
-    });
+  // console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+  // console.log(err.name, err.message);
+  Logger.error("💥 UNHANDLED REJECTION! 💥 Shutting down... 💥");
+  Logger.error(`${err.name}\n${err.message}`);
+  server.close(() => {
+    process.exit(1);
+  });
 });
