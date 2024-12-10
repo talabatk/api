@@ -185,6 +185,7 @@ exports.createOrder = async (req, res) => {
       userId: decodedToken.userId,
       areaId,
       updatedTime: currentDate,
+      status: "not started",
       vendorId: vendor.vendor.id,
     });
 
@@ -236,18 +237,22 @@ exports.createOrder = async (req, res) => {
       topic: "admin",
     });
 
+    await messaging.send({
+      notification: {
+        title: "طلب جديد",
+        body: `هناك طلب جديد من ${name}`,
+      },
+      topic: "delivery",
+    });
+
     if (vendor.fcm) {
-      try {
-        await messaging.send({
-          token: vendor.fcm,
-          notification: {
-            title: "طلب جديد",
-            body: `هناك طلب جديد من ${name}`,
-          },
-        });
-      } catch (error) {
-        Logger.error(error);
-      }
+      await messaging.send({
+        token: vendor.fcm,
+        notification: {
+          title: "طلب جديد",
+          body: `هناك طلب جديد من ${name}`,
+        },
+      });
     }
 
     await Notification.bulkCreate({
@@ -545,7 +550,6 @@ exports.assignDelivery = async (req, res) => {
           ],
         },
         Area,
-        { model: Delivery, include: User },
       ],
     });
 
