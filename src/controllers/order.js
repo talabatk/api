@@ -118,53 +118,53 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "no items in cart" });
     }
 
+    const area = cart.cart_products[0]?.product.user.areas.find(
+      (item) => item.id === +areaId
+    );
+
+    if (!area) {
+      return res
+        .status(400)
+        .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
+    }
+
+    if (cart.cart_products[0]?.product.user.vendor.status !== "open") {
+      return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
+    }
     // calculate shipping cost
     for (const e of cart.cart_products) {
-      const area = e.product.user.areas.find((item) => item.id === +areaId);
-
-      if (!area) {
-        return res
-          .status(400)
-          .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
-      }
-
-      if (e.product.user.vendor.status !== "open") {
-        return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
-      }
-
       await Product.update(
         { orders: +e.product.orders + +e.quantity },
         { where: { id: e.product.id } }
       );
 
-      if (vendor.userId && +e.product.user.userId !== +vendor.userId) {
+      if (
+        vendor &&
+        vendor?.userId &&
+        +e.product.user.userId !== +vendor?.userId
+      ) {
         return res
           .status(400)
           .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
       } else {
-        vendor = { ...e.product.user };
+        vendor = e.product.user;
       }
     }
 
-    const costs = await DeliveryCost.findAll({
-      where: { userId: vendor.userId },
-    });
-    const areaCost = costs.find((cost) => +cost.areaId === +order.area.id);
-
-    if (+vendor.free_delivery_limit === 0) {
-      shipping = +areaCost.cost;
+    if (+vendor.vendor.free_delivery_limit === 0) {
+      shipping = +area.delivery_cost.cost;
     } else if (
-      +vendor.free_delivery_limit !== 0 &&
-      +vendor.free_delivery_limit > +cart.total
+      +vendor.vendor.free_delivery_limit !== 0 &&
+      +vendor.vendor.free_delivery_limit > +cart.total
     ) {
-      shipping = +areaCost.cost;
+      shipping = +area.delivery_cost.cost;
     }
 
     const currentDate = getCurrentDateTimeInPalestine();
     //save order
     const order = await Order.create({
       address,
-      total_quantity: cart.total_quantity,
+      total_quantity: +cart.total_quantity,
       subtotal: +cart.total,
       shipping,
       name,
@@ -175,7 +175,7 @@ exports.createOrder = async (req, res) => {
       userId: decodedToken.userId,
       areaId,
       updatedTime: currentDate,
-      vendorId: vendor.vendor.vendorId,
+      vendorId: vendor.vendor.id,
     });
 
     //assign order id to cart product
@@ -234,7 +234,7 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    const vendorNotifications = await Notification.bulkCreate({
+    await Notification.bulkCreate({
       userId: vendor.userId,
       title: "طلب جديد",
       description: `هناك طلب جديد من ${name}`,
@@ -258,13 +258,7 @@ exports.calculateShipping = async (req, res) => {
   const { areaId } = req.body;
 
   try {
-    const shippingDirections = [];
-
-    let shipping = 0;
-
     let time = 0;
-
-    let distance = 0;
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -290,58 +284,22 @@ exports.calculateShipping = async (req, res) => {
       ],
     });
 
-    if (cart?.cart_products) {
-      for (const e of cart.cart_products) {
-        const area = e.product.user.areas.find((item) => item.id === +areaId);
+    const area = cart.cart_products[0]?.product.user.areas.find(
+      (item) => item.id === +areaId
+    );
 
-        if (!area) {
-          return res
-            .status(400)
-            .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
-        }
-
-        const directionIndex = shippingDirections.findIndex(
-          (item) => item.vendor === e.product.vendorId
-        );
-
-        if (directionIndex < 0) {
-          shippingDirections.push({
-            vendor: +e.product.vendorId,
-            free_limit: +e.product.user.vendor.free_delivery_limit,
-            cost: +area.delivery_cost.cost,
-            time: +e.product.user.vendor.delivery_time,
-            distance: +e.product.user.vendor.distance,
-            total: +e.total,
-          });
-        } else {
-          shippingDirections[directionIndex] = {
-            vendor: +e.product.vendorId,
-            free_limit: +e.product.user.vendor.free_delivery_limit,
-            cost: +area.delivery_cost.cost,
-            time: +e.product.user.vendor.delivery_time,
-            distance: +e.product.user.vendor.distance,
-            total: +e.total + +shippingDirections[directionIndex].total,
-          };
-        }
-      }
-    }
-
-    for (const e of shippingDirections) {
-      if (!e.free_limit || e.free_limit > e.total) {
-        shipping = shipping + e.cost;
-      }
-      time = time + e.time;
-      distance = distance + e.distance;
+    if (!area) {
+      return res
+        .status(400)
+        .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
     }
 
     return res.status(200).json({
       message: "success",
-      shipping,
+      shipping: +area.delivery_cost.cost,
       subtotal: +cart.total,
-      total: +cart.total + shipping,
+      total: +cart.total + +area.delivery_cost.cost,
       time: time,
-      distance: distance,
-      shippingDirections,
     });
   } catch (error) {
     Logger.error(error);
@@ -394,6 +352,7 @@ exports.getAllOrders = async (req, res) => {
             ],
             where: { ordered: true },
           },
+          Vendor,
           Delivery,
           Area,
         ],
