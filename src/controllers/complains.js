@@ -1,4 +1,5 @@
 const Complains = require("../models/complains"); // Adjust path as per your project structure
+const User = require("../models/user"); // Adjust path as per your project structure
 
 // Create a new complain
 exports.createComplain = async (req, res) => {
@@ -54,7 +55,7 @@ exports.getAllComplains = async (req, res) => {
         },
       ],
     });
-    const count = await Product.count(); // Get total number of products
+    const count = await Complains.count(); // Get total number of products
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
     res.status(200).json({ count, pages: numOfPages, result: complains });
