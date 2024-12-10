@@ -243,12 +243,14 @@ exports.createOrder = async (req, res) => {
           android: {
             notification: {
               sound: "alarm.mp3", // Android specific sound configuration
+              autoCancel: false, // Automatically removes the notification when tapped
             },
           },
           apn: {
             payload: {
               aps: {
                 sound: "alarm.mp3", // iOS specific sound configuration
+                contentAvailable: false, // Silent push for background updates (optional)
               },
             },
           },
@@ -500,12 +502,14 @@ exports.updateOrder = async (req, res) => {
             android: {
               notification: {
                 sound: "alarm.mp3", // Android specific sound configuration
+                autoCancel: false, // Automatically removes the notification when tapped
               },
             },
             apn: {
               payload: {
                 aps: {
                   sound: "alarm.mp3", // iOS specific sound configuration
+                  contentAvailable: false, // Automatically removes the notification when tapped
                 },
               },
             },
