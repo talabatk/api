@@ -90,12 +90,13 @@ const CartProduct = require("./models/cartProduct");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
 const Notification = require("./models/notifications");
+const Complains = require("./models/complains");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
 const deliveryRoutes = require("./routes/delivery");
 const vendorRoutes = require("./routes/vendor");
-const notificationsRouts = require("./routes//notification");
+const notificationsRouts = require("./routes/notification");
 const categoryRoutes = require("./routes/category");
 const sliderRoutes = require("./routes/slider");
 const productRoutes = require("./routes/product");
@@ -105,6 +106,7 @@ const deliverCostRoutes = require("./routes/deliverCosts");
 const optionGroupRoutes = require("./routes/optionsGroup");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
+const complainRoutes = require("./routes/complains");
 
 //--------relations---------------------------
 
@@ -119,6 +121,9 @@ Delivery.belongsTo(User);
 //assign Cart  to user profile
 User.hasOne(Cart);
 Cart.belongsTo(User);
+
+User.hasMany(Complains);
+Complains.belongsTo(User);
 
 //assign cart product to user cart
 Cart.hasMany(CartProduct);
@@ -235,6 +240,8 @@ app.use("/api", optionGroupRoutes);
 app.use("/api", cartRoutes);
 
 app.use("/api", orderRoutes);
+
+app.use("/api", complainRoutes);
 
 app.route("/").get((_req, res) => {
   // #swagger.ignore = true
