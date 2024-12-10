@@ -197,6 +197,12 @@ exports.createOrder = async (req, res) => {
       { where: { ordered: false, cartId: cart.id } }
     );
 
+    cart.total_quantity = 0;
+
+    cart.total = 0;
+
+    await cart.save();
+
     //send order to vendor
     const vendorOrder = await getVendorOrder(vendor.userId, order.id);
     const vendorSocket = vendorSockets[vendor.userId];
@@ -238,18 +244,6 @@ exports.createOrder = async (req, res) => {
             title: "طلب جديد",
             body: `هناك طلب جديد من ${name}`,
           },
-          android: {
-            notification: {
-              sound: "alarm.mp3", // Android specific sound configuration
-            },
-          },
-          apn: {
-            payload: {
-              aps: {
-                sound: "alarm.mp3", // iOS specific sound configuration
-              },
-            },
-          },
         });
       } catch (error) {
         Logger.error(error);
@@ -262,12 +256,6 @@ exports.createOrder = async (req, res) => {
       description: `هناك طلب جديد من ${name}`,
       orderId: order.id,
     });
-
-    cart.total_quantity = 0;
-
-    cart.total = 0;
-
-    await cart.save();
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
@@ -494,18 +482,6 @@ exports.updateOrder = async (req, res) => {
                   ? "تم بدء تحضير طلبك"
                   : "تم الانتهاء من طلبك",
             },
-            android: {
-              notification: {
-                sound: "alarm.mp3", // Android specific sound configuration
-              },
-            },
-            apn: {
-              payload: {
-                aps: {
-                  sound: "alarm.mp3", // iOS specific sound configuration
-                },
-              },
-            },
           })
           .catch((error) => {});
       }
@@ -586,18 +562,6 @@ exports.assignDelivery = async (req, res) => {
           notification: {
             title: "تحديث للطلب",
             body: "تم بدء توصيل طلبك",
-          },
-          android: {
-            notification: {
-              sound: "alarm.mp3", // Android specific sound configuration
-            },
-          },
-          apn: {
-            payload: {
-              aps: {
-                sound: "alarm.mp3", // iOS specific sound configuration
-              },
-            },
           },
         })
         .catch((error) => {});
