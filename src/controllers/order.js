@@ -226,7 +226,6 @@ exports.createOrder = async (req, res) => {
       notification: {
         title: "طلب جديد",
         body: `هناك طلب جديد من ${name}`,
-        sound: "alarm.mp3",
       },
       topic: "admin",
     });
@@ -238,19 +237,16 @@ exports.createOrder = async (req, res) => {
           notification: {
             title: "طلب جديد",
             body: `هناك طلب جديد من ${name}`,
-            sound: "alarm.mp3",
           },
           android: {
             notification: {
               sound: "alarm.mp3", // Android specific sound configuration
-              autoCancel: false, // Automatically removes the notification when tapped
             },
           },
           apn: {
             payload: {
               aps: {
                 sound: "alarm.mp3", // iOS specific sound configuration
-                contentAvailable: false, // Silent push for background updates (optional)
               },
             },
           },
@@ -497,19 +493,16 @@ exports.updateOrder = async (req, res) => {
                   : req.body.status === "preparing"
                   ? "تم بدء تحضير طلبك"
                   : "تم الانتهاء من طلبك",
-              sound: "alarm.mp3",
             },
             android: {
               notification: {
                 sound: "alarm.mp3", // Android specific sound configuration
-                autoCancel: false, // Automatically removes the notification when tapped
               },
             },
             apn: {
               payload: {
                 aps: {
                   sound: "alarm.mp3", // iOS specific sound configuration
-                  contentAvailable: false, // Automatically removes the notification when tapped
                 },
               },
             },
@@ -593,7 +586,6 @@ exports.assignDelivery = async (req, res) => {
           notification: {
             title: "تحديث للطلب",
             body: "تم بدء توصيل طلبك",
-            sound: "alarm.mp3",
           },
           android: {
             notification: {
