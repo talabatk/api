@@ -10,7 +10,7 @@ const Option = require("../models/option");
 const { io } = require("../app");
 const admin = require("firebase-admin");
 const Notification = require("../models/notifications");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
@@ -825,5 +825,33 @@ exports.deleteOrder = async (req, res) => {
     return res.status(200).json({ message: "order deleted" });
   } catch (error) {
     return res.status(400).json({ error });
+  }
+};
+exports.getVendorStatic = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const vendor = await Vendor.findOne({ where: { userId: id } });
+    const stats = await Order.findAll({
+      attributes: [
+        "status",
+        [Sequelize.fn("COUNT", Sequelize.col("status")), "order_count"],
+        [Sequelize.fn("SUM", Sequelize.col("total")), "total_sum"],
+      ],
+      where: { vendorId: vendor.id },
+      group: ["status"],
+    });
+
+    res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error("Error fetching order stats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch order stats",
+      error: error.message,
+    });
   }
 };
