@@ -15,400 +15,310 @@ const Vendor = require("../models/vendor");
 const Logger = require("../util/logger");
 
 exports.createProduct = async (req, res) => {
-    const { title, description, price, featured, available, vendorId, categoryId, show_price } = req.body;
+  const {
+    title,
+    description,
+    price,
+    featured,
+    available,
+    vendorId,
+    categoryId,
+    show_price,
+    special_price,
+    endDate_special_price,
+  } = req.body;
 
-    try {
-        // Create the product with the provided data
-        const vendorCategory = await VendorCategory.findOne({
-            where: { categoryId, userId: vendorId }
-        });
+  try {
+    // Create the product with the provided data
+    const vendorCategory = await VendorCategory.findOne({
+      where: { categoryId, userId: vendorId },
+    });
 
-        if (vendorCategory) {
-            vendorCategory.products_number = +vendorCategory.products_number + 1;
-            await vendorCategory.save();
-        } else {
-            await VendorCategory.create({
-                categoryId,
-                userId: vendorId,
-                products_number: 1
-            });
-        }
-
-        const product = await Product.create({
-            title,
-            description,
-            price,
-            available,
-            featured,
-            vendorId,
-            categoryId,
-            show_price
-        });
-
-        const images = await ProductImage.bulkCreate(
-            req.files.image.map((file) => ({
-                productId: product.id,
-                image: file.location
-            }))
-        );
-
-        const imagesWithUrl = images.map((image) => {
-            return {
-                ...image.toJSON(),
-                image: image.image
-            };
-        });
-
-        return res.status(201).json({
-            message: "success",
-            product: { ...product.toJSON(), images: imagesWithUrl }
-        });
-    } catch (error) {
-        Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
+    if (vendorCategory) {
+      vendorCategory.products_number = +vendorCategory.products_number + 1;
+      await vendorCategory.save();
+    } else {
+      await VendorCategory.create({
+        categoryId,
+        userId: vendorId,
+        products_number: 1,
+      });
     }
+
+    const product = await Product.create({
+      title,
+      description,
+      price,
+      available,
+      featured,
+      vendorId,
+      categoryId,
+      show_price,
+      special_price,
+      endDate_special_price,
+    });
+
+    const images = await ProductImage.bulkCreate(
+      req.files.image.map((file) => ({
+        productId: product.id,
+        image: file.location,
+      }))
+    );
+
+    const imagesWithUrl = images.map((image) => {
+      return {
+        ...image.toJSON(),
+        image: image.image,
+      };
+    });
+
+    return res.status(201).json({
+      message: "success",
+      product: { ...product.toJSON(), images: imagesWithUrl },
+    });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.getAll = async (req, res) => {
-    const { size, page, featured, recent, bestSeller, vendorId, categoryId } = req.query;
+  const { size, page, featured, recent, bestSeller, vendorId, categoryId } =
+    req.query;
 
-    try {
-        const limit = Number.parseInt(size);
-        const offset = (Number.parseInt(page) - 1) * limit;
+  try {
+    const limit = Number.parseInt(size);
+    const offset = (Number.parseInt(page) - 1) * limit;
 
-        const filters = {};
+    const filters = {};
 
-        const order = [];
+    const order = [];
 
-        if (featured) {
-            filters.featured = true;
-        }
-
-        if (vendorId) {
-            filters.vendorId = vendorId;
-        }
-
-        if (categoryId) {
-            filters.categoryId = categoryId;
-        }
-
-        if (bestSeller) {
-            order.push(["orders", "DESC"]);
-        }
-
-        if (recent) {
-            order.push(["createdAt", "DESC"]);
-        }
-
-        let products = [];
-
-        if (page) {
-            products = await Product.findAll({
-                limit: limit,
-                offset: offset,
-                where: { ...filters },
-                include: [
-                    {
-                        model: ProductImage,
-                        attributes: [
-                            "id",
-                            "image"
-                            // [
-                            //     Sequelize.literal(
-                            //         `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
-                            //     ),
-                            //     "image"
-                            // ]
-                        ]
-                    },
-                    {
-                        model: OptionGroup,
-                        attributes: ["id", "name", "type"],
-                        include: { model: Option, attributes: ["id", "name", "value"] }
-                    },
-                    {
-                        model: User,
-                        attributes: [
-                            "id",
-                            "name",
-                            "email",
-                            "phone",
-                            "image"
-                            // [
-                            //     Sequelize.literal(
-                            //         `CONCAT("https://${req.get("host")}/uploads/", user.image)`
-                            //     ),
-                            //     "image"
-                            // ]
-                        ],
-                        include: Vendor
-                    },
-                    {
-                        model: Category,
-                        attributes: [
-                            "id",
-                            "name",
-                            "image"
-                            // [
-                            //     Sequelize.literal(
-                            //         `CONCAT("https://${req.get("host")}/uploads/", category.image)`
-                            //     ),
-                            //     "image"
-                            // ]
-                        ]
-                    }
-                ],
-                order: order
-            });
-        } else {
-            products = await Product.findAll({
-                where: { ...filters },
-                include: [
-                    {
-                        model: ProductImage,
-                        attributes: [
-                            "id",
-                            "image"
-                            // [
-                            //     Sequelize.literal(
-                            //         `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
-                            //     ),
-                            //     "image"
-                            // ]
-                        ]
-                    },
-                    {
-                        model: OptionGroup,
-                        attributes: ["id", "name", "type"],
-                        include: { model: Option, attributes: ["id", "name", "value"] }
-                    },
-                    {
-                        model: User,
-                        attributes: [
-                            "id",
-                            "name",
-                            "email",
-                            "phone",
-                            "image"
-                            // [
-                            //     Sequelize.literal(
-                            //         `CONCAT("https://${req.get("host")}/uploads/", user.image)`
-                            //     ),
-                            //     "image"
-                            // ]
-                        ],
-                        include: Vendor
-                    },
-                    {
-                        model: Category,
-                        attributes: [
-                            "id",
-                            "name",
-                            "image"
-                            // [
-                            //     Sequelize.literal(
-                            //         `CONCAT("https://${req.get("host")}/uploads/", category.image)`
-                            //     ),
-                            //     "image"
-                            // ]
-                        ]
-                    }
-                ],
-                order: order
-            });
-        }
-
-        const count = await Product.count({ where: { ...filters } }); // Get total number of products
-        const numOfPages = Math.ceil(count / limit); // Calculate number of pages
-
-        return res.status(200).json({ count: count, pages: numOfPages, results: products });
-    } catch (error) {
-        Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
+    if (featured) {
+      filters.featured = true;
     }
+
+    if (vendorId) {
+      filters.vendorId = vendorId;
+    }
+
+    if (categoryId) {
+      filters.categoryId = categoryId;
+    }
+
+    if (bestSeller) {
+      order.push(["orders", "DESC"]);
+    }
+
+    if (recent) {
+      order.push(["createdAt", "DESC"]);
+    }
+
+    let products = [];
+
+    if (page) {
+      products = await Product.findAll({
+        limit: limit,
+        offset: offset,
+        where: { ...filters },
+        include: [
+          {
+            model: ProductImage,
+            attributes: ["id", "image"],
+          },
+          {
+            model: OptionGroup,
+            attributes: ["id", "name", "type"],
+            include: { model: Option, attributes: ["id", "name", "value"] },
+          },
+          {
+            model: User,
+            attributes: ["id", "name", "email", "phone", "image"],
+            include: Vendor,
+          },
+          {
+            model: Category,
+            attributes: ["id", "name", "image"],
+          },
+        ],
+        order: order,
+      });
+    } else {
+      products = await Product.findAll({
+        where: { ...filters },
+        include: [
+          {
+            model: ProductImage,
+            attributes: ["id", "image"],
+          },
+          {
+            model: OptionGroup,
+            attributes: ["id", "name", "type"],
+            include: { model: Option, attributes: ["id", "name", "value"] },
+          },
+          {
+            model: User,
+            attributes: ["id", "name", "email", "phone", "image"],
+            include: Vendor,
+          },
+          {
+            model: Category,
+            attributes: ["id", "name", "image"],
+          },
+        ],
+        order: order,
+      });
+    }
+
+    const count = await Product.count({ where: { ...filters } }); // Get total number of products
+    const numOfPages = Math.ceil(count / limit); // Calculate number of pages
+
+    return res
+      .status(200)
+      .json({ count: count, pages: numOfPages, results: products });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.getOne = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        const product = await Product.findByPk(id, {
-            include: [
-                {
-                    model: ProductImage,
-                    attributes: [
-                        "id",
-                        "image"
-                        // [
-                        //     Sequelize.literal(
-                        //         `CONCAT("https://${req.get("host")}/uploads/", productImages.image)`
-                        //     ),
-                        //     "image"
-                        // ]
-                    ]
-                },
-                {
-                    model: OptionGroup,
-                    attributes: ["id", "name", "type"],
-                    include: { model: Option, attributes: ["id", "name", "value"] }
-                },
-                {
-                    model: User,
-                    attributes: [
-                        "id",
-                        "name",
-                        "email",
-                        "phone",
-                        "image"
-                        // [
-                        //     Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", user.image)`),
-                        //     "image"
-                        // ]
-                    ],
-                    include: Vendor
-                },
-                {
-                    model: Category,
-                    attributes: [
-                        "id",
-                        "name",
-                        "image"
-                        // [
-                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", category.image)`),
-                        //     "image"
-                        // ]
-                    ]
-                }
-            ]
-        });
+  try {
+    const product = await Product.findByPk(id, {
+      include: [
+        {
+          model: ProductImage,
+          attributes: ["id", "image"],
+        },
+        {
+          model: OptionGroup,
+          attributes: ["id", "name", "type"],
+          include: { model: Option, attributes: ["id", "name", "value"] },
+        },
+        {
+          model: User,
+          attributes: ["id", "name", "email", "phone", "image"],
+          include: Vendor,
+        },
+        {
+          model: Category,
+          attributes: ["id", "name", "image"],
+        },
+      ],
+    });
 
-        return res.status(200).json({ message: "success", product });
-    } catch (error) {
-        Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
-    }
+    return res.status(200).json({ message: "success", product });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.editOne = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const product = await Product.findByPk(id, {
-            include: [
-                {
-                    model: ProductImage,
-                    attributes: [
-                        "id",
-                        "image"
-                        // [
-                        //     Sequelize.literal(
-                        //         `CONCAT("http://${req.get("host")}/uploads/", productImages.image)`
-                        //     ),
-                        //     "image"
-                        // ]
-                    ]
-                },
-                {
-                    model: User,
-                    attributes: [
-                        "id",
-                        "name",
-                        "image"
-                        // [
-                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", user.image)`),
-                        //     "image"
-                        // ]
-                    ]
-                },
-                {
-                    model: Category,
-                    attributes: [
-                        "id",
-                        "name",
-                        "image"
-                        // [
-                        //     Sequelize.literal(`CONCAT("http://${req.get("host")}/uploads/", category.image)`),
-                        //     "image"
-                        // ]
-                    ]
-                }
-            ]
-        });
+  const { id } = req.params;
+  try {
+    const product = await Product.findByPk(id, {
+      include: [
+        {
+          model: ProductImage,
+          attributes: ["id", "image"],
+        },
+        {
+          model: User,
+          attributes: ["id", "name", "image"],
+        },
+        {
+          model: Category,
+          attributes: ["id", "name", "image"],
+        },
+      ],
+    });
 
-        await product.update(req.body);
+    await product.update(req.body);
 
-        let imagesWithUrl = [];
+    let imagesWithUrl = [];
 
-        if (req.files.image) {
-            const images = await ProductImage.bulkCreate(
-                req.files.image?.map((file) => ({
-                    productId: product.id,
-                    image: file.location
-                }))
-            );
+    if (req.files.image) {
+      const images = await ProductImage.bulkCreate(
+        req.files.image?.map((file) => ({
+          productId: product.id,
+          image: file.location,
+        }))
+      );
 
-            imagesWithUrl = images.map((image) => {
-                return {
-                    ...image.toJSON(),
-                    image: image.image
-                };
-            });
-        }
-
-        return res.status(200).json({
-            message: "success",
-            product: {
-                ...product.toJSON(),
-                productImages: product.productImages.concat(imagesWithUrl)
-            }
-        });
-    } catch (error) {
-        Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
+      imagesWithUrl = images.map((image) => {
+        return {
+          ...image.toJSON(),
+          image: image.image,
+        };
+      });
     }
+
+    return res.status(200).json({
+      message: "success",
+      product: {
+        ...product.toJSON(),
+        productImages: product.productImages.concat(imagesWithUrl),
+      },
+    });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.deleteOne = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const product = await Product.findByPk(id);
+  const { id } = req.params;
+  try {
+    const product = await Product.findByPk(id);
 
-        const vendorCategory = await VendorCategory.findOne({
-            where: { categoryId: product.categoryId, userId: product.vendorId }
-        });
+    const vendorCategory = await VendorCategory.findOne({
+      where: { categoryId: product.categoryId, userId: product.vendorId },
+    });
 
-        if (+vendorCategory.products_number === 1) {
-            await VendorCategory.destroy({ where: { id: vendorCategory.id } });
-        } else {
-            vendorCategory.products_number = +vendorCategory.products_number - 1;
-            await vendorCategory.save();
-        }
-
-        Product.destroy({ where: { id } }).then(() => res.json({ message: "deleted" }));
-    } catch (error) {
-        Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
+    if (+vendorCategory.products_number === 1) {
+      await VendorCategory.destroy({ where: { id: vendorCategory.id } });
+    } else {
+      vendorCategory.products_number = +vendorCategory.products_number - 1;
+      await vendorCategory.save();
     }
+
+    Product.destroy({ where: { id } }).then(() =>
+      res.json({ message: "deleted" })
+    );
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };
 
 exports.deleteProductImage = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    ProductImage.destroy({ where: { id } })
-        .then(() => res.json({ message: "deleted" }))
-        .catch((error) => res.status(400).json({ error }));
+  ProductImage.destroy({ where: { id } })
+    .then(() => res.json({ message: "deleted" }))
+    .catch((error) => res.status(400).json({ error }));
 };
 
 exports.dataAnalysis = async (req, res) => {
-    try {
-        const products = await Product.count(); // Get total number of products
+  try {
+    const products = await Product.count(); // Get total number of products
 
-        const customers = await User.count({ where: { role: "customer" } }); // Get total number of customers
+    const customers = await User.count({ where: { role: "customer" } }); // Get total number of customers
 
-        const orders = await Order.count();
+    const onlineDeliveries = await User.count({
+      where: { role: "customer", online: true },
+    });
 
-        return res.status(200).json({ products, customers, orders });
-    } catch (error) {
-        Logger.error(error);
-        return res.status(500).json({ message: "internal server error" });
-    }
+    const orders = await Order.count();
+
+    return res
+      .status(200)
+      .json({ products, customers, orders, onlineDeliveries });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
 };

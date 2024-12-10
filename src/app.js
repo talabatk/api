@@ -139,8 +139,8 @@ Order.belongsTo(Vendor);
 User.hasMany(Order);
 Order.belongsTo(User);
 
-Delivery.hasMany(Order);
-Order.belongsTo(Delivery);
+Delivery.hasMany(Order, { foreignKey: "deliveryId" });
+Order.belongsTo(Delivery, { foreignKey: "deliveryId", targetKey: "userId" });
 
 Product.hasMany(CartProduct);
 CartProduct.belongsTo(Product);
@@ -271,9 +271,9 @@ cron.schedule("0 0 * * *", async () => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 3);
 
-    const deletedRows = await Notification.destroy({
+    await Notification.destroy({
       where: {
-        created_at: {
+        createdAt: {
           [Op.lt]: cutoffDate,
         },
       },

@@ -65,6 +65,7 @@ exports.login = async (req, res) => {
         name: user.name,
         fcm: user.fcm,
         email: user.email,
+        active: user.active,
         phone: user.phone,
         role: user.role,
         image: user.image ? user.image : null,
@@ -78,7 +79,8 @@ exports.login = async (req, res) => {
 };
 
 exports.createDelivery = async (req, res) => {
-  const { name, email, phone, fcm, password, confirm_password } = req.body;
+  const { name, email, phone, fcm, password, confirm_password, active } =
+    req.body;
 
   if (password !== confirm_password) {
     return res.status(400).json({ error: "passwords not matched" });
@@ -95,6 +97,7 @@ exports.createDelivery = async (req, res) => {
       image: req.files.image ? req.files.image[0].location : null,
       role: "delivery",
       password: hashedPassword,
+      active,
     });
 
     const delivery = await Delivery.create({
@@ -117,6 +120,7 @@ exports.createDelivery = async (req, res) => {
         fcm,
         image: user.image ? user.image : null,
         token,
+        active,
         role: "delivery",
       },
     });

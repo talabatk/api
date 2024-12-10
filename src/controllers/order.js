@@ -94,6 +94,16 @@ exports.createOrder = async (req, res) => {
 
     const decodedToken = jwt.verify(token, "talabatek2309288/k_ss-jdls88");
 
+    const user = await User.findByPk(decodedToken.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+
+    if (!user.active) {
+      return res.status(400).json({ message: "تم ايقاف حسابك مؤقتا" });
+    }
+
     const cart = await Cart.findOne({
       where: { userId: decodedToken.userId },
       include: [
@@ -216,6 +226,7 @@ exports.createOrder = async (req, res) => {
       notification: {
         title: "طلب جديد",
         body: `هناك طلب جديد من ${name}`,
+        sound: "alarm.mp3",
       },
       topic: "admin",
     });
@@ -227,6 +238,19 @@ exports.createOrder = async (req, res) => {
           notification: {
             title: "طلب جديد",
             body: `هناك طلب جديد من ${name}`,
+            sound: "alarm.mp3",
+          },
+          android: {
+            notification: {
+              sound: "alarm.mp3", // Android specific sound configuration
+            },
+          },
+          apn: {
+            payload: {
+              aps: {
+                sound: "alarm.mp3", // iOS specific sound configuration
+              },
+            },
           },
         });
       } catch (error) {
@@ -308,7 +332,7 @@ exports.calculateShipping = async (req, res) => {
 };
 
 exports.getAllOrders = async (req, res) => {
-  const { size, page, status, deliveryId } = req.query;
+  const { size, page, status, deliveryId, startDate, endDate } = req.query;
   try {
     const limit = Number.parseInt(size);
     const offset = (Number.parseInt(page) - 1) * limit;
@@ -323,6 +347,15 @@ exports.getAllOrders = async (req, res) => {
 
     if (status) {
       filters.status = status;
+    }
+
+    if (startDate) {
+      filters.createdAt = {
+        [Op.between]: [
+          new Date(startDate),
+          endDate ? new Date(endDate) : Date.now(),
+        ],
+      };
     }
 
     if (page) {
@@ -462,6 +495,19 @@ exports.updateOrder = async (req, res) => {
                   : req.body.status === "preparing"
                   ? "تم بدء تحضير طلبك"
                   : "تم الانتهاء من طلبك",
+              sound: "alarm.mp3",
+            },
+            android: {
+              notification: {
+                sound: "alarm.mp3", // Android specific sound configuration
+              },
+            },
+            apn: {
+              payload: {
+                aps: {
+                  sound: "alarm.mp3", // iOS specific sound configuration
+                },
+              },
             },
           })
           .catch((error) => {});
@@ -543,6 +589,19 @@ exports.assignDelivery = async (req, res) => {
           notification: {
             title: "تحديث للطلب",
             body: "تم بدء توصيل طلبك",
+            sound: "alarm.mp3",
+          },
+          android: {
+            notification: {
+              sound: "alarm.mp3", // Android specific sound configuration
+            },
+          },
+          apn: {
+            payload: {
+              aps: {
+                sound: "alarm.mp3", // iOS specific sound configuration
+              },
+            },
           },
         })
         .catch((error) => {});
@@ -573,7 +632,7 @@ exports.assignDelivery = async (req, res) => {
 };
 
 exports.getVendorOrder = async (req, res) => {
-  const { size, page, status, vendorId } = req.query;
+  const { size, page, status, vendorId, startDate, endDate } = req.query;
 
   try {
     const vendor = await Vendor.findOne({ where: { userId: vendorId } });
@@ -590,22 +649,19 @@ exports.getVendorOrder = async (req, res) => {
       filters.status = status;
     }
 
+    if (startDate) {
+      filters.createdAt = {
+        [Op.between]: [
+          new Date(startDate),
+          endDate ? new Date(endDate) : Date.now(),
+        ],
+      };
+    }
+
     if (page) {
       orders = await Order.findAll({
         limit: limit,
         offset: offset,
-        attributes: [
-          "id",
-          "status",
-          "name",
-          "phone",
-          "total",
-          "shipping",
-          "address",
-          "createdAt",
-          "updatedTime",
-          "notes",
-        ],
         include: [
           {
             model: CartProduct,
@@ -619,25 +675,17 @@ exports.getVendorOrder = async (req, res) => {
             where: { ordered: true, vendorId },
           },
           Area,
-          { model: Delivery, include: User },
+          {
+            model: Delivery,
+            attributes: ["id"],
+            include: [{ model: User, attributes: ["id", "phone", "name"] }],
+          },
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
       });
     } else {
       orders = await Order.findAll({
-        attributes: [
-          "id",
-          "status",
-          "name",
-          "phone",
-          "shipping",
-          "address",
-          "total",
-          "createdAt",
-          "updatedTime",
-          "notes",
-        ],
         include: [
           {
             model: CartProduct,
@@ -676,17 +724,6 @@ exports.getVendorOrderById = async (req, res) => {
     const costs = await DeliveryCost.findAll({ where: { userId: vendorId } });
 
     const orders = await Order.findByPk(id, {
-      attributes: [
-        "id",
-        "status",
-        "name",
-        "phone",
-        "address",
-        "shipping",
-        "total",
-        "createdAt",
-        "notes",
-      ],
       include: [
         {
           model: CartProduct,
@@ -700,7 +737,6 @@ exports.getVendorOrderById = async (req, res) => {
           where: { ordered: true, vendorId },
         },
         Area,
-        { model: Delivery, include: User },
       ],
     });
 
@@ -827,6 +863,7 @@ exports.deleteOrder = async (req, res) => {
     return res.status(400).json({ error });
   }
 };
+
 exports.getVendorStatic = async (req, res) => {
   const { id } = req.params;
 
