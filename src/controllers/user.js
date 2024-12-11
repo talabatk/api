@@ -196,7 +196,7 @@ exports.getUserByToken = async (req, res) => {
         description: user.vendor.description,
         image: user.image ? user.image : null,
         open: user.vendor.open,
-        active: "active",
+        active: user.active,
       });
     }
 
@@ -207,10 +207,11 @@ exports.getUserByToken = async (req, res) => {
         email,
         phone,
         fcm,
-        active: "active",
+        active: user.active,
         role: "admin",
         super_admin: user.admin.super_admin,
         image: user.image ? user.image : null,
+        token,
       });
     }
     return res.status(200).json({
@@ -222,6 +223,7 @@ exports.getUserByToken = async (req, res) => {
       fcm,
       role: user.role,
       image: user.image ? user.image : null,
+      active: user.active,
     });
   } catch (error) {
     Logger.error(error);
@@ -314,7 +316,7 @@ exports.updateProfile = async (req, res) => {
     const updatedUser = await user.update(req.body);
 
     if (req.files.image) {
-      const updateUser = await user.update({
+      await user.update({
         image: req.files.image[0].location,
       });
     }

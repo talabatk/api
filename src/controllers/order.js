@@ -265,7 +265,7 @@ exports.createOrder = async (req, res) => {
           title: "طلب جديد",
           body: `هناك طلب جديد من ${name}`,
         },
-        token: vendor.fcm,
+        topic: `${vendor.phone}`,
         android: {
           notification: {
             sound: "alarm.mp3", // Android specific sound configuration
