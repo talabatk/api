@@ -243,20 +243,7 @@ exports.createOrder = async (req, res) => {
         body: `هناك طلب جديد من ${name}`,
       },
       topic: "delivery",
-      android: {
-        notification: {
-          sound: "alarm.mp3", // Android specific sound configuration
-          vibrateTimingsMillis: [0, 1000, 500, 1000, 2000, 1250], // Custom vibration pattern
-          priority: "high",
-        },
-      },
-      apns: {
-        payload: {
-          aps: {
-            sound: "alarm.mp3", // iOS specific sound configuration
-          },
-        },
-      },
+      ...soundSetting,
     });
 
     await messaging.send({
@@ -265,21 +252,19 @@ exports.createOrder = async (req, res) => {
         body: `هناك طلب جديد من ${name}`,
       },
       topic: vendor.phone,
-      android: {
-        notification: {
-          sound: "alarm.mp3", // Android specific sound configuration
-          vibrateTimingsMillis: [0, 1000, 500, 1000, 2000, 1250], // Custom vibration pattern
-          priority: "high",
-        },
-      },
-      apns: {
-        payload: {
-          aps: {
-            sound: "alarm.mp3", // iOS specific sound configuration
-          },
-        },
-      },
+      ...soundSetting,
     });
+
+    if (vendor.fcm) {
+      await messaging.send({
+        notification: {
+          title: "طلب جديد",
+          body: `هناك طلب جديد من ${name}`,
+        },
+        token: vendor.fcm,
+        ...soundSetting,
+      });
+    }
 
     await Notification.bulkCreate({
       userId: vendor.userId,
@@ -881,4 +866,20 @@ exports.getVendorStatic = async (req, res) => {
       error: error.message,
     });
   }
+};
+const soundSetting = {
+  android: {
+    notification: {
+      sound: "alarm.mp3", // Android specific sound configuration
+      vibrateTimingsMillis: [0, 1000, 500, 1000, 2000, 1250], // Custom vibration pattern
+      priority: "high",
+    },
+  },
+  apns: {
+    payload: {
+      aps: {
+        sound: "alarm.mp3", // iOS specific sound configuration
+      },
+    },
+  },
 };
