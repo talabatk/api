@@ -259,29 +259,27 @@ exports.createOrder = async (req, res) => {
       },
     });
 
-    if (vendor.fcm) {
-      await messaging.send({
+    await messaging.send({
+      notification: {
+        title: "طلب جديد",
+        body: `هناك طلب جديد من ${name}`,
+      },
+      topic: vendor.phone,
+      android: {
         notification: {
-          title: "طلب جديد",
-          body: `هناك طلب جديد من ${name}`,
+          sound: "alarm.mp3", // Android specific sound configuration
+          vibrateTimingsMillis: [0, 1000, 500, 1000, 2000, 1250], // Custom vibration pattern
+          priority: "high",
         },
-        topic: `${vendor.phone}`,
-        android: {
-          notification: {
-            sound: "alarm.mp3", // Android specific sound configuration
-            vibrateTimingsMillis: [0, 1000, 500, 1000, 2000, 1250], // Custom vibration pattern
-            priority: "high",
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: "alarm.mp3", // iOS specific sound configuration
           },
         },
-        apns: {
-          payload: {
-            aps: {
-              sound: "alarm.mp3", // iOS specific sound configuration
-            },
-          },
-        },
-      });
-    }
+      },
+    });
 
     await Notification.bulkCreate({
       userId: vendor.userId,
