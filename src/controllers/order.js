@@ -247,21 +247,21 @@ exports.createOrder = async (req, res) => {
     });
 
     await messaging.send({
+      topic: `vendor_${vendor.phone}`,
       notification: {
         title: "طلب جديد",
         body: `هناك طلب جديد من ${name}`,
       },
-      topic: vendor.phone,
       ...soundSetting,
     });
 
     if (vendor.fcm) {
       await messaging.send({
+        token: vendor.fcm,
         notification: {
           title: "طلب جديد",
           body: `هناك طلب جديد من ${name}`,
         },
-        token: vendor.fcm,
         ...soundSetting,
       });
     }
