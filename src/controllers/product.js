@@ -6,7 +6,7 @@ const User = require("../models/user");
 
 const Category = require("../models/category");
 
-const Sequelize = require("sequelize");
+const { Op } = require("sequelize");
 const VendorCategory = require("../models/vendorCategories");
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
@@ -83,8 +83,16 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getAll = async (req, res) => {
-  const { size, page, featured, recent, bestSeller, vendorId, categoryId } =
-    req.query;
+  const {
+    size,
+    page,
+    featured,
+    recent,
+    bestSeller,
+    vendorId,
+    categoryId,
+    search,
+  } = req.query;
 
   try {
     const limit = Number.parseInt(size);
@@ -96,6 +104,10 @@ exports.getAll = async (req, res) => {
 
     if (featured) {
       filters.featured = true;
+    }
+
+    if (search) {
+      filters.title = { [Op.like]: `%${search}%` };
     }
 
     if (vendorId) {

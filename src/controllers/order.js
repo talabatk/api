@@ -16,6 +16,7 @@ const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
 
 const vendorSockets = {};
+const adminSockets = {};
 
 io.on("connection", (socket) => {
   socket.on("disconnect", () => {
@@ -28,10 +29,19 @@ io.on("connection", (socket) => {
         break;
       }
     }
+    for (const adminId in adminSockets) {
+      if (vendorSockets[adminId] === socket) {
+        delete vendorSockets[adminId];
+        break;
+      }
+    }
   });
 
   socket.on("registerVendor", (vendorId) => {
     vendorSockets[vendorId] = socket;
+  });
+  socket.on("registerAdmin", (adminId) => {
+    adminSockets[adminId] = socket;
   });
 });
 
@@ -210,7 +220,11 @@ exports.createOrder = async (req, res) => {
     if (vendorSocket) {
       vendorSocket.emit("newOrder", vendorOrder);
     }
+    for (const adminId in adminSockets) {
+      const socket = adminSockets[adminId];
 
+      socket.emit("newOrder", vendorOrder);
+    }
     const admins = await User.findAll({
       attributes: ["id"],
       where: { role: { [Op.in]: ["admin"] } },
@@ -334,7 +348,16 @@ exports.calculateShipping = async (req, res) => {
 };
 
 exports.getAllOrders = async (req, res) => {
-  const { size, page, status, deliveryId, startDate, endDate } = req.query;
+  const {
+    size,
+    page,
+    status,
+    deliveryId,
+    vendorId,
+    startDate,
+    endDate,
+    search,
+  } = req.query;
   try {
     const limit = Number.parseInt(size);
     const offset = (Number.parseInt(page) - 1) * limit;
@@ -343,10 +366,20 @@ exports.getAllOrders = async (req, res) => {
 
     const filters = {};
 
+    if (search) {
+      filters.name = { [Op.like]: `%${search}%` };
+    }
+
     if (deliveryId) {
       filters.deliveryId = deliveryId;
     }
 
+    if (vendorId) {
+      const vendor = await Vendor.findOne({
+        where: { userId: vendorId },
+      });
+      filters.vendorId = vendor.id;
+    }
     if (status) {
       filters.status = status;
     }
@@ -388,7 +421,13 @@ exports.getAllOrders = async (req, res) => {
             where: { ordered: true },
           },
           Vendor,
-          Delivery,
+          {
+            model: Delivery,
+            include: {
+              model: User,
+              attributes: ["id", "name", "phone"],
+            },
+          },
           Area,
         ],
         where: filters,
@@ -747,6 +786,11 @@ exports.getOne = async (req, res) => {
     const order = await Order.findByPk(id, {
       include: [
         { model: User, attributes: ["id", "name", "phone", "address"] },
+        {
+          model: Delivery,
+          attributes: ["id"],
+          include: [{ model: User, attributes: ["id", "phone", "name"] }],
+        },
         {
           model: CartProduct,
           include: [

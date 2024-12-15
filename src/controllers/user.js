@@ -248,7 +248,7 @@ exports.getAllUsers = async (req, res, next) => {
     }
 
     if (search) {
-      filters.name = { [Op.like]: `%${search}%` };
+      filters.phone = { [Op.like]: `%${search}%` };
     }
 
     let users = null;

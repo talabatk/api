@@ -32,6 +32,49 @@ exports.sendNotification = async (req, res) => {
 };
 
 exports.getUserNotification = async (req, res) => {
+  const { size, page } = req.query;
+  try {
+    const limit = Number.parseInt(size);
+    const offset = (Number.parseInt(page) - 1) * limit;
+
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: {
+        token: token,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "المستخدم غير موجود" });
+    }
+
+    const notifications = await Notification.findAll({
+      limit: limit,
+      offset: offset,
+      where: {
+        userId: user.id,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    const count = await Notification.count({
+      where: { userId: user.id },
+    }); // Get total number of products
+    const notSeen = await Notification.count({
+      where: { seen: false, userId: user.id },
+    }); // Get total number of products
+    const numOfPages = Math.ceil(count / limit); // Calculate number of pages
+
+    return res
+      .status(200)
+      .json({ count, notSeen, numOfPages, results: notifications });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "Invalid token" });
+  }
+};
+exports.updateNotification = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -41,13 +84,6 @@ exports.getUserNotification = async (req, res) => {
       return res.status(404).json({ message: "المستخدم غير موجود" });
     }
 
-    const notifications = await Notification.findAll({
-      where: {
-        userId: decodedToken.userId,
-      },
-      order: [["createdAt", "DESC"]],
-    });
-
     await Notification.update(
       { seen: true },
       {
@@ -56,8 +92,7 @@ exports.getUserNotification = async (req, res) => {
         },
       }
     );
-
-    return res.status(200).json({ results: notifications });
+    return res.status(200).json({ message: "success" });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "Invalid token" });

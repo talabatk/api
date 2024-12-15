@@ -109,7 +109,7 @@ exports.createVendor = async (req, res) => {
   } = req.body;
 
   if (password !== confirm_password) {
-    return res.status(400).json({ error: "passwords not matched" });
+    return res.status(400).json({ message: "passwords not matched" });
   }
 
   try {
