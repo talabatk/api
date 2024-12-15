@@ -91,12 +91,14 @@ exports.addToCart = async (req, res) => {
       subtotal += Number(product.price); // Convert explicitly to a number
     }
 
-    const optionsRes = await Option.findAll({
-      where: { id: { [Op.in]: options } },
-    });
-
-    for (const option of optionsRes) {
-      subtotal = subtotal + +option.value;
+    let optionsRes = [];
+    if (options) {
+      optionsRes = await Option.findAll({
+        where: { id: { [Op.in]: options } },
+      });
+      for (const option of optionsRes) {
+        subtotal = subtotal + +option.value;
+      }
     }
 
     total = total + quantity * subtotal;
@@ -117,7 +119,7 @@ exports.addToCart = async (req, res) => {
     await cart.save();
 
     const cartProductOption = await CartProductOption.bulkCreate(
-      optionsRes.map((option) => {
+      optionsRes?.map((option) => {
         return {
           optionId: option.id,
           cartProductId: cartProduct.id,
