@@ -44,7 +44,7 @@ exports.register = async (req, res) => {
       role: "customer",
       phone,
       fcm,
-      active,
+      active: active || true,
     });
 
     const token = generateToken(user.id);
