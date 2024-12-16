@@ -108,3 +108,40 @@ exports.updateNotification = async (req, res) => {
     return res.status(500).json({ message: "Invalid token" });
   }
 };
+// Function to get FCM tokens of all admins
+
+async function getAdminFCMTokens() {
+  try {
+    const admins = await User.findAll({
+      attributes: ["fcm"], // assuming fcmToken is stored in the Admin model
+      where: {
+        role: "admin",
+      },
+    });
+    return admins.map((admin) => admin.fcm);
+  } catch (error) {
+    console.error("Error fetching admin FCM tokens:", error);
+    return [];
+  }
+}
+
+exports.subscribeAdminsToTopic = async () => {
+  try {
+    const fcmTokens = await getAdminFCMTokens(); // Fetch FCM tokens of admins
+
+    if (fcmTokens.length === 0) {
+      console.log("No admin FCM tokens found");
+      return;
+    }
+
+    // Subscribe FCM tokens to 'admin' topic
+    const response = await admin
+      .messaging()
+      .subscribeToTopic(fcmTokens, "admin");
+    console.log(response);
+
+    console.log("Successfully subscribed to topic:", response);
+  } catch (error) {
+    console.error("Error subscribing to topic:", error);
+  }
+};

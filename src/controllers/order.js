@@ -14,6 +14,7 @@ const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
+const { subscribeAdminsToTopic } = require("./notifications");
 
 const vendorSockets = {};
 const adminSockets = {};
@@ -242,6 +243,8 @@ exports.createOrder = async (req, res) => {
     );
 
     const messaging = admin.messaging();
+
+    await subscribeAdminsToTopic();
 
     await messaging.send({
       notification: {
@@ -537,6 +540,7 @@ exports.updateOrder = async (req, res) => {
                   ? "تم بدء تحضير طلبك"
                   : "تم الانتهاء من طلبك",
             },
+            ...soundSetting,
           })
           .catch((error) => {});
       }
