@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
       address,
       email,
       password: hashedPassword,
-      image: req.files.image[0] ? req.files.image[0].location : null,
+      image: req.files.image ? req.files.image[0].location : null,
       role: "customer",
       phone,
       fcm,
