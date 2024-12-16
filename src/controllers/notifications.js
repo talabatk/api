@@ -48,15 +48,24 @@ exports.getUserNotification = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "المستخدم غير موجود" });
     }
-
-    const notifications = await Notification.findAll({
-      limit: limit,
-      offset: offset,
-      where: {
-        userId: user.id,
-      },
-      order: [["createdAt", "DESC"]],
-    });
+    let notifications = null;
+    if (page) {
+      notifications = await Notification.findAll({
+        limit: limit,
+        offset: offset,
+        where: {
+          userId: user.id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
+    } else {
+      notifications = await Notification.findAll({
+        where: {
+          userId: user.id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
+    }
 
     const count = await Notification.count({
       where: { userId: user.id },
@@ -64,6 +73,7 @@ exports.getUserNotification = async (req, res) => {
     const notSeen = await Notification.count({
       where: { seen: false, userId: user.id },
     }); // Get total number of products
+
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
     return res
