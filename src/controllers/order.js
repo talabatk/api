@@ -528,11 +528,6 @@ exports.updateOrder = async (req, res) => {
 
     await order.save();
 
-    const vendorSocket = vendorSockets[order.vendor.userId];
-    if (vendorSocket) {
-      vendorSocket.emit("updatedOrder", order);
-    }
-
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     Logger.error(error);
@@ -595,12 +590,6 @@ exports.assignDelivery = async (req, res) => {
       status: "in the way",
       deliveryId: decodedToken.userId,
     });
-
-    const vendorSocket = vendorSockets[order.vendor.userId];
-
-    if (vendorSocket) {
-      vendorSocket.emit("updatedOrder", order);
-    }
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
