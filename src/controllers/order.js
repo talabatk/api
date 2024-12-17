@@ -128,11 +128,7 @@ exports.createOrder = async (req, res) => {
         { where: { id: e.product.id } }
       );
 
-      if (
-        vendor &&
-        vendor?.userId &&
-        +e.product.user.userId !== +vendor?.userId
-      ) {
+      if (vendor && vendor?.id && +e.product.user.userId !== +vendor?.id) {
         return res
           .status(400)
           .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
