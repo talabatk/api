@@ -7,7 +7,6 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const Vendor = require("../models/vendor");
 const Option = require("../models/option");
-const { io } = require("../app");
 const admin = require("firebase-admin");
 const Notification = require("../models/notifications");
 const { Op, Sequelize } = require("sequelize");
@@ -15,36 +14,6 @@ const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
 const { subscribeAdminsToTopic } = require("./notifications");
-
-const vendorSockets = {};
-const adminSockets = {};
-
-io.on("connection", (socket) => {
-  socket.on("disconnect", () => {
-    Logger.info("User disconnected");
-
-    // Remove disconnected vendor from vendorSockets
-    for (const vendorId in vendorSockets) {
-      if (vendorSockets[vendorId] === socket) {
-        delete vendorSockets[vendorId];
-        break;
-      }
-    }
-    for (const adminId in adminSockets) {
-      if (vendorSockets[adminId] === socket) {
-        delete vendorSockets[adminId];
-        break;
-      }
-    }
-  });
-
-  socket.on("registerVendor", (vendorId) => {
-    vendorSockets[vendorId] = socket;
-  });
-  socket.on("registerAdmin", (adminId) => {
-    adminSockets[adminId] = socket;
-  });
-});
 
 function getCurrentDateTimeInPalestine() {
   const date = new Date().toLocaleString("en-US", {
@@ -216,16 +185,7 @@ exports.createOrder = async (req, res) => {
     await cart.save();
 
     //send order to vendor
-    const vendorOrder = await getVendorOrder(vendor.userId, order.id);
-    const vendorSocket = vendorSockets[vendor.userId];
-    if (vendorSocket) {
-      vendorSocket.emit("newOrder", vendorOrder);
-    }
-    for (const adminId in adminSockets) {
-      const socket = adminSockets[adminId];
 
-      socket.emit("newOrder", vendorOrder);
-    }
     const admins = await User.findAll({
       attributes: ["id"],
       where: { role: { [Op.in]: ["admin"] } },
@@ -244,15 +204,15 @@ exports.createOrder = async (req, res) => {
 
     const messaging = admin.messaging();
 
-    await subscribeAdminsToTopic();
-
-    await messaging.send({
-      notification: {
-        title: "طلب جديد",
-        body: `هناك طلب جديد من ${name}`,
-      },
-      topic: "admin",
-    });
+    try {
+      await subscribeAdminsToTopic();
+      await messaging.send({
+        notification: { title: "طلب جديد", body: `هناك طلب جديد من ${name}` },
+        topic: "admin",
+      });
+    } catch (err) {
+      console.error("Failed to send admin notification:", err.message);
+    }
 
     await messaging.send({
       notification: {
@@ -273,14 +233,18 @@ exports.createOrder = async (req, res) => {
     });
 
     if (vendor.fcm) {
-      await messaging.send({
-        token: vendor.fcm,
-        notification: {
-          title: "طلب جديد",
-          body: `هناك طلب جديد من ${name}`,
-        },
-        ...soundSetting,
-      });
+      try {
+        await messaging.send({
+          token: vendor.fcm,
+          notification: {
+            title: "طلب جديد",
+            body: `هناك طلب جديد من ${name}`,
+          },
+          ...soundSetting,
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     await Notification.bulkCreate({

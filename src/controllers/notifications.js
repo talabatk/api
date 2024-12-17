@@ -138,7 +138,6 @@ exports.subscribeAdminsToTopic = async () => {
     const response = await admin
       .messaging()
       .subscribeToTopic(fcmTokens, "admin");
-    console.log(response);
 
     console.log("Successfully subscribed to topic:", response);
   } catch (error) {
