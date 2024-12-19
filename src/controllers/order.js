@@ -31,37 +31,6 @@ function getCurrentDateTimeInPalestine() {
   return date;
 }
 
-const getVendorOrder = async (id) => {
-  const order = await Order.findByPk(id, {
-    attributes: [
-      "id",
-      "status",
-      "name",
-      "phone",
-      "total",
-      "shipping",
-      "address",
-      "createdAt",
-      "notes",
-    ],
-    include: [
-      {
-        model: CartProduct,
-        include: [
-          {
-            model: Product,
-          },
-          Option,
-        ],
-      },
-      Area,
-      { model: Delivery, include: User },
-    ],
-  });
-
-  return order;
-};
-
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 

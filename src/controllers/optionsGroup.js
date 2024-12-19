@@ -2,46 +2,82 @@ const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 const Logger = require("../util/logger");
 
-exports.createGroup = async (req, res) => {
+exports.createOrUpdateGroup = async (req, res) => {
   const { products, groups } = req.body;
 
   try {
-    console.log(req.body);
-
     const groupsList = [];
-
     const options = [];
+    const updatedGroups = [];
 
+    // Process groups and products
     for (const group of groups) {
       for (const product of products) {
-        groupsList.push({
-          productId: product,
-          name: group.name,
-          type: group.type,
-          options: group.options,
+        // Check if group exists for this product
+        const existingGroup = await OptionGroup.findOne({
+          where: { productId: product, id: group.id },
         });
+
+        if (existingGroup) {
+          // Update the existing group
+          await existingGroup.update(group);
+          updatedGroups.push({
+            ...existingGroup.toJSON(),
+            options: group.options,
+          });
+        } else {
+          // Add to the list of new groups to create
+          groupsList.push({
+            productId: product,
+            name: group.name,
+            type: group.type,
+            options: group.options,
+          });
+        }
       }
     }
 
-    const groupsRes = await OptionGroup.bulkCreate(groupsList);
+    // Bulk create new groups
+    const createdGroups = await OptionGroup.bulkCreate(groupsList, {
+      returning: true, // Ensure created entries are returned
+    });
+    const newGroups = createdGroups.map((group, index) => {
+      return { ...group.toJSON(), options: groupsList[index].options };
+    });
+    // Combine created and updated groups
+    const allGroups = [...newGroups, ...updatedGroups];
 
-    for (const [index, group] of groupsList.entries()) {
-      for (const option of group.options) {
-        options.push({
-          name: option.name,
-          value: option.value,
-          optionsGroupId: groupsRes[index].id,
+    // Process options for each group
+    for (const group of allGroups) {
+      const groupOptions = group.options || [];
+      for (const option of groupOptions) {
+        // Check if option exists
+        const existingOption = await Option.findOne({
+          where: { optionsGroupId: group.id, id: option.id },
         });
+
+        if (existingOption) {
+          // Update existing option
+          await existingOption.update(option);
+        } else {
+          // Add to options list for bulk creation
+          options.push({
+            name: option.name,
+            value: option.value,
+            optionsGroupId: group.id,
+          });
+        }
       }
     }
 
-    const optionsRes = await Option.bulkCreate(options);
+    // // Bulk create new options
+    const optionsRes = await Option.bulkCreate(options, { returning: true });
 
     return res.status(200).json({
       message: "success",
-      groups: groupsRes.map((group) => {
+      groups: allGroups.map((group) => {
         return {
-          ...group.toJSON(),
+          group,
           options: optionsRes.filter(
             (option) => option.optionsGroupId === group.id
           ),

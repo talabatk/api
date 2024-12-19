@@ -207,7 +207,7 @@ exports.getOne = async (req, res) => {
         {
           model: OptionGroup,
           attributes: ["id", "name", "type"],
-          include: { model: Option, attributes: ["id", "name", "value"] },
+          include: { model: Option },
         },
         {
           model: User,

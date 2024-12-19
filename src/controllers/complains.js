@@ -54,6 +54,7 @@ exports.getAllComplains = async (req, res) => {
           attributes: ["id", "name", "email", "role", "phone"],
         },
       ],
+      order: [["createdAt", "DESC"]],
     });
     const count = await Complains.count(); // Get total number of products
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages

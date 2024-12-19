@@ -315,7 +315,7 @@ exports.updateProfile = async (req, res) => {
 
     const updatedUser = await user.update(req.body);
 
-    if (req.files.image) {
+    if (req.files?.image) {
       await user.update({
         image: req.files.image[0].location,
       });
