@@ -510,6 +510,7 @@ exports.updateOrder = async (req, res) => {
 
     await order.save();
 
+    io.to("admins").emit("update-order-admin", order);
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     Logger.error(error);
@@ -572,6 +573,8 @@ exports.assignDelivery = async (req, res) => {
       status: "in the way",
       deliveryId: decodedToken.userId,
     });
+
+    io.to("admins").emit("update-order-admin", order);
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
