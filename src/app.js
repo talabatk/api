@@ -53,7 +53,10 @@ app.options("*", cors()); // include before other routes
 app.use(cors());
 
 const io = socketIO(server, {
-  cors: "*",
+  cors: {
+    origin: "*", // Or specify allowed origins, e.g., ["https://example.com"]
+    methods: ["GET", "POST"],
+  },
 });
 
 io.on("connection", (socket) => {
