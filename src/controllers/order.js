@@ -14,6 +14,27 @@ const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
 const { subscribeAdminsToTopic } = require("./notifications");
+const { io } = require("../app");
+
+let sockets = {};
+
+io.on("connection", (socket) => {
+  Logger.info("A user is connected");
+
+  // Join rooms based on roles (vendors or admins)
+  socket.on("join-room", (room) => {
+    socket.join(room);
+    Logger.info(`${socket.id} joined room: ${room}`);
+  });
+
+  socket.on("message", (message) => {
+    Logger.info(`Message from ${socket.id}: ${message}`);
+  });
+
+  socket.on("disconnect", () => {
+    Logger.info(`Socket ${socket.id} disconnected`);
+  });
+});
 
 function getCurrentDateTimeInPalestine() {
   const date = new Date().toLocaleString("en-US", {
@@ -169,15 +190,7 @@ exports.createOrder = async (req, res) => {
 
     const messaging = admin.messaging();
 
-    try {
-      await subscribeAdminsToTopic();
-      await messaging.send({
-        notification: { title: "طلب جديد", body: `هناك طلب جديد من ${name}` },
-        topic: "admin",
-      });
-    } catch (err) {
-      console.error("Failed to send admin notification:", err.message);
-    }
+    io.to("admins").emit("new-order-admin", order);
 
     await messaging.send({
       notification: {
