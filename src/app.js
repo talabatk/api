@@ -280,15 +280,20 @@ cron.schedule("0 0 * * *", async () => {
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 3);
+    cutoffDate.setHours(0, 0, 0, 0); // Set to 00:00:00
 
-    await Notification.destroy({
+    // Perform the deletion
+    const deletedCount = await Notification.destroy({
       where: {
         createdAt: {
-          [Op.lt]: cutoffDate,
+          [Op.lt]: cutoffDate.toISOString(), // Compare with the calculated cutoff date
         },
       },
     });
+    console.log(`Deleted ${deletedCount} old notifications`);
   } catch (error) {
+    console.error("Error in cron job:", error);
+
     Logger.error(error);
   }
 });

@@ -197,6 +197,7 @@ exports.getUserByToken = async (req, res) => {
         image: user.image ? user.image : null,
         open: user.vendor.open,
         active: user.active,
+        token: user.token,
       });
     }
 
