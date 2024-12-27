@@ -250,30 +250,20 @@ exports.editOne = async (req, res) => {
 
     await product.update(req.body);
 
-    let imagesWithUrl = [];
-
     if (req.files.image) {
-      const images = await ProductImage.bulkCreate(
+      await ProductImage.destroy({ where: { productId: product.id } });
+
+      await ProductImage.bulkCreate(
         req.files.image?.map((file) => ({
           productId: product.id,
           image: file.location,
         }))
       );
-
-      imagesWithUrl = images.map((image) => {
-        return {
-          ...image.toJSON(),
-          image: image.image,
-        };
-      });
     }
 
     return res.status(200).json({
       message: "success",
-      product: {
-        ...product.toJSON(),
-        productImages: product.productImages.concat(imagesWithUrl),
-      },
+      product,
     });
   } catch (error) {
     Logger.error(error);
