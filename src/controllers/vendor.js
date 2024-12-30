@@ -290,7 +290,8 @@ exports.editVendor = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 12);
 
       vendor.password = hashedPassword;
-      await vendor.save();
+
+      req.body.password = hashedPassword;
     }
     // Check if email or phone exists and belongs to someone else
     const { phone } = req.body;
