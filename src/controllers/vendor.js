@@ -264,7 +264,7 @@ exports.getVendor = async (req, res) => {
 };
 
 exports.editVendor = async (req, res) => {
-  const { id } = req.body;
+  const { id, password, confirm_password } = req.body;
 
   try {
     let vendor = null;
@@ -283,7 +283,15 @@ exports.editVendor = async (req, res) => {
     if (!vendor) {
       return res.status(404).json({ message: "notfound" });
     }
+    if (password) {
+      if (password !== confirm_password) {
+        return res.status(400).json({ error: "password not matched" });
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
 
+      vendor.password = hashedPassword;
+      await vendor.save();
+    }
     // Check if email or phone exists and belongs to someone else
     const { phone } = req.body;
     if (
