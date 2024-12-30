@@ -279,7 +279,7 @@ exports.getAllUsers = async (req, res, next) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { id } = req.body;
+  const { id, password, confirm_password } = req.body;
 
   try {
     let user = null;
@@ -313,7 +313,15 @@ exports.updateProfile = async (req, res) => {
     ) {
       return res.status(400).json({ message: "phone number already exist" });
     }
+    if (req.body.password) {
+      if (password !== confirm_password) {
+        return res.status(400).json({ error: "password not matched" });
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
 
+      user.password = hashedPassword;
+      await user.save();
+    }
     const updatedUser = await user.update(req.body);
 
     if (req.files?.image) {
