@@ -17,13 +17,24 @@ exports.sendNotification = async (req, res) => {
   try {
     const messaging = admin.messaging();
 
-    const result = await messaging.send({
-      notification: {
-        title,
-        body: description,
-      },
-      token: fcm,
-    });
+    let result = null;
+    if (topic) {
+      result = await messaging.send({
+        notification: {
+          title,
+          body: description,
+        },
+        topic: topic,
+      });
+    } else {
+      result = await messaging.send({
+        notification: {
+          title,
+          body: description,
+        },
+        token: fcm,
+      });
+    }
 
     return res.status(200).json({ message: "success", result });
   } catch (error) {
