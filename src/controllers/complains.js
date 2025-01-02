@@ -51,7 +51,7 @@ exports.getAllComplains = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "email", "role", "phone"],
+          attributes: ["id", "name", "email", "role", "phone","fcm"],
         },
       ],
       order: [["createdAt", "DESC"]],
