@@ -13,10 +13,7 @@ const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
-const { subscribeAdminsToTopic } = require("./notifications");
 const { io } = require("../app");
-
-let sockets = {};
 
 io.on("connection", (socket) => {
   Logger.info("A user is connected");
@@ -191,6 +188,7 @@ exports.createOrder = async (req, res) => {
     const messaging = admin.messaging();
 
     io.to("admins").emit("new-order-admin", order);
+
     io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
 
     await messaging.send({
