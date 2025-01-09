@@ -83,13 +83,13 @@ const Product = require("./models/product");
 const ProductImage = require("./models/productImage");
 const UserFavoriteProduct = require("./models/UserFavoriteproduct");
 const UserFavoriteVendor = require("./models/userFavoriteVendors");
-const VendorCategory = require("./models/vendorCategories");
 const Area = require("./models/area");
 const DeliveryCost = require("./models/delivery_cost");
 const OptionGroup = require("./models/optionGroup");
 const Option = require("./models/option");
 const Cart = require("./models/cart");
 const CartProduct = require("./models/cartProduct");
+const VendorCategory = require("./models/VendorCategory");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
 const Notification = require("./models/notifications");
@@ -110,6 +110,7 @@ const optionGroupRoutes = require("./routes/optionsGroup");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
 const complainRoutes = require("./routes/complains");
+const VendorCategoryRoutes = require("./routes/vendorCategory");
 
 //--------relations---------------------------
 
@@ -143,6 +144,8 @@ Order.belongsTo(Area);
 Vendor.hasMany(Order);
 Order.belongsTo(Vendor);
 
+VendorCategory.hasMany(Vendor);
+Vendor.belongsTo(VendorCategory);
 //assign cart product to user order
 User.hasMany(Order);
 Order.belongsTo(User);
@@ -204,10 +207,6 @@ Slider.belongsTo(User, {
 User.hasMany(Notification);
 Notification.belongsTo(User);
 
-// define associations between vendor and category
-User.belongsToMany(Category, { through: VendorCategory });
-Category.belongsToMany(User, { through: VendorCategory });
-
 // define associations between vendor and area
 User.belongsToMany(Area, { through: DeliveryCost });
 Area.belongsToMany(User, { through: DeliveryCost });
@@ -227,6 +226,8 @@ app.use("/vendor", vendorRoutes);
 app.use("/api", notificationsRouts);
 
 app.use("/api", categoryRoutes);
+
+app.use("/api", VendorCategoryRoutes);
 
 app.use("/api", sliderRoutes);
 

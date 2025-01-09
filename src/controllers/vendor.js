@@ -106,6 +106,7 @@ exports.createVendor = async (req, res) => {
     free_delivery_limit,
     direction,
     distance,
+    vendorCategoryId,
   } = req.body;
 
   if (password !== confirm_password) {
@@ -135,6 +136,7 @@ exports.createVendor = async (req, res) => {
       delivery_time,
       direction,
       distance,
+      vendorCategoryId,
     });
 
     const token = generateToken(user.id);

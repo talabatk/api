@@ -7,7 +7,6 @@ const User = require("../models/user");
 const Category = require("../models/category");
 
 const { Op } = require("sequelize");
-const VendorCategory = require("../models/vendorCategories");
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 const Order = require("../models/order");
@@ -30,20 +29,6 @@ exports.createProduct = async (req, res) => {
 
   try {
     // Create the product with the provided data
-    const vendorCategory = await VendorCategory.findOne({
-      where: { categoryId, userId: vendorId },
-    });
-
-    if (vendorCategory) {
-      vendorCategory.products_number = +vendorCategory.products_number + 1;
-      await vendorCategory.save();
-    } else {
-      await VendorCategory.create({
-        categoryId,
-        userId: vendorId,
-        products_number: 1,
-      });
-    }
 
     const product = await Product.create({
       title,
@@ -274,19 +259,6 @@ exports.editOne = async (req, res) => {
 exports.deleteOne = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findByPk(id);
-
-    const vendorCategory = await VendorCategory.findOne({
-      where: { categoryId: product.categoryId, userId: product.vendorId },
-    });
-
-    if (+vendorCategory.products_number === 1) {
-      await VendorCategory.destroy({ where: { id: vendorCategory.id } });
-    } else {
-      vendorCategory.products_number = +vendorCategory.products_number - 1;
-      await vendorCategory.save();
-    }
-
     Product.destroy({ where: { id } }).then(() =>
       res.json({ message: "deleted" })
     );
