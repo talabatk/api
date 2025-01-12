@@ -22,6 +22,8 @@ router.get("/user-orders", orderController.getUserOrders);
 
 router.delete("/order/:id", orderController.deleteOrder);
 
+router.delete("/delete-orders/", orderController.deleteOrders);
+
 router.get("/vendor-statics/:id", orderController.getVendorStatic);
 
 module.exports = router;

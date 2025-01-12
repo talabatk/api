@@ -73,5 +73,10 @@ const Order = sequelize.define("order", {
     allowNull: false,
     defaultValue: 0,
   },
+  deleted: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 });
 module.exports = Order;

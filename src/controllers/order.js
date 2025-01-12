@@ -49,6 +49,22 @@ function getCurrentDateTimeInPalestine() {
   return date;
 }
 
+const formateDate = (date) => {
+  let formattedDate =
+    date.getFullYear() +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0") +
+    " " +
+    "00" +
+    ":" +
+    "00" +
+    ":" +
+    "00";
+
+  return formattedDate;
+};
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 
@@ -310,6 +326,8 @@ exports.getAllOrders = async (req, res) => {
 
     const filters = {};
 
+    filters.deleted = false;
+
     if (search) {
       filters.name = { [Op.like]: `%${search}%` };
     }
@@ -327,12 +345,15 @@ exports.getAllOrders = async (req, res) => {
     if (status) {
       filters.status = status;
     }
+    let start_Date = new Date(startDate);
+    let end_date = new Date(endDate);
+    end_date.setDate(end_date.getDate() + 1);
 
     if (startDate) {
       filters.createdAt = {
         [Op.between]: [
-          new Date(startDate),
-          endDate ? new Date(endDate) : Date.now(),
+          formateDate(start_Date),
+          endDate ? formateDate(end_date) : Date.now(),
         ],
       };
     }
@@ -820,6 +841,38 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+exports.deleteOrders = async (req, res) => {
+  const { vendorId, startDate, endDate } = req.query;
+
+  try {
+    const filters = {};
+
+    if (vendorId) {
+      const vendor = await Vendor.findOne({
+        where: { userId: vendorId },
+      });
+      filters.vendorId = vendor.id;
+    }
+    let start_Date = new Date(startDate);
+    let end_date = new Date(endDate);
+    end_date.setDate(end_date.getDate() + 1);
+
+    if (startDate) {
+      filters.createdAt = {
+        [Op.between]: [
+          formateDate(start_Date),
+          endDate ? formateDate(end_date) : Date.now(),
+        ],
+      };
+    }
+    await Order.update({ deleted: true }, { where: filters });
+
+    return res.status(200).json({ message: "order deleted" });
+  } catch (error) {
+    return res.status(400).json({ error });
+  }
+};
+
 exports.getVendorStatic = async (req, res) => {
   const { id } = req.params;
 
@@ -848,6 +901,7 @@ exports.getVendorStatic = async (req, res) => {
     });
   }
 };
+
 const soundSetting = {
   android: {
     notification: {
