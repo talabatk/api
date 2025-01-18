@@ -3,6 +3,7 @@ const VendorCategory = require("../models/VendorCategory");
 const Vendor = require("../models/vendor");
 const User = require("../models/user");
 const Alert = require("../models/alert");
+const Area = require("../models/area");
 
 exports.createVendorCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -34,7 +35,11 @@ exports.getAll = async (req, res, next) => {
         {
           model: Vendor,
           attributes: ["id", "status"],
-          include: { model: User, attributes: ["id", "name", "image"] },
+          include: {
+            model: User,
+            attributes: ["id", "name", "image"],
+            include: [Area],
+          },
         },
       ],
       order: [["order"]],
