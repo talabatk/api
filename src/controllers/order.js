@@ -615,13 +615,12 @@ exports.getVendorOrder = async (req, res) => {
 
     let orders = null;
 
-    filters.deleted = false;
-
     const filters = {};
 
     if (status) {
       filters.status = status;
     }
+    filters.deleted = false;
 
     if (startDate) {
       filters.createdAt = {
