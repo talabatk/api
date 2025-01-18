@@ -2,6 +2,7 @@ const Logger = require("../util/logger");
 const VendorCategory = require("../models/VendorCategory");
 const Vendor = require("../models/vendor");
 const User = require("../models/user");
+const Alert = require("../models/alert");
 
 exports.createVendorCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -26,21 +27,37 @@ exports.createVendorCategory = async (req, res, next) => {
 };
 
 exports.getAll = async (req, res, next) => {
-  VendorCategory.findAll({
-    attributes: ["id", "order", "name", "image"],
-    include: [
-      {
-        model: Vendor,
-        attributes: ["id", "status"],
-        include: { model: User, attributes: ["id", "name", "image"] },
+  try {
+    const categories = await VendorCategory.findAll({
+      attributes: ["id", "order", "name", "image"],
+      include: [
+        {
+          model: Vendor,
+          attributes: ["id", "status"],
+          include: { model: User, attributes: ["id", "name", "image"] },
+        },
+      ],
+      order: [["order"]],
+    });
+
+    const app_status = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "app_status",
       },
-    ],
-    order: [["order"]],
-  })
-    .then((categories) => {
-      return res.status(200).json({ results: categories });
-    })
-    .catch((error) => res.status(400).json({ error }));
+    });
+
+    const alert = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "alert",
+      },
+    });
+    return res.status(200).json({ results: categories, app_status, alert });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "error" });
+  }
 };
 
 exports.getOne = async (req, res) => {

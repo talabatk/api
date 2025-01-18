@@ -94,6 +94,7 @@ const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
 const Notification = require("./models/notifications");
 const Complains = require("./models/complains");
+const Alert = require("./models/alert");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");

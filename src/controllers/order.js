@@ -615,6 +615,8 @@ exports.getVendorOrder = async (req, res) => {
 
     let orders = null;
 
+    filters.deleted = false;
+
     const filters = {};
 
     if (status) {
@@ -884,7 +886,7 @@ exports.getVendorStatic = async (req, res) => {
         [Sequelize.fn("COUNT", Sequelize.col("status")), "order_count"],
         [Sequelize.fn("SUM", Sequelize.col("total")), "total_sum"],
       ],
-      where: { vendorId: vendor.id },
+      where: { vendorId: vendor.id, deleted: false },
       group: ["status"],
     });
 
