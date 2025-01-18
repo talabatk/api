@@ -29,15 +29,13 @@ exports.createVendorCategory = async (req, res, next) => {
 
 exports.getAll = async (req, res, next) => {
   try {
-    const categories = await VendorCategory.findAll({
+    let categories = await VendorCategory.findAll({
       attributes: ["id", "order", "name", "image"],
       include: [
         {
           model: Vendor,
-          attributes: ["id", "status"],
           include: {
             model: User,
-            attributes: ["id", "name", "image"],
             include: [Area],
           },
         },
@@ -45,6 +43,32 @@ exports.getAll = async (req, res, next) => {
       order: [["order"]],
     });
 
+    categories = categories.map((category) => {
+      const vendors = category.vendors.map((vendor) => {
+        return {
+          id: vendor.user.id,
+          status: vendor.status,
+          name: vendor.user.name,
+          image: vendor.user.image,
+          email: vendor.user.email,
+          phone: vendor.user.phone,
+          address: vendor.user.address,
+          fcm: vendor.user.fcm,
+          role: "vendor",
+          description: vendor.description,
+          direction: vendor.direction,
+          distance: vendor.distance,
+          delivery_time: vendor.delivery_time,
+          free_delivery_limit: vendor.free_delivery_limit,
+          cover: vendor.cover,
+          areas: vendor.user.areas,
+        };
+      });
+      return {
+        ...category.toJSON(),
+        vendors,
+      };
+    });
     const app_status = await Alert.findOne({
       attributes: ["content", "active"],
       where: {
