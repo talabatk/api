@@ -6,6 +6,7 @@ const User = require("../models/user");
 const Vendor = require("../models/vendor");
 const Area = require("../models/area");
 const Logger = require("../util/logger");
+const VendorCategory = require("../models/VendorCategory");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -178,7 +179,7 @@ exports.getAllVendors = async (req, res) => {
       where: {
         role: "vendor",
       },
-      include: [Vendor, Area],
+      include: [{ model: Vendor, include: [VendorCategory] }, Area],
       attributes: { exclude: ["password"] },
     });
 
@@ -208,6 +209,7 @@ exports.getAllVendors = async (req, res) => {
         image: user.image,
         cover: user.vendor.cover,
         areas: user.areas,
+        vendorCategory: user.vendor.vendor_category,
       };
     });
 
@@ -225,7 +227,7 @@ exports.getVendor = async (req, res) => {
         role: "vendor",
         id: req.params.id,
       },
-      include: [Vendor, Area],
+      include: [{ model: Vendor, include: [VendorCategory] }, Area],
       attributes: { exclude: ["password"] },
     });
 
@@ -255,6 +257,7 @@ exports.getVendor = async (req, res) => {
         image: user.image,
         cover: user.vendor.cover,
         areas: user.areas,
+        vendorCategory: user.vendor.vendor_category,
       };
     });
 
