@@ -34,6 +34,11 @@ exports.sendNotification = async (req, res) => {
         },
         token: fcm,
       });
+      await Notification.create({
+        userId: order.user.id,
+        title,
+        description,
+      });
     }
 
     return res.status(200).json({ message: "success", result });

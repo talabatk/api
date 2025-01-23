@@ -71,7 +71,9 @@ exports.createOrder = async (req, res) => {
   try {
     let vendor = null;
 
-    let shipping = 0;
+    let shipping = 0,
+      total = 0,
+      total_quantity = 0;
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -126,6 +128,9 @@ exports.createOrder = async (req, res) => {
     }
     // calculate shipping cost
     for (const e of cart.cart_products) {
+      total += +e.total;
+      total_quantity += +e.quantity;
+
       await Product.update(
         { orders: +e.product.orders + +e.quantity },
         { where: { id: e.product.id } }
@@ -153,14 +158,14 @@ exports.createOrder = async (req, res) => {
     //save order
     const order = await Order.create({
       address,
-      total_quantity: +cart.total_quantity,
-      subtotal: +cart.total,
+      total_quantity,
+      subtotal: +total,
       shipping,
       name,
       phone,
       location,
       notes,
-      total: shipping + +cart.total,
+      total: shipping + +total,
       userId: decodedToken.userId,
       areaId,
       updatedTime: currentDate,
@@ -432,9 +437,18 @@ exports.getAllOrders = async (req, res) => {
     }
 
     const count = await Order.count({ where: filters }); // Get total number of products
+    const total = await Order.sum("total", { where: filters }); // Get total number of products
+    const totalShipping = await Order.sum("shipping", { where: filters }); // Get total number of products
+
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
-    return res.status(200).json({ count, pages: numOfPages, results: orders });
+    return res.status(200).json({
+      count,
+      pages: numOfPages,
+      total,
+      totalShipping,
+      results: orders,
+    });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
