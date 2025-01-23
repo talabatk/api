@@ -12,7 +12,7 @@ admin.initializeApp({
 });
 
 exports.sendNotification = async (req, res) => {
-  const { title, description, topic, fcm } = req.body;
+  const { title, description, topic, fcm, userId } = req.body;
 
   try {
     const messaging = admin.messaging();
@@ -35,7 +35,7 @@ exports.sendNotification = async (req, res) => {
         token: fcm,
       });
       await Notification.create({
-        userId: order.user.id,
+        userId,
         title,
         description,
       });
