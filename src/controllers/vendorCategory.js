@@ -34,10 +34,12 @@ exports.getAll = async (req, res, next) => {
       include: [
         {
           model: Vendor,
-          include: {
-            model: User,
-            include: [Area],
-          },
+          include: [
+            {
+              model: User,
+              include: [Area],
+            },
+          ],
         },
       ],
       order: [["order"]],
@@ -46,14 +48,14 @@ exports.getAll = async (req, res, next) => {
     categories = categories.map((category) => {
       const vendors = category.vendors.map((vendor) => {
         return {
-          id: vendor.user.id,
+          id: vendor.user?.id,
           status: vendor.status,
-          name: vendor.user.name,
-          image: vendor.user.image,
-          email: vendor.user.email,
-          phone: vendor.user.phone,
-          address: vendor.user.address,
-          fcm: vendor.user.fcm,
+          name: vendor.user?.name,
+          image: vendor.user?.image,
+          email: vendor.user?.email,
+          phone: vendor.user?.phone,
+          address: vendor.user?.address,
+          fcm: vendor.user?.fcm,
           role: "vendor",
           description: vendor.description,
           direction: vendor.direction,
@@ -61,7 +63,7 @@ exports.getAll = async (req, res, next) => {
           delivery_time: vendor.delivery_time,
           free_delivery_limit: vendor.free_delivery_limit,
           cover: vendor.cover,
-          areas: vendor.user.areas,
+          areas: vendor.user?.areas,
         };
       });
       return {
