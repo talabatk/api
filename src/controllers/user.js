@@ -365,6 +365,32 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+exports.forgetPassword = async (req, res) => {
+  const { phone, password, confirm_password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: { phone },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    if (password !== confirm_password) {
+      return res.status(400).json({ error: "password not matched" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    user.password = hashedPassword;
+
+    await user.save();
+    // send email with new password
+    return res.status(200).json({ message: "password reset successfully" });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
 

@@ -90,6 +90,7 @@ const Option = require("./models/option");
 const Cart = require("./models/cart");
 const CartProduct = require("./models/cartProduct");
 const VendorCategory = require("./models/VendorCategory");
+const VendorCategories = require("./models/VendorCategories");
 const CartProductOption = require("./models/cartProductOption");
 const Order = require("./models/order");
 const Notification = require("./models/notifications");
@@ -145,8 +146,8 @@ Order.belongsTo(Area);
 Vendor.hasMany(Order);
 Order.belongsTo(Vendor);
 
-VendorCategory.hasMany(Vendor);
-Vendor.belongsTo(VendorCategory);
+VendorCategory.belongsToMany(Vendor, { through: VendorCategories });
+Vendor.belongsToMany(VendorCategory, { through: VendorCategories });
 //assign cart product to user order
 User.hasMany(Order);
 Order.belongsTo(User);
