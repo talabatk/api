@@ -108,7 +108,7 @@ exports.createVendor = async (req, res) => {
     free_delivery_limit,
     direction,
     distance,
-    vendorCategoryId,
+    categories,
   } = req.body;
 
   if (password !== confirm_password) {
@@ -138,8 +138,16 @@ exports.createVendor = async (req, res) => {
       delivery_time,
       direction,
       distance,
-      vendorCategoryId,
     });
+
+    if (categories) {
+      categories.forEach(async (category) => {
+        await VendorCategories.create({
+          vendorId: vendor.id,
+          vendorCategoryId: category,
+        });
+      });
+    }
 
     const token = generateToken(user.id);
 
@@ -258,7 +266,7 @@ exports.getVendor = async (req, res) => {
         image: user.image,
         cover: user.vendor.cover,
         areas: user.areas,
-        vendorCategory: user.vendor.vendor_category,
+        vendorCategories: user.vendor.vendor_categories,
       };
     });
 
@@ -285,6 +293,7 @@ exports.editVendor = async (req, res) => {
         include: [Vendor, Area],
       });
     }
+    console.log(categories);
 
     if (!vendor) {
       return res.status(404).json({ message: "notfound" });
