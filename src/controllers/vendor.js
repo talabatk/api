@@ -7,6 +7,7 @@ const Vendor = require("../models/vendor");
 const Area = require("../models/area");
 const Logger = require("../util/logger");
 const VendorCategory = require("../models/VendorCategory");
+const VendorCategories = require("../models/VendorCategories");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -269,7 +270,7 @@ exports.getVendor = async (req, res) => {
 };
 
 exports.editVendor = async (req, res) => {
-  const { id, password, confirm_password } = req.body;
+  const { id, password, confirm_password, categories } = req.body;
 
   try {
     let vendor = null;
@@ -311,13 +312,23 @@ exports.editVendor = async (req, res) => {
     const updatedVendor = await vendor.update(req.body);
 
     if (req.files.image) {
-      const updateUser = await vendor.update({
+      await vendor.update({
         image: req.files.image[0].location,
       });
     }
 
     if (req.files.cover) {
       await vendor.vendor.update({ cover: req.files.cover[0].location });
+    }
+
+    if (categories) {
+      await VendorCategories.destroy({ where: { vendorId: vendor.vendor.id } });
+      categories.forEach(async (category) => {
+        await VendorCategories.create({
+          vendorId: vendor.vendor.id,
+          vendorCategoryId: category,
+        });
+      });
     }
 
     await vendor.vendor.update(req.body);
