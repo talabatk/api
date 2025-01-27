@@ -5,9 +5,13 @@ exports.editAlert = async (req, res) => {
   const { name } = req.body;
 
   try {
-    await Alert.update(req.body).where("name", name);
+    const data = await Alert.update(req.body, {
+      where: {
+        name,
+      },
+    });
 
-    return res.status(200).json(Alert);
+    return res.status(200).json({ data });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });

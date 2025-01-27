@@ -107,6 +107,7 @@ const sliderRoutes = require("./routes/slider");
 const productRoutes = require("./routes/product");
 const favoriteRoutes = require("./routes/favorite");
 const areaRoutes = require("./routes/area");
+const alertRoutes = require("./routes/alert");
 const deliverCostRoutes = require("./routes/deliverCosts");
 const optionGroupRoutes = require("./routes/optionsGroup");
 const cartRoutes = require("./routes/cart");
@@ -228,6 +229,8 @@ app.use("/vendor", vendorRoutes);
 app.use("/api", notificationsRouts);
 
 app.use("/api", categoryRoutes);
+
+app.use("/api", alertRoutes);
 
 app.use("/api", VendorCategoryRoutes);
 
