@@ -12,6 +12,7 @@ const Option = require("../models/option");
 const Order = require("../models/order");
 const Vendor = require("../models/vendor");
 const Logger = require("../util/logger");
+const Alert = require("../models/alert");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -288,9 +289,30 @@ exports.dataAnalysis = async (req, res) => {
 
     const orders = await Order.count();
 
+    const app_status = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "app_status",
+      },
+    });
+
+    const alert = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "alert",
+      },
+    });
+
     return res
       .status(200)
-      .json({ products, customers, orders, onlineDeliveries });
+      .json({
+        products,
+        customers,
+        orders,
+        onlineDeliveries,
+        app_status,
+        alert,
+      });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });

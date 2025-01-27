@@ -65,6 +65,7 @@ const formateDate = (date) => {
 
   return formattedDate;
 };
+
 exports.createOrder = async (req, res) => {
   const { areaId, address, name, phone, location, notes } = req.body;
 
@@ -524,6 +525,7 @@ exports.updateOrder = async (req, res) => {
       await Notification.create({
         userId: order.user.id,
         title: "تحديث للطلب",
+        orderId: id,
         description:
           req.body.status === "in the way"
             ? "تم بدء توصيل طلبك , في الطريق اليك"
@@ -601,6 +603,7 @@ exports.assignDelivery = async (req, res) => {
       userId: order.user.id,
       title: "تحديث للطلب",
       description: "تم بدء توصيل طلبك",
+      orderId: id,
     });
 
     await order.update({
