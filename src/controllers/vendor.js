@@ -209,7 +209,7 @@ exports.getAllVendors = async (req, res) => {
         image: user.image,
         cover: user.vendor.cover,
         areas: user.areas,
-        vendorCategory: user.vendor.vendor_category,
+        vendorCategories: user.vendor.vendor_categories,
       };
     });
 
