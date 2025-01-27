@@ -2,7 +2,7 @@ const Alert = require("../models/alert");
 const Logger = require("../util/logger");
 
 exports.editAlert = async (req, res) => {
-  const { name } = req.query;
+  const { name } = req.body;
 
   try {
     await Alert.update(req.body).where("name", name);
