@@ -8,6 +8,8 @@ router.get("/category", categoryController.getAll);
 
 router.get("/category/:id", categoryController.getOne);
 
+router.get("/category-with-vendor/:id", categoryController.getOneWithVendors);
+
 router.patch("/category/:id", categoryController.editOne);
 
 router.delete("/category/:id", categoryController.deleteOne);

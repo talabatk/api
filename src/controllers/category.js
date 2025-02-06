@@ -79,6 +79,34 @@ exports.editOne = async (req, res) => {
   }
 };
 
+exports.getOneWithVendors = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const vendors = await User.findAll({
+      attributes: ["id", "name", "image"],
+      include: [
+        {
+          model: Product,
+          where: {
+            categoryId: id,
+          },
+          include: [
+            {
+              model: ProductImage,
+              attributes: ["id", "image"],
+            },
+          ],
+        },
+      ],
+    });
+
+    return res.status(200).json({ count: vendors.length, results: vendors });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
 exports.deleteOne = async (req, res, next) => {
   const { id } = req.params;
 

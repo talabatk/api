@@ -293,7 +293,6 @@ exports.editVendor = async (req, res) => {
         include: [Vendor, Area],
       });
     }
-    console.log(categories);
 
     if (!vendor) {
       return res.status(404).json({ message: "notfound" });
