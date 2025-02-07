@@ -207,7 +207,7 @@ exports.getOne = async (req, res) => {
       ],
     });
 
-    return res.status(200).json({ message: "success", product });
+    return res.status(200).json({ message: "success", results: product });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
@@ -303,16 +303,14 @@ exports.dataAnalysis = async (req, res) => {
       },
     });
 
-    return res
-      .status(200)
-      .json({
-        products,
-        customers,
-        orders,
-        onlineDeliveries,
-        app_status,
-        alert,
-      });
+    return res.status(200).json({
+      products,
+      customers,
+      orders,
+      onlineDeliveries,
+      app_status,
+      alert,
+    });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
