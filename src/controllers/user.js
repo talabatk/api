@@ -79,6 +79,7 @@ exports.login = async (req, res) => {
 
   try {
     let user = null;
+    let isWithEmail = true;
 
     if (key.includes("@")) {
       user = await User.findOne({
@@ -88,12 +89,22 @@ exports.login = async (req, res) => {
       user = await User.findOne({
         where: { phone: key },
       });
+      isWithEmail = false;
     }
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ message: "user with this email or phone not exist" });
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      user = await User.create({
+        name: key,
+        address: null,
+        email: key,
+        password: hashedPassword,
+        image: req.files.image ? req.files.image[0].location : null,
+        role: "customer",
+        phone: key,
+        active: true,
+      });
     }
 
     const isEqual = await bcrypt.compare(password, user.password);
