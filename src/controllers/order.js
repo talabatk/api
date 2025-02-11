@@ -184,10 +184,6 @@ exports.createOrder = async (req, res) => {
       { where: { ordered: false, cartId: cart.id } }
     );
 
-    await OrderTimeLine.create({
-      orderId: order.id,
-      content: `لقد تم انشاء الطلب من قبل ${order.name}`,
-    });
     cart.total_quantity = 0;
 
     cart.total = 0;
@@ -211,6 +207,11 @@ exports.createOrder = async (req, res) => {
         };
       })
     );
+
+    await OrderTimeLine.create({
+      orderId: order.id,
+      content: `لقد تم انشاء الطلب من قبل ${name}`,
+    });
 
     const messaging = admin.messaging();
 
