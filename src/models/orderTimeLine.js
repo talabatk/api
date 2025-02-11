@@ -15,7 +15,7 @@ const OrderTimeLine = sequelize.define("orderTimeLine", {
   },
   lastStatus: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
     defaultValue: null,
   },
 });
