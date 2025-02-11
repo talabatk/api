@@ -14,6 +14,7 @@ const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
 const { io } = require("../app");
+const OrderTimeLine = require("../models/orderTimeLine");
 
 io.on("connection", (socket) => {
   Logger.info("A user is connected");
@@ -183,6 +184,10 @@ exports.createOrder = async (req, res) => {
       { where: { ordered: false, cartId: cart.id } }
     );
 
+    await OrderTimeLine.create({
+      orderId: order.id,
+      content: `لقد تم انشاء الطلب من قبل ${order.name}`,
+    });
     cart.total_quantity = 0;
 
     cart.total = 0;
@@ -400,6 +405,7 @@ exports.getAllOrders = async (req, res) => {
             },
           },
           Area,
+          OrderTimeLine,
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
@@ -502,20 +508,21 @@ exports.updateOrder = async (req, res) => {
       // Map the order status to a valid VendorOrder status
       const messaging = admin.messaging();
 
+      await OrderTimeLine.create({
+        orderId: order.id,
+        content: `لقد تم تغيير حاله طلبك من ${
+          orderStatusArabicNames[order.status]
+        } الى ${orderStatusArabicNames[status]}`,
+        lastStatus: orderStatusArabicNames[status],
+      });
+
       if (order.user.fcm) {
         await messaging
           .send({
             token: order.user.fcm,
             notification: {
               title: "تحديث للطلب",
-              body:
-                req.body.status === "in the way"
-                  ? "تم بدء توصيل طلبك , في الطريق اليك"
-                  : req.body.status === "complete"
-                  ? "تم توصيل طلبك ,شكرا لك"
-                  : req.body.status === "preparing"
-                  ? "تم بدء تحضير طلبك"
-                  : "تم الانتهاء من طلبك",
+              body: orderStatusArabicNames[status],
             },
             ...soundSetting,
           })
@@ -787,6 +794,7 @@ exports.getOne = async (req, res) => {
           ],
           where: { ordered: true },
         },
+        OrderTimeLine,
       ],
     });
 
@@ -834,6 +842,7 @@ exports.getUserOrders = async (req, res) => {
           where: { ordered: true },
         },
         { model: Delivery, include: User },
+        OrderTimeLine,
       ],
       where: { userId: decodedToken.userId },
     });
@@ -935,4 +944,14 @@ const soundSetting = {
       },
     },
   },
+};
+const orderStatusArabicNames = {
+  "not started": "لم يتم البدء",
+  started: "تم بدء طلبك",
+  preparing: "طلبك قيد التحضير الان",
+  finished: "تم الانتهاء من تحضير طلبك",
+  "in the way": "الطلب في الطريق اليك",
+  complete: "تم توصيل طلبك",
+  cancel: "تم الغاء طلبك",
+  deleted: "تم حذف طلبك",
 };

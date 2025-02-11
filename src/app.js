@@ -96,6 +96,7 @@ const Order = require("./models/order");
 const Notification = require("./models/notifications");
 const Complains = require("./models/complains");
 const Alert = require("./models/alert");
+const OrderTimeLine = require("./models/orderTimeLine");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -142,6 +143,9 @@ CartProduct.belongsTo(Order);
 
 Area.hasMany(Order);
 Order.belongsTo(Area);
+
+Order.hasMany(OrderTimeLine);
+OrderTimeLine.belongsTo(Order);
 
 // define associations between cartProduct and Option
 Vendor.hasMany(Order);
