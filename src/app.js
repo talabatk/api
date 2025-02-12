@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
-const socketIO = require("socket.io");
+const { Server } = require("socket.io");
 const http = require("node:http");
 const cors = require("cors");
 const cron = require("node-cron");
@@ -52,9 +52,9 @@ app.options("*", cors()); // include before other routes
 
 app.use(cors());
 
-const io = socketIO(server, {
+const io = new Server(server, {
   cors: {
-    origin: "*", // Or specify allowed origins, e.g., ["https://example.com"]
+    origin: "*", // Adjust this based on your frontend URL
     methods: ["GET", "POST"],
   },
 });
@@ -328,7 +328,7 @@ const address = `http://localhost:${process.env.PORT}`;
 sequelize
   .sync()
   .then((result) => {
-    server.listen(process.env.PORT || 3000, () => {
+    server.listen(process.env.PORT || 5000, () => {
       console.info(
         "------------------------------------------------------------------------------------------\n"
       );
