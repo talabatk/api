@@ -16,24 +16,6 @@ const Logger = require("../util/logger");
 const { io } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 
-io.on("connection", (socket) => {
-  Logger.info("A user is connected");
-
-  // Join rooms based on roles (vendors or admins)
-  socket.on("join-room", (room) => {
-    socket.join(room);
-    Logger.info(`${socket.id} joined room: ${room}`);
-  });
-
-  socket.on("message", (message) => {
-    Logger.info(`Message from ${socket.id}: ${message}`);
-  });
-
-  socket.on("disconnect", () => {
-    Logger.info(`Socket ${socket.id} disconnected`);
-  });
-});
-
 function getCurrentDateTimeInPalestine() {
   const date = new Date().toLocaleString("en-US", {
     timeZone: "Asia/Gaza", // or 'Asia/Hebron'

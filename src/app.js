@@ -61,11 +61,19 @@ const io = socketIO(server, {
 
 io.on("connection", (socket) => {
   Logger.info("A user is connected");
-  socket.on("message", (message) => {
-    Logger.info(`message from ${socket.id} : ${message}`);
+
+  // Join rooms based on roles (vendors or admins)
+  socket.on("join-room", (room) => {
+    socket.join(room);
+    Logger.info(`${socket.id} joined room: ${room}`);
   });
+
+  socket.on("message", (message) => {
+    Logger.info(`Message from ${socket.id}: ${message}`);
+  });
+
   socket.on("disconnect", () => {
-    Logger.info(`socket ${socket.id} disconnected`);
+    Logger.info(`Socket ${socket.id} disconnected`);
   });
 });
 
@@ -97,6 +105,7 @@ const Notification = require("./models/notifications");
 const Complains = require("./models/complains");
 const Alert = require("./models/alert");
 const OrderTimeLine = require("./models/orderTimeLine");
+const Message = require("./models/messages");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -115,6 +124,7 @@ const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
 const complainRoutes = require("./routes/complains");
 const VendorCategoryRoutes = require("./routes/vendorCategory");
+const messageRoutes = require("./routes/message");
 
 //--------relations---------------------------
 
@@ -132,6 +142,9 @@ Cart.belongsTo(User);
 
 User.hasMany(Complains);
 Complains.belongsTo(User);
+
+User.hasMany(Message);
+Message.belongsTo(User);
 
 //assign cart product to user cart
 Cart.hasMany(CartProduct);
@@ -255,6 +268,8 @@ app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
 
 app.use("/api", complainRoutes);
+
+app.use("/api", messageRoutes);
 
 app.route("/").get((_req, res) => {
   // #swagger.ignore = true
