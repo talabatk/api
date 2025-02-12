@@ -24,7 +24,7 @@ exports.sendMessageFromUser = async (req, res) => {
       userId: user.id,
     });
 
-    io.to("admin-chat").emit("new-message", newMessage);
+    io.to("admins").emit("new-message", newMessage);
     return res.status(201).json({ status: "success", message: newMessage });
   } catch (error) {
     Logger.error(error);
