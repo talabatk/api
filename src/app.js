@@ -58,6 +58,9 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
+  transports: ["websocket", "polling"], // Allow both transports
+  pingInterval: 25000, // Send ping every 25 seconds
+  pingTimeout: 60000, // Wait 60 seconds before disconnecting
 });
 
 io.on("connection", (socket) => {
@@ -73,8 +76,13 @@ io.on("connection", (socket) => {
     Logger.info(`Message from ${socket.id}: ${message}`);
   });
 
-  socket.on("disconnect", () => {
-    Logger.info(`Socket ${socket.id} disconnected`);
+  socket.on("disconnect", (reason) => {
+    console.error("❌ Disconnected:", reason);
+  });
+
+  socket.on("ping", () => {
+    console.log("📡 Received ping from client");
+    socket.emit("pong"); // Reply to ping
   });
 });
 
