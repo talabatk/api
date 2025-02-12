@@ -56,7 +56,7 @@ const io = new Server(server, {
   cors: {
     origin: "*", // Allow both local & production
     methods: ["GET", "POST"],
-    // credentials: true,
+    credentials: true,
   },
 });
 
