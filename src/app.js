@@ -54,8 +54,9 @@ app.use(cors());
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // Adjust this based on your frontend URL
+    origin: "*", // Allow both local & production
     methods: ["GET", "POST"],
+    // credentials: true,
   },
 });
 
