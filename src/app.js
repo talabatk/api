@@ -54,8 +54,9 @@ app.use(cors());
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // Adjust this based on your frontend URL
+    origin: "https://talabatk.top/", // Adjust this based on your frontend URL
     methods: ["GET", "POST"],
+    credentials: true, // Allow cookies & auth headers
   },
 });
 
