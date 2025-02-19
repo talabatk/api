@@ -26,6 +26,11 @@ exports.sendNotification = async (req, res) => {
         },
         topic: topic,
       });
+      await Notification.create({
+        topic,
+        title,
+        description,
+      });
     } else {
       result = await messaging.send({
         notification: {
@@ -71,6 +76,7 @@ exports.getUserNotification = async (req, res) => {
         offset: offset,
         where: {
           userId: user.id,
+          topic: { [Op.in]: ["all", user.role] },
         },
         order: [["createdAt", "DESC"]],
       });
@@ -78,6 +84,7 @@ exports.getUserNotification = async (req, res) => {
       notifications = await Notification.findAll({
         where: {
           userId: user.id,
+          topic: { [Op.in]: ["all", user.role] },
         },
         order: [["createdAt", "DESC"]],
       });
