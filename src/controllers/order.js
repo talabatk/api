@@ -461,7 +461,8 @@ exports.updateOrder = async (req, res) => {
       "cancel",
       "deleted",
     ];
-    if (!validOrderStatuses.includes(status)) {
+
+    if (status && !validOrderStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid order status value" });
     }
 
@@ -487,7 +488,7 @@ exports.updateOrder = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (status !== order.status) {
+    if (status && status !== order.status) {
       // Map the order status to a valid VendorOrder status
       const messaging = admin.messaging();
 
