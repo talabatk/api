@@ -6,13 +6,15 @@ const User = require("../models/user");
 
 const Category = require("../models/category");
 
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 const Order = require("../models/order");
 const Vendor = require("../models/vendor");
 const Logger = require("../util/logger");
 const Alert = require("../models/alert");
+const CartProduct = require("../models/cartProduct");
+const Cart = require("../models/cart");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -236,6 +238,49 @@ exports.editOne = async (req, res) => {
         },
       ],
     });
+
+    if (req.body.isOffer === false && product.isOffer === true) {
+      const cartProducts = await CartProduct.findAll({
+        include: [
+          {
+            model: Product,
+          },
+          Option,
+        ],
+        where: {
+          productId: product.id,
+          ordered: false,
+        },
+      });
+
+      for (const e of cartProducts) {
+        let oldSubTotal = 0,
+          oldTotal = 0,
+          newSubtotal = 0,
+          newTotal = 0;
+        oldSubTotal = +e.subtotal;
+        oldTotal = +e.total;
+        newSubtotal = +e.price;
+
+        for (const option of e.options) {
+          newSubtotal = newSubtotal + +option.value;
+        }
+
+        newTotal = newSubtotal * +e.quantity;
+
+        await CartProduct.update(
+          {
+            subtotal: newSubtotal,
+            total: newTotal,
+          },
+          {
+            where: {
+              id: e.id,
+            },
+          }
+        );
+      }
+    }
 
     await product.update(req.body);
 

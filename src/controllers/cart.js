@@ -40,17 +40,6 @@ exports.getUserCart = async (req, res) => {
       },
     });
 
-    for (const e of cart.cart_products) {
-      const specialPriceEndDate = new Date(e.product.endDate_special_price);
-      const dateNow = Date.now();
-
-      if (e.product.special_price && specialPriceEndDate.getTime() <= dateNow) {
-        e.product.special_price = 0;
-        e.product.endDate_special_price = null;
-        e.product.save();
-      }
-    }
-
     return res.status(200).json({ message: "success", cart });
   } catch (error) {
     Logger.error(error);
@@ -82,11 +71,8 @@ exports.addToCart = async (req, res) => {
       return res.status(404).json({ message: "product not found" });
     }
 
-    const specialPriceEndDate = new Date(product.endDate_special_price);
-    const dateNow = Date.now();
-
-    if (product.special_price && specialPriceEndDate.getTime() > dateNow) {
-      subtotal += Number(product.special_price); // Convert explicitly to a number
+    if (product.isOffer) {
+      subtotal += Number(product.offerPrice); // Convert explicitly to a number
     } else {
       subtotal += Number(product.price); // Convert explicitly to a number
     }
