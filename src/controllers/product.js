@@ -24,8 +24,8 @@ exports.createProduct = async (req, res) => {
     vendorId,
     categoryId,
     show_price,
-    special_price,
-    endDate_special_price,
+    offerPrice,
+    isOffer,
   } = req.body;
 
   try {
@@ -40,8 +40,8 @@ exports.createProduct = async (req, res) => {
       vendorId,
       categoryId,
       show_price,
-      special_price,
-      endDate_special_price,
+      offerPrice,
+      isOffer,
     });
 
     const images = await ProductImage.bulkCreate(
@@ -78,6 +78,7 @@ exports.getAll = async (req, res) => {
     vendorId,
     categoryId,
     search,
+    isOffer,
   } = req.query;
 
   try {
@@ -107,7 +108,9 @@ exports.getAll = async (req, res) => {
     if (bestSeller) {
       order.push(["orders", "DESC"]);
     }
-
+    if (isOffer) {
+      filters.isOffer = isOffer;
+    }
     if (recent) {
       order.push(["createdAt", "DESC"]);
     }

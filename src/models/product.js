@@ -41,15 +41,15 @@ const Product = sequelize.define("product", {
     allowNull: false,
     defaultValue: 0,
   },
-  special_price: {
+  offerPrice: {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,
     defaultValue: 0,
   },
-  endDate_special_price: {
-    type: Sequelize.DATE,
-    allowNull: true,
-    defaultValue: null,
+  isOffer: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 });
 module.exports = Product;
