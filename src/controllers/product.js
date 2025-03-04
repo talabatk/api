@@ -111,7 +111,7 @@ exports.getAll = async (req, res) => {
       order.push(["orders", "DESC"]);
     }
     if (isOffer) {
-      filters.isOffer = isOffer;
+      filters.isOffer = isOffer === "true" ? true : false;
     }
     if (recent) {
       order.push(["createdAt", "DESC"]);
