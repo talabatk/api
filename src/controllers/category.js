@@ -5,6 +5,7 @@ const ProductImage = require("../models/productImage");
 const Vendor = require("../models/vendor");
 const User = require("../models/user");
 const Logger = require("../util/logger");
+const Area = require("../models/area");
 
 exports.createCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -107,6 +108,58 @@ exports.getOneWithVendors = async (req, res) => {
     return res.status(500).json({ message: "internal server error" });
   }
 };
+
+exports.getCategoryWithVendors = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const vendors = await User.findAll({
+      attributes: ["id", "name", "image", "email", "phone", "address", "fcm"], // Exclude product attributes from results
+      include: [
+        {
+          model: Product,
+          attributes: [], // Exclude product attributes from results
+          where: {
+            categoryId: id,
+          },
+        },
+        {
+          model: Vendor,
+        },
+        Area,
+      ],
+    });
+
+    const results = vendors.map((user) => {
+      const { id, name, email, phone, address, fcm } = user;
+
+      return {
+        id,
+        name,
+        email,
+        phone,
+        address,
+        status: user.vendor.status,
+        fcm,
+        role: "vendor",
+        description: user.vendor.description,
+        direction: user.vendor.direction,
+        distance: user.vendor.distance,
+        delivery_time: user.vendor.delivery_time,
+        free_delivery_limit: user.vendor.free_delivery_limit,
+        image: user.image,
+        cover: user.vendor.cover,
+        areas: user.areas,
+      };
+    });
+
+    return res.status(200).json({ count: vendors.length, results: vendors });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
 exports.deleteOne = async (req, res, next) => {
   const { id } = req.params;
 
