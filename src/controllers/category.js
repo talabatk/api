@@ -153,7 +153,7 @@ exports.getCategoryWithVendors = async (req, res) => {
       };
     });
 
-    return res.status(200).json({ count: vendors.length, results: vendors });
+    return res.status(200).json({ count: vendors.length, results });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
