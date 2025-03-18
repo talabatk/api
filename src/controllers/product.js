@@ -42,7 +42,7 @@ exports.createProduct = async (req, res) => {
       vendorId,
       categoryId,
       show_price,
-      offerPrice,
+      offerPrice: offerPrice || 0,
       isOffer,
     });
 
