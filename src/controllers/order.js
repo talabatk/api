@@ -147,9 +147,9 @@ exports.createOrder = async (req, res) => {
       shipping,
       name,
       phone: phone.includes("97")
-        ? "0" + phone.slice(3)
-        : !phone.startsWith("0")
-        ? "0" + phone
+        ? phone.slice(3)
+        : phone.startsWith("0")
+        ? phone.slice(1)
         : phone,
       location,
       notes,
