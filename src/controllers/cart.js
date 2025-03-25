@@ -170,6 +170,9 @@ exports.deleteCartProduct = async (req, res) => {
 
     const cartProduct = await CartProduct.findByPk(id);
 
+    if (!cart || !cartProduct) {
+      return res.status(500).json({ message: "internal server error" });
+    }
     cart.total = +cart.total - +cartProduct.total;
 
     cart.total_quantity = +cart.total_quantity - +cartProduct.quantity;

@@ -207,7 +207,7 @@ exports.getAllVendors = async (req, res) => {
         email,
         phone,
         address,
-        status: user.vendor.status,
+        status: user.vendor ? user.vendor?.status : "opened",
         fcm,
         role: "vendor",
         description: user.vendor.description,
