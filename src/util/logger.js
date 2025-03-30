@@ -10,7 +10,11 @@ const Logger = winston.createLogger({
       return `${info.timestamp} ${info.level}: ${info.message}`;
     })
   ),
-  transports: [],
+  transports: [
+    new winston.transports.Stream({
+      stream: require("fs").createWriteStream("/dev/null"),
+    }),
+  ],
 });
 
 module.exports = Logger;
