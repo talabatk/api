@@ -17,8 +17,17 @@ const { io } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 
 function getCurrentDateTimeInPalestine() {
-  const date = new Date().toLocaleString("en-US", {
-    timeZone: "Asia/Gaza", // or 'Asia/Hebron'
+  // Get current time in Palestine
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Gaza" })
+  );
+
+  // Add 1 hour
+  now.setHours(now.getHours() + 1);
+
+  // Format the new time
+  const updatedTime = now.toLocaleString("en-US", {
+    timeZone: "Asia/Gaza",
     hour12: true,
     weekday: "long",
     year: "numeric",
@@ -29,7 +38,7 @@ function getCurrentDateTimeInPalestine() {
     second: "2-digit",
   });
 
-  return date;
+  return updatedTime;
 }
 
 const formateDate = (date) => {
