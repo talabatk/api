@@ -33,7 +33,13 @@ const upload = multer({
 
   limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: (_req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      "application/vnd.ms-excel",
+    ];
     if (!allowedTypes.includes(file.mimetype)) {
       const error = new Error("نوع الملف غير مدعوم");
       return cb(error);

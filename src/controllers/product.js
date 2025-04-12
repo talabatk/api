@@ -15,6 +15,12 @@ const Logger = require("../util/logger");
 const Alert = require("../models/alert");
 const CartProduct = require("../models/cartProduct");
 const Cart = require("../models/cart");
+const XLSX = require("xlsx");
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
+const os = require("os");
+const { log } = require("util");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -184,7 +190,60 @@ exports.getAll = async (req, res) => {
     return res.status(500).json({ message: "internal server error" });
   }
 };
+exports.bulkCreate = async (req, res) => {
+  try {
+    // Assuming file uploaded via multer and available at req.file.path
+    console.log(req.files);
 
+    const fileUrl = req.files.image[0].location;
+    const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}.xlsx`);
+
+    // Download the file from Spaces
+    const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
+    fs.writeFileSync(tempFilePath, response.data);
+
+    const workbook = XLSX.readFile(tempFilePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(sheet);
+
+    const products = data.map((row) => ({
+      title: row.name,
+      description: row.name,
+      categoryId: Number(row.category),
+      price: row.price,
+      vendorId: 1649,
+    }));
+
+    // Save to DB
+    const results = await Product.bulkCreate(products); // Or your ORM logic
+
+    const images = await ProductImage.bulkCreate(
+      data.map((row, index) => ({
+        productId: results[index].id,
+        image: row.image,
+      }))
+    );
+    console.log(
+      data.map((row, index) => ({
+        productId: products[index].id,
+        image: row.image,
+      }))
+    );
+
+    // Optional: delete file after processing
+
+    res.status(200).json({
+      message: "Products created successfully",
+      count: products.length,
+    });
+  } catch (error) {
+    console.error("Error bulk creating products:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
 exports.getOne = async (req, res) => {
   const { id } = req.params;
 

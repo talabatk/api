@@ -1,4 +1,8 @@
+const fs = require("fs");
+const os = require("os");
 const winston = require("winston");
+
+const isWindows = os.platform() === "win32";
 
 const Logger = winston.createLogger({
   level: "error", // Only log errors in production
@@ -11,9 +15,12 @@ const Logger = winston.createLogger({
     })
   ),
   transports: [
-    new winston.transports.Stream({
-      stream: require("fs").createWriteStream("/dev/null"),
-    }),
+    // Use null stream only on non-Windows systems
+    !isWindows
+      ? new winston.transports.Stream({
+          stream: fs.createWriteStream("/dev/null"),
+        })
+      : new winston.transports.Console(),
   ],
 });
 
