@@ -404,10 +404,16 @@ exports.forgetPassword = async (req, res) => {
 };
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
+  try {
+    await Vendor.destroy({ where: { userId: id } });
 
-  User.destroy({ where: { id } })
-    .then(() => res.json({ message: "deleted" }))
-    .catch((error) => res.status(400).json({ error }));
+    await User.destroy({ where: { id } });
+
+    return res.status(200).json("success");
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 exports.changeStatus = async (req, res) => {
