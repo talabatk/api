@@ -20,7 +20,6 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 const os = require("os");
-const { log } = require("util");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -38,7 +37,15 @@ exports.createProduct = async (req, res) => {
 
   try {
     // Create the product with the provided data
+    const user = await User.findOne({
+      where: {
+        id: vendorId,
+      },
+    });
 
+    if (!user) {
+      return res.status(400).json({ message: "user not found" });
+    }
     const product = await Product.create({
       title,
       description,
@@ -193,8 +200,6 @@ exports.getAll = async (req, res) => {
 exports.bulkCreate = async (req, res) => {
   try {
     // Assuming file uploaded via multer and available at req.file.path
-    console.log(req.files);
-
     const fileUrl = req.files.image[0].location;
     const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}.xlsx`);
 
