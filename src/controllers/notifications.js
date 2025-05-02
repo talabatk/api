@@ -75,16 +75,34 @@ exports.getUserNotification = async (req, res) => {
         limit: limit,
         offset: offset,
         where: {
-          userId: user.id,
-          topic: { [Op.in]: ["all", user.role] },
+          [Op.or]: [
+            { userId: user.id },
+            {
+              topic: {
+                [Op.in]: [
+                  "all",
+                  user.role === "vendor" ? "restaurant" : user.role,
+                ],
+              },
+            },
+          ],
         },
         order: [["createdAt", "DESC"]],
       });
     } else {
       notifications = await Notification.findAll({
         where: {
-          userId: user.id,
-          topic: { [Op.in]: ["all", user.role] },
+          [Op.or]: [
+            { userId: user.id },
+            {
+              topic: {
+                [Op.in]: [
+                  "all",
+                  user.role === "vendor" ? "restaurant" : user.role,
+                ],
+              },
+            },
+          ],
         },
         order: [["createdAt", "DESC"]],
       });

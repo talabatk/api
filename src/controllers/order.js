@@ -244,7 +244,7 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    await Notification.bulkCreate({
+    await Notification.create({
       userId: vendor.userId,
       title: "طلب جديد",
       description: `هناك طلب جديد من ${name}`,
