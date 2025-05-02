@@ -115,6 +115,9 @@ exports.getCategoryWithVendors = async (req, res) => {
   try {
     const vendors = await User.findAll({
       attributes: ["id", "name", "image", "email", "phone", "address", "fcm"], // Exclude product attributes from results
+      where: {
+        active: true,
+      },
       include: [
         {
           model: Product,

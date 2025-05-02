@@ -37,6 +37,9 @@ exports.getAll = async (req, res, next) => {
           include: [
             {
               model: User,
+              where: {
+                active: true,
+              },
               include: [Area],
             },
           ],

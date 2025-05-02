@@ -187,6 +187,7 @@ exports.getAllVendors = async (req, res) => {
     const users = await User.findAll({
       where: {
         role: "vendor",
+        active: true,
       },
       include: [{ model: Vendor, include: [VendorCategory] }, Area],
       attributes: { exclude: ["password"] },
