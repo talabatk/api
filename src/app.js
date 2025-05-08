@@ -60,9 +60,6 @@ function initSocket(server) {
       origin: "*", // or a specific frontend origin
       credentials: true,
     },
-    transports: ["websocket", "polling"],
-    pingInterval: 25000,
-    pingTimeout: 60000,
   });
 
   io.on("connection", (socket) => {
