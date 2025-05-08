@@ -13,7 +13,7 @@ const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
-const { io } = require("../app");
+// const { io } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 
 function getCurrentDateTimeInPalestine() {
@@ -56,6 +56,8 @@ const formateDate = (date) => {
 };
 
 exports.createOrder = async (req, res) => {
+  const io = getIO();
+
   const { areaId, address, name, phone, location, notes } = req.body;
 
   try {

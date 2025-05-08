@@ -52,37 +52,51 @@ app.options("*", cors()); // include before other routes
 
 app.use(cors());
 
-const io = new Server(server, {
-  cors: {
-    origin: "*", // or whatever port your frontend runs on
-    credentials: true,
-  },
-});
+let io;
 
-io.on("connection", (socket) => {
-  Logger.info("A user is connected");
-
-  // Join rooms based on roles (vendors or admins)
-  socket.on("join-room", (room) => {
-    socket.join(room);
-    Logger.info(`${socket.id} joined room: ${room}`);
+function initSocket(server) {
+  io = new Server(server, {
+    cors: {
+      origin: "*", // or a specific frontend origin
+      credentials: true,
+    },
+    transports: ["websocket", "polling"],
+    pingInterval: 25000,
+    pingTimeout: 60000,
   });
 
-  socket.on("message", (message) => {
-    Logger.info(`Message from ${socket.id}: ${message}`);
-  });
+  io.on("connection", (socket) => {
+    console.log("✅ User connected:", socket.id);
 
-  socket.on("disconnect", (reason) => {
-    console.error("❌ Disconnected:", reason);
-  });
+    socket.on("join-room", (room) => {
+      socket.join(room);
+      console.log(`${socket.id} joined room: ${room}`);
+    });
 
-  socket.on("ping", () => {
-    console.log("📡 Received ping from client");
-    socket.emit("pong"); // Reply to ping
-  });
-});
+    socket.on("ping", () => {
+      console.log("📡 Received ping from client");
+      socket.emit("pong");
+    });
 
-module.exports = { io };
+    socket.on("disconnect", (reason) => {
+      console.warn("❌ Disconnected:", reason);
+    });
+  });
+}
+
+function getIO() {
+  if (!io) {
+    throw new Error("Socket.io not initialized!");
+  }
+  return io;
+}
+
+module.exports = {
+  initSocket,
+  getIO,
+};
+
+initSocket(server); // ✅ Important!
 
 //---------models---------------------------------
 const User = require("./models/user");
