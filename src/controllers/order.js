@@ -207,7 +207,7 @@ exports.createOrder = async (req, res) => {
 
     const messaging = admin.messaging();
 
-    io.to("admins").emit("new-order-admin", order);
+    io.emit("new-order-admin", order);
 
     io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
 
