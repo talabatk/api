@@ -52,15 +52,11 @@ app.options("*", cors()); // include before other routes
 
 app.use(cors());
 
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
-    origin: "*", // Allow both local & production
-    methods: ["GET", "POST"],
+    origin: "*", // or whatever port your frontend runs on
     credentials: true,
   },
-  transports: ["websocket", "polling"], // Allow both transports
-  pingInterval: 25000, // Send ping every 25 seconds
-  pingTimeout: 60000, // Wait 60 seconds before disconnecting
 });
 
 io.on("connection", (socket) => {
@@ -70,7 +66,6 @@ io.on("connection", (socket) => {
   socket.on("join-room", (room) => {
     socket.join(room);
     Logger.info(`${socket.id} joined room: ${room}`);
-    socket.emit("pong"); // Reply to ping
   });
 
   socket.on("message", (message) => {
@@ -81,10 +76,10 @@ io.on("connection", (socket) => {
     console.error("❌ Disconnected:", reason);
   });
 
-  // socket.on("ping", () => {
-  //   console.log("📡 Received ping from client");
-  //   socket.emit("pong"); // Reply to ping
-  // });
+  socket.on("ping", () => {
+    console.log("📡 Received ping from client");
+    socket.emit("pong"); // Reply to ping
+  });
 });
 
 module.exports = { io };
