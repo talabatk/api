@@ -459,6 +459,7 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrder = async (req, res) => {
   const { id } = req.params;
   const { status, time } = req.body;
+  const io = getIO();
 
   try {
     // Validate order status
@@ -560,6 +561,7 @@ exports.updateOrder = async (req, res) => {
 
 exports.assignDelivery = async (req, res) => {
   const { id } = req.params;
+  const io = getIO();
 
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
