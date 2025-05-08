@@ -70,6 +70,7 @@ io.on("connection", (socket) => {
   socket.on("join-room", (room) => {
     socket.join(room);
     Logger.info(`${socket.id} joined room: ${room}`);
+    socket.emit("pong"); // Reply to ping
   });
 
   socket.on("message", (message) => {
@@ -80,10 +81,10 @@ io.on("connection", (socket) => {
     console.error("❌ Disconnected:", reason);
   });
 
-  socket.on("ping", () => {
-    console.log("📡 Received ping from client");
-    socket.emit("pong"); // Reply to ping
-  });
+  // socket.on("ping", () => {
+  //   console.log("📡 Received ping from client");
+  //   socket.emit("pong"); // Reply to ping
+  // });
 });
 
 module.exports = { io };

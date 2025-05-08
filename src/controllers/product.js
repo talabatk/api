@@ -151,6 +151,9 @@ exports.getAll = async (req, res) => {
             model: User,
             attributes: ["id", "name", "email", "phone", "image"],
             include: Vendor,
+            where: {
+              active: true,
+            },
           },
           {
             model: Category,
@@ -176,6 +179,9 @@ exports.getAll = async (req, res) => {
             model: User,
             attributes: ["id", "name", "email", "phone", "image"],
             include: Vendor,
+            where: {
+              active: true,
+            },
           },
           {
             model: Category,
