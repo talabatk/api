@@ -54,13 +54,9 @@ app.use(cors());
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow both local & production
-    methods: ["GET", "POST"],
+    origin: "*", // or whatever port your frontend runs on
     credentials: true,
   },
-  transports: ["websocket", "polling"], // Allow both transports
-  pingInterval: 25000, // Send ping every 25 seconds
-  pingTimeout: 60000, // Wait 60 seconds before disconnecting
 });
 
 io.on("connection", (socket) => {
