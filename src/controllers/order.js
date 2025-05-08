@@ -13,7 +13,7 @@ const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
-// const { io } = require("../app");
+const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 
 function getCurrentDateTimeInPalestine() {
