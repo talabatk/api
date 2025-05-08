@@ -65,6 +65,7 @@ io.on("connection", (socket) => {
   // Join rooms based on roles (vendors or admins)
   socket.on("join-room", (room) => {
     socket.join(room);
+    io.to("admins").emit("new-order-admin", { id: 5 });
     Logger.info(`${socket.id} joined room: ${room}`);
   });
 
@@ -78,6 +79,7 @@ io.on("connection", (socket) => {
 
   socket.on("ping", () => {
     console.log("📡 Received ping from client");
+    io.to("admins").emit("new-order-admin", { id: 5 });
     socket.emit("pong"); // Reply to ping
   });
 });

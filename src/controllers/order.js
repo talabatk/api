@@ -167,6 +167,9 @@ exports.createOrder = async (req, res) => {
       vendorId: vendor.vendor.id,
     });
 
+    io.to("admins").emit("new-order-admin", order);
+
+    io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
     //assign order id to cart product
     await CartProduct.update(
       {
@@ -206,10 +209,6 @@ exports.createOrder = async (req, res) => {
     });
 
     const messaging = admin.messaging();
-
-    io.emit("new-order-admin", order);
-
-    io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
 
     await messaging.send({
       notification: {
