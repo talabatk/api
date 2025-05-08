@@ -52,7 +52,7 @@ app.options("*", cors()); // include before other routes
 
 app.use(cors());
 
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: "*", // or whatever port your frontend runs on
     credentials: true,
@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
   });
 });
 
-module.exports = { io };
+// module.exports = { io };
 
 //---------models---------------------------------
 const User = require("./models/user");
