@@ -52,11 +52,15 @@ app.options("*", cors()); // include before other routes
 
 app.use(cors());
 
-export const io = new Server(server, {
+const io = new Server(server, {
   cors: {
-    origin: "*", // or whatever port your frontend runs on
+    origin: "*", // Allow both local & production
+    methods: ["GET", "POST"],
     credentials: true,
   },
+  transports: ["websocket", "polling"], // Allow both transports
+  pingInterval: 25000, // Send ping every 25 seconds
+  pingTimeout: 60000, // Wait 60 seconds before disconnecting
 });
 
 io.on("connection", (socket) => {
