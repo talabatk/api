@@ -3,19 +3,20 @@ const Option = require("../models/option");
 const Logger = require("../util/logger");
 
 exports.createOrUpdateGroup = async (req, res) => {
-  const { products, groups } = req.body;
-
+  const groups = req.body.groups;
+  const products = req.body.products;
   try {
     const groupsList = [];
     const options = [];
     const updatedGroups = [];
+    console.log(req.body);
 
     // Process groups and products
     for (const group of groups) {
       for (const product of products) {
         // Check if group exists for this product
         const existingGroup = await OptionGroup.findOne({
-          where: { productId: product, id: group.id },
+          where: { productId: product, id: group?.id ? group?.id : null },
         });
 
         if (existingGroup) {
@@ -53,7 +54,7 @@ exports.createOrUpdateGroup = async (req, res) => {
       for (const option of groupOptions) {
         // Check if option exists
         const existingOption = await Option.findOne({
-          where: { optionsGroupId: group.id, id: option.id },
+          where: { optionsGroupId: group.id, id: option.id ? option.id : null },
         });
 
         if (existingOption) {
@@ -86,6 +87,8 @@ exports.createOrUpdateGroup = async (req, res) => {
     });
   } catch (error) {
     Logger.error(error);
+    console.log(error);
+
     return res.status(500).json({ message: "internal server error!" });
   }
 };
