@@ -25,10 +25,14 @@ exports.createComplain = async (req, res) => {
         .json({ message: "Title and description are required." });
     }
 
+    const date = new Date();
     const docRef = await admin.firestore().collection("complains").add({
       title,
       description,
       userId: user.id,
+      name: user.name,
+      phone: user.phone,
+      createdAt: date.toLocaleString(),
       seen: false,
     });
 
