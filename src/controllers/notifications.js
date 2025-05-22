@@ -1,4 +1,3 @@
-const admin = require("firebase-admin");
 const jwt = require("jsonwebtoken");
 const Logger = require("../util/logger");
 
@@ -7,9 +6,12 @@ const User = require("../models/user");
 const { Op } = require("sequelize");
 const serviceAccount = require("../talabatek-firebase.json");
 
+import admin from "firebase-admin";
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+
+export const firestore = admin.firestore();
 
 exports.sendNotification = async (req, res) => {
   const { title, description, topic, fcm, userId } = req.body;
