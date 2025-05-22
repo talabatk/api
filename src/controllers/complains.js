@@ -33,6 +33,7 @@ exports.createComplain = async (req, res) => {
       name: user.name,
       phone: user.phone,
       createdAt: date.toLocaleString(),
+      fcm: user.fcm,
       seen: false,
     });
 
