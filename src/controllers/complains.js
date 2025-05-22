@@ -1,13 +1,7 @@
 const Complains = require("../models/complains"); // Adjust path as per your project structure
 const User = require("../models/user"); // Adjust path as per your project structure
-import admin from "firebase-admin";
-const serviceAccount = require("../talabatek-firebase.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-export const firestore = admin.firestore();
+import { firestore } from "./notifications";
 
 // Create a new complain
 exports.createComplain = async (req, res) => {
