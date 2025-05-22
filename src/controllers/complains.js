@@ -99,7 +99,7 @@ exports.getComplainById = async (req, res) => {
 exports.deleteComplain = async (req, res) => {
   const { id } = req.params;
   try {
-    await admin.firestore().collection("complaints").doc(id).delete();
+    await admin.firestore().collection("complains").doc(id).delete();
 
     res.status(200).json({ message: "Complain deleted successfully." });
   } catch (error) {
