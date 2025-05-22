@@ -1,5 +1,13 @@
 const Complains = require("../models/complains"); // Adjust path as per your project structure
 const User = require("../models/user"); // Adjust path as per your project structure
+import admin from "firebase-admin";
+const serviceAccount = require("../talabatek-firebase.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+export const firestore = admin.firestore();
 
 // Create a new complain
 exports.createComplain = async (req, res) => {
@@ -23,15 +31,16 @@ exports.createComplain = async (req, res) => {
         .json({ message: "Title and description are required." });
     }
 
-    const complain = await Complains.create({
+    const docRef = await firestore.collection("complains").add({
       title,
       description,
       userId: user.id,
+      seen: false,
     });
 
     res
       .status(201)
-      .json({ message: "Complain created successfully.", complain });
+      .json({ message: "Complain created successfully.", id: docRef.id });
   } catch (error) {
     res
       .status(500)
@@ -51,7 +60,7 @@ exports.getAllComplains = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "email", "role", "phone","fcm"],
+          attributes: ["id", "name", "email", "role", "phone", "fcm"],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -90,15 +99,9 @@ exports.getComplainById = async (req, res) => {
 exports.deleteComplain = async (req, res) => {
   const { id } = req.params;
   try {
-    const complain = await Complains.findByPk(id);
+    await firestore.collection("complaints").doc(id).delete();
 
-    if (!complain) {
-      return res.status(404).json({ message: "Complain not found." });
-    }
-
-    await complain.destroy();
-
-    res.status(200).json({ message: "Complain deleted successfully." });
+    return res.status(200).json({ message: "Complaint deleted successfully" });
   } catch (error) {
     res
       .status(500)
