@@ -11,8 +11,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-export const firestore = admin.firestore();
-
 exports.sendNotification = async (req, res) => {
   const { title, description, topic, fcm, userId } = req.body;
 
