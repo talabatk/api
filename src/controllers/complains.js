@@ -3,6 +3,8 @@ const User = require("../models/user"); // Adjust path as per your project struc
 
 const admin = require("firebase-admin");
 
+const serviceAccount = require("../talabatek-firebase.json");
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
