@@ -1,8 +1,6 @@
 const Complains = require("../models/complains"); // Adjust path as per your project structure
 const User = require("../models/user"); // Adjust path as per your project structure
 
-import { firestore } from "./notifications";
-
 // Create a new complain
 exports.createComplain = async (req, res) => {
   try {
@@ -25,16 +23,15 @@ exports.createComplain = async (req, res) => {
         .json({ message: "Title and description are required." });
     }
 
-    const docRef = await firestore.collection("complains").add({
+    const complain = await Complains.create({
       title,
       description,
       userId: user.id,
-      seen: false,
     });
 
     res
       .status(201)
-      .json({ message: "Complain created successfully.", id: docRef.id });
+      .json({ message: "Complain created successfully.", complain });
   } catch (error) {
     res
       .status(500)
@@ -93,9 +90,15 @@ exports.getComplainById = async (req, res) => {
 exports.deleteComplain = async (req, res) => {
   const { id } = req.params;
   try {
-    await firestore.collection("complaints").doc(id).delete();
+    const complain = await Complains.findByPk(id);
 
-    return res.status(200).json({ message: "Complaint deleted successfully" });
+    if (!complain) {
+      return res.status(404).json({ message: "Complain not found." });
+    }
+
+    await complain.destroy();
+
+    res.status(200).json({ message: "Complain deleted successfully." });
   } catch (error) {
     res
       .status(500)
