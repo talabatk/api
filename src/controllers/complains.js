@@ -1,6 +1,11 @@
 const Complains = require("../models/complains"); // Adjust path as per your project structure
 const User = require("../models/user"); // Adjust path as per your project structure
 
+const admin = require("firebase-admin");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 // Create a new complain
 exports.createComplain = async (req, res) => {
   try {
@@ -23,15 +28,17 @@ exports.createComplain = async (req, res) => {
         .json({ message: "Title and description are required." });
     }
 
-    const complain = await Complains.create({
+    const docRef = await admin.firestore().collection("complains").add({
       title,
       description,
       userId: user.id,
+      seen: false,
     });
 
-    res
-      .status(201)
-      .json({ message: "Complain created successfully.", complain });
+    res.status(201).json({
+      id: docRef.id,
+      message: "Complain added successfully",
+    });
   } catch (error) {
     res
       .status(500)
@@ -90,13 +97,7 @@ exports.getComplainById = async (req, res) => {
 exports.deleteComplain = async (req, res) => {
   const { id } = req.params;
   try {
-    const complain = await Complains.findByPk(id);
-
-    if (!complain) {
-      return res.status(404).json({ message: "Complain not found." });
-    }
-
-    await complain.destroy();
+    await admin.firestore().collection("complaints").doc(id).delete();
 
     res.status(200).json({ message: "Complain deleted successfully." });
   } catch (error) {
