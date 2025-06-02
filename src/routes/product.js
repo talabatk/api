@@ -9,6 +9,8 @@ router.get("/product", ProductController.getAll);
 
 router.get("/product/:id", ProductController.getOne);
 
+router.get("/product/getOne/:id", ProductController.getOneProduct);
+
 router.get("/numbers", ProductController.dataAnalysis);
 
 router.patch("/product/:id", ProductController.editOne);

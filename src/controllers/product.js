@@ -285,7 +285,44 @@ exports.getOne = async (req, res) => {
       return res.status(404).json({ message: "لا يوجد منتج بهذا الرقم" });
     }
 
-    return res.status(200).json({ message: "success",product });
+    return res.status(200).json({ message: "success", product });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
+exports.getOneProduct = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await Product.findByPk(id, {
+      include: [
+        {
+          model: ProductImage,
+          attributes: ["id", "image"],
+        },
+        {
+          model: OptionGroup,
+          attributes: ["id", "name", "type"],
+          include: { model: Option },
+        },
+        {
+          model: User,
+          attributes: ["id", "name", "email", "phone", "image"],
+          include: Vendor,
+        },
+        {
+          model: Category,
+          attributes: ["id", "name", "image"],
+        },
+      ],
+    });
+    if (!product) {
+      return res.status(404).json({ message: "لا يوجد منتج بهذا الرقم" });
+    }
+
+    return res.status(200).json({ message: "success", results: product });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
