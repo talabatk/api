@@ -4,6 +4,8 @@ const Vendor = require("../models/vendor");
 const User = require("../models/user");
 const Alert = require("../models/alert");
 const Area = require("../models/area");
+const Product = require("../models/product");
+const { Op } = require("sequelize");
 
 exports.createVendorCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -28,6 +30,7 @@ exports.createVendorCategory = async (req, res, next) => {
 };
 
 exports.getAll = async (req, res, next) => {
+  const { supermarket } = req.query;
   try {
     let categories = await VendorCategory.findAll({
       attributes: ["id", "order", "name", "image"],
@@ -37,9 +40,20 @@ exports.getAll = async (req, res, next) => {
           include: [
             {
               model: User,
-              where: {
-                active: true,
-              },
+              where:
+                supermarket === "true"
+                  ? {
+                      active: true,
+                      name: {
+                        [Op.like]: "%سوبر%",
+                      },
+                    }
+                  : {
+                      active: true,
+                      name: {
+                        [Op.notLike]: "%سوبر%",
+                      },
+                    },
               include: [Area],
             },
           ],
@@ -48,32 +62,34 @@ exports.getAll = async (req, res, next) => {
       order: [["order"]],
     });
 
-    categories = categories.map((category) => {
-      const vendors = category.vendors.map((vendor) => {
+    categories = categories
+      .filter((c) => c.vendors.length > 0)
+      .map((category) => {
+        const vendors = category.vendors.map((vendor) => {
+          return {
+            id: vendor.user?.id,
+            status: vendor.status,
+            name: vendor.user?.name,
+            image: vendor.user?.image,
+            email: vendor.user?.email,
+            phone: vendor.user?.phone,
+            address: vendor.user?.address,
+            fcm: vendor.user?.fcm,
+            role: "vendor",
+            description: vendor.description,
+            direction: vendor.direction,
+            distance: vendor.distance,
+            delivery_time: vendor.delivery_time,
+            free_delivery_limit: vendor.free_delivery_limit,
+            cover: vendor.cover,
+            areas: vendor.user?.areas,
+          };
+        });
         return {
-          id: vendor.user?.id,
-          status: vendor.status,
-          name: vendor.user?.name,
-          image: vendor.user?.image,
-          email: vendor.user?.email,
-          phone: vendor.user?.phone,
-          address: vendor.user?.address,
-          fcm: vendor.user?.fcm,
-          role: "vendor",
-          description: vendor.description,
-          direction: vendor.direction,
-          distance: vendor.distance,
-          delivery_time: vendor.delivery_time,
-          free_delivery_limit: vendor.free_delivery_limit,
-          cover: vendor.cover,
-          areas: vendor.user?.areas,
+          ...category.toJSON(),
+          vendors,
         };
       });
-      return {
-        ...category.toJSON(),
-        vendors,
-      };
-    });
     const app_status = await Alert.findOne({
       attributes: ["content", "active"],
       where: {
