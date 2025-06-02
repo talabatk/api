@@ -120,10 +120,10 @@ exports.getAll = async (req, res) => {
       filters.categoryId = categoryId;
     }
 
-    if (bestSeller) {
+    if (bestSeller && bestSeller === "true") {
       order.push(["orders", "DESC"]);
     }
-    if (isOffer) {
+    if (isOffer && isOffer === "true") {
       filters.isOffer = isOffer === "true" ? true : false;
     }
     if (recent) {
@@ -281,8 +281,11 @@ exports.getOne = async (req, res) => {
         },
       ],
     });
+    if (!product) {
+      return res.status(404).json({ message: "لا يوجد منتج بهذا الرقم" });
+    }
 
-    return res.status(200).json({ message: "success", product });
+    return res.status(200).json({ message: "success", results: product });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });

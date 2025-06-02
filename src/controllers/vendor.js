@@ -271,7 +271,7 @@ exports.getVendor = async (req, res) => {
       };
     });
 
-    return res.status(200).json({ result: results[0] });
+    return res.status(200).json({ results: results[0] });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "Internal server error" });
