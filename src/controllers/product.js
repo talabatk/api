@@ -285,7 +285,7 @@ exports.getOne = async (req, res) => {
       return res.status(404).json({ message: "لا يوجد منتج بهذا الرقم" });
     }
 
-    return res.status(200).json({ message: "success", results: product });
+    return res.status(200).json({ message: "success",product });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
