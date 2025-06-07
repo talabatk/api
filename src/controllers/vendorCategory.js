@@ -30,7 +30,7 @@ exports.createVendorCategory = async (req, res, next) => {
 };
 
 exports.getAll = async (req, res, next) => {
-  const { supermarket } = req.query;
+  const { supermarket, categoryId } = req.query;
   try {
     let categories = await VendorCategory.findAll({
       attributes: ["id", "order", "name", "image"],
@@ -54,7 +54,18 @@ exports.getAll = async (req, res, next) => {
                         [Op.notLike]: "%سوبر%",
                       },
                     },
-              include: [Area],
+              include: [
+                Area,
+                {
+                  model: Product,
+                  attributes: [], // Exclude product attributes from results
+                  where: categoryId
+                    ? {
+                        categoryId: categoryId,
+                      }
+                    : {},
+                },
+              ],
             },
           ],
         },
