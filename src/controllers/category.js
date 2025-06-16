@@ -30,30 +30,47 @@ exports.createCategory = async (req, res, next) => {
 exports.getAll = async (req, res, next) => {
   const { size, page } = req.query;
   try {
-    const limit = size ? Number.parseInt(size) : 1000;
-    const offset = size ? (Number.parseInt(page) - 1) * limit : 1000;
+    let categories = null;
+    if (page) {
+      const limit = size ? Number.parseInt(size) : 1000;
+      const offset = size ? (Number.parseInt(page) - 1) * limit : 1000;
+      categories = await Category.findAll({
+        limit: limit,
+        offset: offset,
+        attributes: [
+          "id",
+          "order",
+          "name",
+          "image",
+          // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
+        ],
+        order: [["order"]],
+      });
+      const count = await Category.count({ where: filters }); // Get total number of products
 
-    const categories = await Category.findAll({
-      limit: limit,
-      offset: offset,
-      attributes: [
-        "id",
-        "order",
-        "name",
-        "image",
-        // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
-      ],
-      order: [["order"]],
-    });
-    const count = await Category.count({ where: filters }); // Get total number of products
+      const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
-    const numOfPages = Math.ceil(count / limit); // Calculate number of pages
+      return res.status(200).json({
+        count,
+        pages: numOfPages,
+        results: categories,
+      });
+    } else {
+      categories = await Category.findAll({
+        attributes: [
+          "id",
+          "order",
+          "name",
+          "image",
+          // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
+        ],
+        order: [["order"]],
+      });
 
-    return res.status(200).json({
-      count,
-      pages: numOfPages,
-      results: categories,
-    });
+      return res.status(200).json({
+        results: categories,
+      });
+    }
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
