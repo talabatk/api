@@ -39,6 +39,14 @@ const Order = sequelize.define("order", {
     type: Sequelize.STRING,
     allowNull: true,
   },
+  lang: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  lat: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   notes: {
     type: Sequelize.STRING,
     allowNull: true,

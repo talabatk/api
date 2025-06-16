@@ -58,7 +58,7 @@ const formateDate = (date) => {
 exports.createOrder = async (req, res) => {
   const io = getIO();
 
-  const { areaId, address, name, phone, location, notes } = req.body;
+  const { areaId, address, name, phone, location, notes, lang, lat } = req.body;
 
   try {
     let vendor = null;
@@ -167,6 +167,8 @@ exports.createOrder = async (req, res) => {
       updatedTime: currentDate,
       status: "not started",
       vendorId: vendor.vendor.id,
+      lang: lang,
+      lat,
     });
 
     io.to("admins").emit("new-order-admin", order);
