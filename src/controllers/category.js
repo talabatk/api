@@ -8,7 +8,7 @@ const Logger = require("../util/logger");
 const Area = require("../models/area");
 
 exports.createCategory = async (req, res, next) => {
-  const { name, order } = req.body;
+  const { name, order, type } = req.body;
 
   try {
     const maxOrder = await Category.max("order");
@@ -16,6 +16,7 @@ exports.createCategory = async (req, res, next) => {
       name,
       order: order ? order : +maxOrder + 1,
       image: req.files.image ? req.files.image[0].location : null,
+      type: type ? type : "restaurant",
     });
 
     return res.status(201).json({ message: "Category created!", category });
@@ -28,7 +29,7 @@ exports.createCategory = async (req, res, next) => {
 };
 
 exports.getAll = async (req, res, next) => {
-  const { size, page } = req.query;
+  const { size, page, type } = req.query;
   try {
     let categories = null;
     if (page) {
@@ -37,16 +38,28 @@ exports.getAll = async (req, res, next) => {
       categories = await Category.findAll({
         limit: limit,
         offset: offset,
+        where: type
+          ? {
+              type: type,
+            }
+          : {},
         attributes: [
           "id",
           "order",
           "name",
           "image",
+          "type",
           // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
         ],
         order: [["order"]],
       });
-      const count = await Category.count({ where: filters }); // Get total number of products
+      const count = await Category.count({
+        where: type
+          ? {
+              type: type,
+            }
+          : {},
+      }); // Get total number of products
 
       const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
@@ -57,11 +70,17 @@ exports.getAll = async (req, res, next) => {
       });
     } else {
       categories = await Category.findAll({
+        where: type
+          ? {
+              type: type,
+            }
+          : {},
         attributes: [
           "id",
           "order",
           "name",
           "image",
+          "type",
           // [Sequelize.literal(`CONCAT("https://${req.get("host")}/uploads/", image)`), "image"]
         ],
         order: [["order"]],
