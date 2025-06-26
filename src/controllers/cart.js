@@ -66,9 +66,9 @@ exports.addToCart = async (req, res) => {
           include: [
             {
               model: Product,
+              attributes: ["vendorId"],
               include: {
                 model: User,
-                attributes: ["id"],
               },
             },
           ],
@@ -86,14 +86,14 @@ exports.addToCart = async (req, res) => {
       return res.status(404).json({ message: "product not found" });
     }
 
-    // calculate shipping cost
-    for (const e of cart.cart_products) {
-      if (+e.product.user.id !== +product.vendorId) {
-        return res
-          .status(400)
-          .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
-      }
-    }
+    // // calculate shipping cost
+    // for (const e of cart.cart_products) {
+    //   if (+e.product.user.id !== +product.vendorId) {
+    //     return res
+    //       .status(400)
+    //       .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
+    //   }
+    // }
     if (product.isOffer) {
       subtotal += Number(product.offerPrice); // Convert explicitly to a number
     } else {
