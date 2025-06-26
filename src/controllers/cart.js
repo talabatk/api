@@ -60,21 +60,6 @@ exports.addToCart = async (req, res) => {
 
     const [cart, created] = await Cart.findOrCreate({
       where: { userId: decodedToken.userId },
-      include: [
-        {
-          model: CartProduct,
-          include: [
-            {
-              model: Product,
-              attributes: ["vendorId"],
-              include: {
-                model: User,
-              },
-            },
-          ],
-          where: { ordered: false },
-        },
-      ],
       defaults: {
         userId: decodedToken.userId,
       },
@@ -86,14 +71,21 @@ exports.addToCart = async (req, res) => {
       return res.status(404).json({ message: "product not found" });
     }
 
-    // // calculate shipping cost
-    // for (const e of cart.cart_products) {
-    //   if (+e.product.user.id !== +product.vendorId) {
-    //     return res
-    //       .status(400)
-    //       .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
-    //   }
-    // }
+    const cartProducts = await CartProduct.findAll({
+      where: {
+        ordered: false,
+        cartId: cart.id,
+        include: [Product],
+      },
+    });
+    // calculate shipping cost
+    for (const e of cartProducts) {
+      if (+e.product.vendorId !== +product.vendorId) {
+        return res
+          .status(400)
+          .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
+      }
+    }
     if (product.isOffer) {
       subtotal += Number(product.offerPrice); // Convert explicitly to a number
     } else {
