@@ -66,6 +66,10 @@ exports.addToCart = async (req, res) => {
           include: [
             {
               model: Product,
+              include: {
+                model: User,
+                attributes: ["id"],
+              },
             },
           ],
           where: { ordered: false },
@@ -84,7 +88,7 @@ exports.addToCart = async (req, res) => {
 
     // calculate shipping cost
     for (const e of cart.cart_products) {
-      if (+e.product.user.id !== +product.user?.id) {
+      if (+e.product.user.id !== +product.userId) {
         return res
           .status(400)
           .json({ message: "لا يمكنك طلب طلبيه بأكثر من مطعم في نفس الطلبيه" });
