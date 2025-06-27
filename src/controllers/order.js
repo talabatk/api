@@ -165,8 +165,6 @@ exports.createOrder = async (req, res) => {
       userId: decodedToken.userId,
       areaId,
       updatedTime: currentDate,
-      createdAt: currentDate,
-      updatedAt: currentDate,
       status: "not started",
       vendorId: vendor.vendor.id,
       lang: lang,
