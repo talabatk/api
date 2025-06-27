@@ -75,8 +75,8 @@ exports.addToCart = async (req, res) => {
       where: {
         ordered: false,
         cartId: cart.id,
-        include: [Product],
       },
+      include: [Product],
     });
     // calculate shipping cost
     for (const e of cartProducts) {
