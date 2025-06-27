@@ -167,7 +167,6 @@ exports.createOrder = async (req, res) => {
       updatedTime: currentDate,
       createdAt: currentDate,
       updatedAt: currentDate,
-      updatedTime: currentDate,
       status: "not started",
       vendorId: vendor.vendor.id,
       lang: lang,
