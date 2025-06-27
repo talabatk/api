@@ -21,6 +21,7 @@ function getCurrentDateTimeInPalestine() {
   const now = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Asia/Gaza" })
   );
+  now.setHours(now.getHours() - 3);
   // Format the new time
   const updatedTime = now.toLocaleString("en-US", {
     timeZone: "Asia/Gaza",
