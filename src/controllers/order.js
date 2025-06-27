@@ -18,13 +18,9 @@ const OrderTimeLine = require("../models/orderTimeLine");
 
 function getCurrentDateTimeInPalestine() {
   // Get current time in Palestine
-  const now = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Gaza" })
-  );
-  now.setHours(now.getHours() - 3);
+  const now = new Date();
   // Format the new time
   const updatedTime = now.toLocaleString("en-US", {
-    timeZone: "Asia/Gaza",
     hour12: true,
     weekday: "long",
     year: "numeric",
