@@ -165,6 +165,9 @@ exports.createOrder = async (req, res) => {
       userId: decodedToken.userId,
       areaId,
       updatedTime: currentDate,
+      createdAt: currentDate,
+      updatedAt: currentDate,
+      updatedTime: currentDate,
       status: "not started",
       vendorId: vendor.vendor.id,
       lang: lang,
@@ -210,6 +213,8 @@ exports.createOrder = async (req, res) => {
     await OrderTimeLine.create({
       orderId: order.id,
       content: `لقد تم انشاء الطلب من قبل ${name}`,
+      createdAt: currentDate,
+      updatedAt: currentDate,
     });
 
     const messaging = admin.messaging();
@@ -505,13 +510,15 @@ exports.updateOrder = async (req, res) => {
     if (status && status !== order.status) {
       // Map the order status to a valid VendorOrder status
       const messaging = admin.messaging();
-
+      const currentDate = getCurrentDateTimeInPalestine();
       await OrderTimeLine.create({
         orderId: order.id,
         content: `لقد تم تغيير حاله طلبك من ${
           orderStatusArabicNames[order.status]
         } الى ${orderStatusArabicNames[status]}`,
         lastStatus: orderStatusArabicNames[status],
+        createdAt: currentDate,
+        updatedAt: currentDate,
       });
 
       if (order.user.fcm) {
