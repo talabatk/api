@@ -53,6 +53,7 @@ exports.addToCart = async (req, res) => {
     let subtotal = 0;
 
     let total = 0;
+    console.log("quantity", quantity);
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
