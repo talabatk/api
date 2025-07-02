@@ -232,16 +232,10 @@ exports.bulkCreate = async (req, res) => {
     const images = await ProductImage.bulkCreate(
       data.map((row, index) => ({
         productId: results[index].id,
-        image: row.image,
+        image:
+          "https://talabatk-bucket.fra1.digitaloceanspaces.com/uploads/images/image-1735310942353-272872000.jpeg",
       }))
     );
-    console.log(
-      data.map((row, index) => ({
-        productId: products[index].id,
-        image: row.image,
-      }))
-    );
-
     // Optional: delete file after processing
 
     res.status(200).json({

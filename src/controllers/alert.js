@@ -17,3 +17,25 @@ exports.editAlert = async (req, res) => {
     return res.status(500).json({ message: "internal server error" });
   }
 };
+
+exports.getAll = async (req, res) => {
+  try {
+    const app_status = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "app_status",
+      },
+    });
+
+    const alert = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "alert",
+      },
+    });
+    return res.status(200).json({ app_status, alert });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "error" });
+  }
+};

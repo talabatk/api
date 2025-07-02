@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/product", ProductController.createProduct);
+
 router.post("/product-excel", ProductController.bulkCreate);
 
 router.get("/product", ProductController.getAll);
