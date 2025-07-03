@@ -3,6 +3,6 @@ const { editAlert, getAll } = require("../controllers/alert");
 const router = express.Router();
 
 router.patch("/alert", editAlert);
-router.patch("/app-statuses", getAll);
+router.get("/app-statuses", getAll);
 
 module.exports = router;
