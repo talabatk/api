@@ -7,6 +7,8 @@ const { Op } = require("sequelize");
 const CartProductOption = require("../models/cartProductOption");
 const ProductImage = require("../models/productImage");
 const Logger = require("../util/logger");
+const Vendor = require("../models/vendor");
+const User = require("../models/user");
 
 exports.getUserCart = async (req, res) => {
   try {
@@ -27,6 +29,16 @@ exports.getUserCart = async (req, res) => {
                 {
                   model: ProductImage,
                   attributes: ["id", "image"],
+                },
+                {
+                  model: User,
+                  attributes: [],
+                  include: [
+                    {
+                      model: Vendor,
+                      attributes: ["free_delivery_limit"],
+                    },
+                  ],
                 },
               ],
             },
@@ -53,7 +65,6 @@ exports.addToCart = async (req, res) => {
     let subtotal = 0;
 
     let total = 0;
-    console.log("quantity", quantity);
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
