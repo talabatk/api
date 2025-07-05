@@ -32,7 +32,7 @@ exports.getUserCart = async (req, res) => {
                 },
                 {
                   model: User,
-                  attributes: [],
+                  attributes: ["id"],
                   include: [
                     {
                       model: Vendor,
