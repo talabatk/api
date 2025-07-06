@@ -109,6 +109,7 @@ exports.createVendor = async (req, res) => {
     direction,
     distance,
     categories,
+    type,
   } = req.body;
 
   if (password !== confirm_password) {
@@ -138,6 +139,7 @@ exports.createVendor = async (req, res) => {
       delivery_time,
       direction,
       distance,
+      type,
     });
 
     if (categories) {
@@ -214,6 +216,7 @@ exports.getAllVendors = async (req, res) => {
         description: user.vendor.description,
         direction: user.vendor.direction,
         distance: user.vendor.distance,
+        type: user.vendor.type,
         delivery_time: user.vendor.delivery_time,
         free_delivery_limit: user.vendor.free_delivery_limit,
         image: user.image,
@@ -263,6 +266,7 @@ exports.getVendor = async (req, res) => {
         direction: user.vendor.direction,
         distance: user.vendor.distance,
         delivery_time: user.vendor.delivery_time,
+        type: user.vendor.type,
         free_delivery_limit: user.vendor.free_delivery_limit,
         image: user.image,
         cover: user.vendor.cover,

@@ -948,7 +948,7 @@ const orderStatusArabicNames = {
   started: "تم بدء طلبك",
   preparing: "طلبك قيد التحضير الان",
   finished: "تم الانتهاء من تحضير طلبك",
-  "in the way": "الطلب في الطريق اليك",
+  "in the way": "الشوفير في الطريق لاستلام الطلبيه",
   complete: "تم توصيل طلبك",
   cancel: "تم الغاء طلبك",
   deleted: "تم حذف طلبك",

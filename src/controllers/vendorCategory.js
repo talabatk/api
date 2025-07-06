@@ -5,7 +5,7 @@ const User = require("../models/user");
 const Alert = require("../models/alert");
 const Area = require("../models/area");
 const Product = require("../models/product");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 
 exports.createVendorCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -37,23 +37,15 @@ exports.getAll = async (req, res, next) => {
       include: [
         {
           model: Vendor,
+          where: {
+            type: supermarket === "true" ? "supermarket" : "restaurant",
+          },
           include: [
             {
               model: User,
-              where:
-                supermarket === "true"
-                  ? {
-                      active: true,
-                      name: {
-                        [Op.like]: "%سوبر%",
-                      },
-                    }
-                  : {
-                      active: true,
-                      name: {
-                        [Op.notLike]: "%سوبر%",
-                      },
-                    },
+              where: {
+                active: true,
+              },
               include: [
                 Area,
                 {
