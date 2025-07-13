@@ -698,7 +698,11 @@ exports.getVendorOrder = async (req, res) => {
             where: { ordered: true, vendorId },
           },
           Area,
-          { model: Delivery, include: User },
+          {
+            model: Delivery,
+            attributes: ["id"],
+            include: [{ model: User, attributes: ["id", "phone", "name"] }],
+          },
         ],
         where: filters,
         order: [["createdAt", "DESC"]],
