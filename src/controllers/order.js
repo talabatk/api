@@ -143,7 +143,11 @@ exports.createOrder = async (req, res) => {
       +vendor.vendor.free_delivery_limit !== 0 &&
       +vendor.vendor.free_delivery_limit > +cart.total
     ) {
-      shipping = +area.delivery_cost.cost;
+      if (lang === "delivery") {
+        shipping = +area.delivery_cost.cost;
+      } else {
+        shipping = 0;
+      }
     }
 
     const currentDate = getCurrentDateTimeInPalestine();
