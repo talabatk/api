@@ -8,6 +8,10 @@ router.post("/login", userController.login);
 
 router.post("/sms-login", userController.smsLogin);
 
+router.post("/send-otp", userController.sendOtp);
+
+router.post("/confirm-otp", userController.confirmOtp);
+
 router.get("/profile", userController.getUserByToken);
 
 router.get("/all-users", userController.getAllUsers);

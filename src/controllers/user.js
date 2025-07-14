@@ -8,6 +8,16 @@ const AdminRole = require("../models/adminRole");
 const { Op } = require("sequelize");
 const Logger = require("../util/logger");
 
+const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
+const INSTANCE_ID = "instance131791";
+
+const phonesOtp = [];
+
+// توليد OTP من 6 أرقام
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 //generate token=======================
 const generateToken = (userId) => {
   const token = jwt.sign({ userId }, "talabatek2309288/k_ss-jdls88", {
@@ -172,6 +182,79 @@ exports.smsLogin = async (req, res) => {
     return res.status(200).json({
       message: "success",
       user,
+    });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.sendOtp = async (req, res) => {
+  const { phone } = req.body;
+
+  try {
+    if (!phone) {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
+
+    const otp = generateOTP();
+
+    const formBody = new URLSearchParams({
+      token: ULTRA_TOKEN,
+      to: phone,
+      body: `Your verification code is: ${otp}`,
+    });
+
+    const response = await fetch(
+      `https://api.ultramsg.com/${INSTANCE_ID}/messages/chat`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formBody,
+      }
+    );
+
+    const checkIfExist = phonesOtp.findIndex((p) => p.phone === phone);
+
+    if (checkIfExist >= 0) {
+      phonesOtp[checkIfExist] = { phone: phone, otp: randomPart + "" };
+    } else {
+      phonesOtp.push({ phone: phone, otp: randomPart + "" });
+    }
+
+    const result = await response.json();
+
+    return res.status(200).json({
+      message: "OTP sent successfully",
+      otp: otp,
+      apiResponse: result,
+    });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.confirmOtp = async (req, res) => {
+  const { phone, otp } = req.body;
+
+  try {
+    if (!phone) {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
+
+    const phoneData = phonesOtp.find((p) => p.phone === data.phone);
+
+    const checkIfExist = phonesOtp.findIndex((p) => p.phone === data.phone);
+
+    if (!phoneData || phoneData.otp !== otp) {
+      return res.status(400).json({ message: "هذا الرقم غير صالح" });
+    }
+
+    phonesOtp[checkIfExist] = { phone: "", otp: "" };
+
+    return res.status(200).json({
+      message: "valid",
     });
   } catch (error) {
     Logger.error(error);
