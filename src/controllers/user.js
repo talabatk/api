@@ -217,9 +217,9 @@ exports.sendOtp = async (req, res) => {
     const checkIfExist = phonesOtp.findIndex((p) => p.phone === phone);
 
     if (checkIfExist >= 0) {
-      phonesOtp[checkIfExist] = { phone: phone, otp: randomPart + "" };
+      phonesOtp[checkIfExist] = { phone: phone, otp: otp + "" };
     } else {
-      phonesOtp.push({ phone: phone, otp: randomPart + "" });
+      phonesOtp.push({ phone: phone, otp: otp + "" });
     }
 
     const result = await response.json();
@@ -243,9 +243,9 @@ exports.confirmOtp = async (req, res) => {
       return res.status(400).json({ message: "Phone number is required" });
     }
 
-    const phoneData = phonesOtp.find((p) => p.phone === data.phone);
+    const phoneData = phonesOtp.find((p) => p.phone === phone);
 
-    const checkIfExist = phonesOtp.findIndex((p) => p.phone === data.phone);
+    const checkIfExist = phonesOtp.findIndex((p) => p.phone === phone);
 
     if (!phoneData || phoneData.otp !== otp) {
       return res.status(400).json({ message: "هذا الرقم غير صالح" });
