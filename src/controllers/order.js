@@ -572,7 +572,7 @@ exports.updateOrder = async (req, res) => {
         lastStatus: orderStatusArabicNames[status],
       });
       sendUltraMsg(
-        phone,
+        order.phone,
         `لقد تم تغيير حاله طلبك من ${
           orderStatusArabicNames[order.status]
         } الى ${orderStatusArabicNames[status]}`
