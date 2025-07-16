@@ -55,6 +55,50 @@ const formateDate = (date) => {
   return formattedDate;
 };
 
+function normalizeIsraeliPhone(phone) {
+  // Remove non-digits
+  let digits = phone.replace(/\D/g, "");
+
+  if (digits.startsWith("0")) {
+    digits = digits.slice(1); // Remove leading 0
+  }
+
+  if (digits.startsWith("972")) {
+    digits = digits; // Keep as is
+  } else {
+    digits = "972" + digits;
+  }
+
+  // Validate length after country code (should be 9 digits)
+  const phoneBody = digits.slice(3); // After 972
+  if (!/^\d{9}$/.test(phoneBody)) {
+    return null; // Invalid
+  }
+
+  return `+${digits}`; // Final international format
+}
+
+async function sendUltraMsg(phone, message) {
+  const formattedPhone = normalizeIsraeliPhone(phone);
+
+  const formBody = new URLSearchParams({
+    token: ULTRA_TOKEN,
+    to: formattedPhone.replace(/\s|-/g, ""), // Remove spaces/dashes for API
+    body: message,
+  });
+
+  const response = await fetch(
+    `https://api.ultramsg.com/${INSTANCE_ID}/messages/chat`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formBody,
+    }
+  );
+
+  return await response.json();
+}
+
 exports.createOrder = async (req, res) => {
   const io = getIO();
 
@@ -257,7 +301,18 @@ exports.createOrder = async (req, res) => {
       description: `هناك طلب جديد من ${name}`,
       orderId: order.id,
     });
-
+    sendUltraMsg(
+      phone,
+      `
+      مرحبا طلبت طلبيه من طلباتك .
+      قيمه الطلب:
+      ${total} شيكل
+      الشحن:
+      ${shipping} شيكل
+      المجموع : 
+      ${total + shipping} شيكل
+      `
+    );
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     Logger.error(error);
@@ -516,7 +571,12 @@ exports.updateOrder = async (req, res) => {
         } الى ${orderStatusArabicNames[status]}`,
         lastStatus: orderStatusArabicNames[status],
       });
-
+      sendUltraMsg(
+        phone,
+        `لقد تم تغيير حاله طلبك من ${
+          orderStatusArabicNames[order.status]
+        } الى ${orderStatusArabicNames[status]}`
+      );
       if (order.user.fcm) {
         await messaging
           .send({
