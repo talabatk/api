@@ -83,7 +83,9 @@ function normalizeIsraeliPhone(phone) {
 
 async function sendUltraMsg(phone, message) {
   const formattedPhone = normalizeIsraeliPhone(phone);
-
+  if (!formattedPhone) {
+    return;
+  }
   const formBody = new URLSearchParams({
     token: ULTRA_TOKEN,
     to: formattedPhone.replace(/\s|-/g, ""), // Remove spaces/dashes for API
