@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Vendor = require("../models/vendor");
 const Admin = require("../models/admin");
+const Otp = require("../models/otps");
 const AdminRole = require("../models/adminRole");
 const { Op } = require("sequelize");
 const Logger = require("../util/logger");
@@ -11,8 +12,6 @@ const Logger = require("../util/logger");
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
 
-const Redis = require("ioredis");
-const redis = new Redis();
 // توليد OTP من 6 أرقام
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -213,9 +212,15 @@ exports.sendOtp = async (req, res) => {
         body: formBody,
       }
     );
-    // حفظ OTP في Redis لمدة 5 دقائق
-    await redis.set(`otp:${phone}`, otp, "EX", 600);
+    // حفظ أو تحديث OTP في قاعدة البيانات
+    const [otpRecord, created] = await Otp.findOrCreate({
+      where: { phone: phone },
+      defaults: { otp: otp },
+    });
 
+    if (!created) {
+      await otpRecord.update({ otp: otp });
+    }
     const result = await response.json();
 
     return res.status(200).json({
@@ -236,18 +241,18 @@ exports.confirmOtp = async (req, res) => {
     if (!phone) {
       return res.status(400).json({ message: "Phone number is required" });
     }
-    const savedOtp = await redis.get(`otp:${phone}`);
+    const otpRecord = await Otp.findOne({ where: { phone: phone } });
 
-    if (!savedOtp) {
+    if (!otpRecord) {
       return res.status(400).json({ message: "هذا الرقم غير صالح" });
     }
 
-    if (savedOtp !== otp) {
+    if (otpRecord.otp !== otp + "") {
       return res.status(400).json({ message: "رمز التحقق غير صحيح" });
     }
 
     // حذف OTP بعد التأكيد
-    await redis.del(`otp:${phone}`);
+    await otpRecord.destroy();
 
     return res.status(200).json({
       message: "valid",

@@ -120,6 +120,7 @@ const Order = require("./models/order");
 const Notification = require("./models/notifications");
 const Complains = require("./models/complains");
 const Alert = require("./models/alert");
+const Otp = require("./models/otps");
 const OrderTimeLine = require("./models/orderTimeLine");
 const Message = require("./models/messages");
 //--------routes------------------------------
