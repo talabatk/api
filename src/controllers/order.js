@@ -82,26 +82,32 @@ function normalizeIsraeliPhone(phone) {
 }
 
 async function sendUltraMsg(phone, message) {
-  const formattedPhone = normalizeIsraeliPhone(phone);
-  if (!formattedPhone) {
-    return;
-  }
-  const formBody = new URLSearchParams({
-    token: ULTRA_TOKEN,
-    to: formattedPhone.replace(/\s|-/g, ""), // Remove spaces/dashes for API
-    body: message,
-  });
-
-  const response = await fetch(
-    `https://api.ultramsg.com/${INSTANCE_ID}/messages/chat`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formBody,
+  try {
+    const formattedPhone = normalizeIsraeliPhone(phone);
+    if (!formattedPhone) {
+      return null;
     }
-  );
 
-  return await response.json();
+    const formBody = new URLSearchParams({
+      token: ULTRA_TOKEN,
+      to: formattedPhone.replace(/\s|-/g, ""),
+      body: message,
+    });
+
+    const response = await fetch(
+      `https://api.ultramsg.com/${INSTANCE_ID}/messages/chat`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formBody,
+      }
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error("sendUltraMsg error:", error);
+    return null; // Or return { success: false } or any fallback value
+  }
 }
 
 exports.createOrder = async (req, res) => {
