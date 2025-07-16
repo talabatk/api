@@ -11,8 +11,8 @@ const Logger = require("../util/logger");
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
 
-const phonesOtp = [];
-
+const Redis = require("ioredis");
+const redis = new Redis();
 // توليد OTP من 6 أرقام
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -213,14 +213,8 @@ exports.sendOtp = async (req, res) => {
         body: formBody,
       }
     );
-
-    const checkIfExist = phonesOtp.findIndex((p) => p.phone === phone);
-
-    if (checkIfExist >= 0) {
-      phonesOtp[checkIfExist] = { phone: phone, otp: otp + "" };
-    } else {
-      phonesOtp.push({ phone: phone, otp: otp + "" });
-    }
+    // حفظ OTP في Redis لمدة 5 دقائق
+    await redis.set(`otp:${phone}`, otp, "EX", 600);
 
     const result = await response.json();
 
@@ -242,19 +236,18 @@ exports.confirmOtp = async (req, res) => {
     if (!phone) {
       return res.status(400).json({ message: "Phone number is required" });
     }
-    console.log(phonesOtp);
+    const savedOtp = await redis.get(`otp:${phone}`);
 
-    const phoneData = phonesOtp.find((p) => p.phone === phone);
-    console.log("phoneData", phoneData);
-
-    const checkIfExist = phonesOtp.findIndex((p) => p.phone === phone);
-    console.log("checkIfExist", checkIfExist);
-
-    if (!phoneData || phoneData.otp !== otp) {
+    if (!savedOtp) {
       return res.status(400).json({ message: "هذا الرقم غير صالح" });
     }
 
-    phonesOtp[checkIfExist] = { phone: "", otp: "" };
+    if (savedOtp !== otp) {
+      return res.status(400).json({ message: "رمز التحقق غير صحيح" });
+    }
+
+    // حذف OTP بعد التأكيد
+    await redis.del(`otp:${phone}`);
 
     return res.status(200).json({
       message: "valid",
