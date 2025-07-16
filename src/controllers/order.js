@@ -16,6 +16,9 @@ const Logger = require("../util/logger");
 const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 
+const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
+const INSTANCE_ID = "instance131791";
+
 function getCurrentDateTimeInPalestine() {
   // Get current time in Palestine
   const now = new Date(
