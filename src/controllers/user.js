@@ -242,10 +242,13 @@ exports.confirmOtp = async (req, res) => {
     if (!phone) {
       return res.status(400).json({ message: "Phone number is required" });
     }
+    console.log(phonesOtp);
 
     const phoneData = phonesOtp.find((p) => p.phone === phone);
+    console.log("phoneData", phoneData);
 
     const checkIfExist = phonesOtp.findIndex((p) => p.phone === phone);
+    console.log("checkIfExist", checkIfExist);
 
     if (!phoneData || phoneData.otp !== otp) {
       return res.status(400).json({ message: "هذا الرقم غير صالح" });
