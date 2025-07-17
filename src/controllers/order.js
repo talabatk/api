@@ -120,7 +120,8 @@ exports.createOrder = async (req, res) => {
 
     let shipping = 0,
       total = 0,
-      total_quantity = 0;
+      total_quantity = 0,
+      products = "";
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -177,7 +178,9 @@ exports.createOrder = async (req, res) => {
     for (const e of cart.cart_products) {
       total += +e.total;
       total_quantity += +e.quantity;
-
+      products += `الكميه:${e.quantity}
+                  ${e.product.title}
+      -----------------------------`;
       await Product.update(
         { orders: +e.product.orders + +e.quantity },
         { where: { id: e.product.id } }
@@ -322,6 +325,8 @@ exports.createOrder = async (req, res) => {
       ${shipping} شيكل
       المجموع : 
       ${total + shipping} شيكل
+      --------------------------
+      ${products}
       `
     );
     return res.status(200).json({ message: "success", order });
@@ -582,12 +587,14 @@ exports.updateOrder = async (req, res) => {
         } الى ${orderStatusArabicNames[status]}`,
         lastStatus: orderStatusArabicNames[status],
       });
-      sendUltraMsg(
-        order.phone,
-        `لقد تم تغيير حاله طلبك من ${
-          orderStatusArabicNames[order.status]
-        } الى ${orderStatusArabicNames[status]}`
-      );
+      if (status === "preparing" || status === "cancel") {
+        sendUltraMsg(
+          order.phone,
+          `لقد تم تغيير حاله طلبك من ${
+            orderStatusArabicNames[order.status]
+          } الى ${orderStatusArabicNames[status]}`
+        );
+      }
       if (order.user.fcm) {
         await messaging
           .send({
