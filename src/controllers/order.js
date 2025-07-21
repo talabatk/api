@@ -15,6 +15,7 @@ const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
 const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
+const ProductImage = require("../models/productImage");
 
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
@@ -461,6 +462,10 @@ exports.getAllOrders = async (req, res) => {
                       attributes: ["id", "direction", "distance"],
                     },
                   },
+                  {
+                    model: ProductImage,
+                    attributes: ["id", "image"],
+                  },
                 ],
               },
               Option,
@@ -500,6 +505,10 @@ exports.getAllOrders = async (req, res) => {
                       model: Vendor,
                       attributes: ["id", "direction", "distance"],
                     },
+                  },
+                  {
+                    model: ProductImage,
+                    attributes: ["id", "image"],
                   },
                 ],
               },
@@ -746,6 +755,12 @@ exports.getVendorOrder = async (req, res) => {
             include: [
               {
                 model: Product,
+                include: [
+                  {
+                    model: ProductImage,
+                    attributes: ["id", "image"],
+                  },
+                ],
               },
               Option,
             ],
@@ -770,6 +785,12 @@ exports.getVendorOrder = async (req, res) => {
             include: [
               {
                 model: Product,
+                include: [
+                  {
+                    model: ProductImage,
+                    attributes: ["id", "image"],
+                  },
+                ],
               },
               Option,
             ],
@@ -918,6 +939,10 @@ exports.getUserOrders = async (req, res) => {
                     model: Vendor,
                     attributes: ["id", "direction", "distance"],
                   },
+                },
+                {
+                  model: ProductImage,
+                  attributes: ["id", "image"],
                 },
               ],
             },
