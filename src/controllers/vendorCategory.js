@@ -113,6 +113,19 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
+exports.getAllForAdmin = async (req, res, next) => {
+  try {
+    let categories = await VendorCategory.findAll({
+      attributes: ["id", "order", "name", "image"],
+      order: [["order"]],
+    });
+
+    return res.status(200).json({ results: categories });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "error" });
+  }
+};
 exports.getOne = async (req, res) => {
   const { id } = req.params;
 
