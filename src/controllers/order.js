@@ -148,7 +148,7 @@ exports.createOrder = async (req, res) => {
               model: Product,
               include: {
                 model: User,
-                attributes: ["id", "fcm"],
+                attributes: ["id", "fcm", "name"],
                 include: [{ model: Area }, Vendor],
               },
             },
@@ -176,12 +176,17 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
     }
     // calculate shipping cost
+    products += `
+    اسم المطعم:${cart.cart_products[0]?.product.user.name}
+    ----------------------------------
+    `;
     for (const e of cart.cart_products) {
       total += +e.total;
       total_quantity += +e.quantity;
       products += `الكميه:${e.quantity}
-                  ${e.product.title}
-      -----------------------------`;
+      ${e.product.title}
+      -----------------------------
+      `;
       await Product.update(
         { orders: +e.product.orders + +e.quantity },
         { where: { id: e.product.id } }
