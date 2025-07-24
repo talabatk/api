@@ -39,6 +39,7 @@ exports.getAll = async (req, res, next) => {
           model: Vendor,
           where: {
             type: supermarket === "true" ? "supermarket" : "restaurant",
+            status: "open",
           },
           include: [
             {
