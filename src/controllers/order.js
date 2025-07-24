@@ -604,9 +604,7 @@ exports.updateOrder = async (req, res) => {
       if (status === "preparing" || status === "cancel") {
         sendUltraMsg(
           order.phone,
-          `لقد تم تغيير حاله طلبك من ${
-            orderStatusArabicNames[order.status]
-          } الى ${orderStatusArabicNames[status]}`
+          status === "preparing" ? "طلبك قيد التحضير" : "تم رفض طلبك"
         );
       }
       if (order.user.fcm) {
