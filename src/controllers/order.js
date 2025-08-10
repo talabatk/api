@@ -148,7 +148,7 @@ exports.createOrder = async (req, res) => {
               model: Product,
               include: {
                 model: User,
-                attributes: ["id", "fcm", "name", "cityId"],
+                attributes: ["id", "fcm", "name", "cityId", "phone"],
                 include: [{ model: Area }, Vendor],
               },
             },
@@ -337,7 +337,7 @@ exports.createOrder = async (req, res) => {
       `
     );
     sendUltraMsg(
-      phone,
+      vendor.phone,
       `
       مرحبا هناك طلبيه جديده من طلباتك .
       قيمه الطلب:
