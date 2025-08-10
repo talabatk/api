@@ -148,7 +148,7 @@ exports.createOrder = async (req, res) => {
               model: Product,
               include: {
                 model: User,
-                attributes: ["id", "fcm", "name"],
+                attributes: ["id", "fcm", "name", "cityId"],
                 include: [{ model: Area }, Vendor],
               },
             },
@@ -235,6 +235,7 @@ exports.createOrder = async (req, res) => {
       updatedTime: currentDate,
       status: "not started",
       vendorId: vendor.vendor.id,
+      cityId: vendor.cityId,
       lang: lang,
       lat,
     });
@@ -335,6 +336,20 @@ exports.createOrder = async (req, res) => {
       ${products}
       `
     );
+    sendUltraMsg(
+      phone,
+      `
+      مرحبا هناك طلبيه جديده من طلباتك .
+      قيمه الطلب:
+      ${total} شيكل
+      الشحن:
+      ${shipping} شيكل
+      المجموع : 
+      ${total + shipping} شيكل
+      --------------------------
+      ${products}
+      `
+    );
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     Logger.error(error);
@@ -405,6 +420,7 @@ exports.getAllOrders = async (req, res) => {
     startDate,
     endDate,
     search,
+    cityId,
   } = req.query;
   try {
     const limit = Number.parseInt(size);
@@ -422,6 +438,10 @@ exports.getAllOrders = async (req, res) => {
 
     if (deliveryId) {
       filters.deliveryId = deliveryId;
+    }
+
+    if (cityId) {
+      filters.cityId = cityId;
     }
 
     if (vendorId) {
@@ -477,7 +497,7 @@ exports.getAllOrders = async (req, res) => {
             ],
             where: { ordered: true },
           },
-          Vendor,
+          { model: Vendor },
           {
             model: Delivery,
             include: {
@@ -635,6 +655,24 @@ exports.updateOrder = async (req, res) => {
       });
     }
 
+    if (status && status === "finished") {
+      const deliveries = await User.findAll({
+        where: {
+          role: "delivery",
+        },
+        attributes: ["id", "phone"],
+      });
+      deliveries.forEach((d) => {
+        sendUltraMsg(
+          d.phone,
+          `
+            مرحبا هناك طلبيه جاهزه من طلباتك .
+            اسم المطعم : ${order.vendor.name}
+            رقم الطلب : ${order.id}
+          `
+        );
+      });
+    }
     order.status = status;
 
     if (+time && +order.time < +time) {

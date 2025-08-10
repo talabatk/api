@@ -33,6 +33,7 @@ exports.createProduct = async (req, res) => {
     show_price,
     offerPrice,
     isOffer,
+    order,
   } = req.body;
 
   try {
@@ -57,6 +58,7 @@ exports.createProduct = async (req, res) => {
       show_price,
       offerPrice: offerPrice || 0,
       isOffer,
+      order,
     });
 
     const images = await ProductImage.bulkCreate(
@@ -120,14 +122,16 @@ exports.getAll = async (req, res) => {
       filters.categoryId = categoryId;
     }
 
-    if (bestSeller && bestSeller === "true") {
-      order.push(["orders", "DESC"]);
-    }
     if (isOffer && isOffer === "true") {
       filters.isOffer = isOffer === "true" ? true : false;
     }
-    if (recent) {
+
+    if (bestSeller && bestSeller === "true") {
+      order.push(["orders", "DESC"]);
+    } else if (recent) {
       order.push(["createdAt", "DESC"]);
+    } else {
+      order.push(["createdAt", "ASC"]);
     }
 
     let products = [];
@@ -203,6 +207,7 @@ exports.getAll = async (req, res) => {
     return res.status(500).json({ message: "internal server error" });
   }
 };
+
 exports.bulkCreate = async (req, res) => {
   try {
     // Assuming file uploaded via multer and available at req.file.path
@@ -249,6 +254,7 @@ exports.bulkCreate = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
+
 exports.getOne = async (req, res) => {
   const { id } = req.params;
 
@@ -436,7 +442,7 @@ exports.dataAnalysis = async (req, res) => {
     const customers = await User.count({ where: { role: "customer" } }); // Get total number of customers
 
     const onlineDeliveries = await User.count({
-      where: { role: "customer", online: true },
+      where: { role: "delivery", online: true },
     });
 
     const orders = await Order.count();

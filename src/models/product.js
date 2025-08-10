@@ -51,5 +51,10 @@ const Product = sequelize.define("product", {
     allowNull: false,
     defaultValue: false,
   },
+  order: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    defaultValue: 1,
+  },
 });
 module.exports = Product;

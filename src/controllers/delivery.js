@@ -68,6 +68,7 @@ exports.login = async (req, res) => {
         active: user.active,
         phone: user.phone,
         role: user.role,
+        cityId: user.cityId,
         image: user.image ? user.image : null,
         token,
       },
@@ -79,8 +80,16 @@ exports.login = async (req, res) => {
 };
 
 exports.createDelivery = async (req, res) => {
-  const { name, email, phone, fcm, password, confirm_password, active } =
-    req.body;
+  const {
+    name,
+    email,
+    phone,
+    fcm,
+    password,
+    confirm_password,
+    active,
+    cityId,
+  } = req.body;
 
   if (password !== confirm_password) {
     return res.status(400).json({ message: "passwords not matched" });
@@ -98,6 +107,7 @@ exports.createDelivery = async (req, res) => {
       role: "delivery",
       password: hashedPassword,
       active,
+      cityId,
     });
 
     const delivery = await Delivery.create({
@@ -122,6 +132,7 @@ exports.createDelivery = async (req, res) => {
         token,
         active,
         role: "delivery",
+        cityId,
       },
     });
   } catch (error) {

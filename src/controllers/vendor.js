@@ -8,6 +8,7 @@ const Area = require("../models/area");
 const Logger = require("../util/logger");
 const VendorCategory = require("../models/VendorCategory");
 const VendorCategories = require("../models/VendorCategories");
+const City = require("../models/city");
 
 //generate token=======================
 const generateToken = (userId) => {
@@ -110,6 +111,7 @@ exports.createVendor = async (req, res) => {
     distance,
     categories,
     type,
+    cityId,
   } = req.body;
 
   if (password !== confirm_password) {
@@ -128,6 +130,7 @@ exports.createVendor = async (req, res) => {
       image: req.files.image ? req.files.image[0].location : null,
       role: "vendor",
       password: hashedPassword,
+      cityId,
     });
 
     const vendor = await Vendor.create({
@@ -185,20 +188,23 @@ exports.createVendor = async (req, res) => {
 };
 
 exports.getAllVendors = async (req, res) => {
+  const { cityId } = req.query;
   try {
+    const filters = {};
+    filters.role = "vendor";
+    filters.active = true;
+
+    if (cityId) {
+      filters.cityId = cityId;
+    }
     const users = await User.findAll({
-      where: {
-        role: "vendor",
-        active: true,
-      },
-      include: [{ model: Vendor, include: [VendorCategory] }, Area],
+      where: filters,
+      include: [{ model: Vendor, include: [VendorCategory] }, Area, City],
       attributes: { exclude: ["password"] },
     });
 
     const count = await User.count({
-      where: {
-        role: "vendor",
-      },
+      where: filters,
     }); // Get total number of admins
 
     const results = users.map((user) => {
@@ -210,6 +216,7 @@ exports.getAllVendors = async (req, res) => {
         email,
         phone,
         address,
+        city: user.city,
         status: user.vendor ? user.vendor?.status : "opened",
         fcm,
         role: "vendor",
@@ -240,7 +247,7 @@ exports.getVendor = async (req, res) => {
         role: "vendor",
         id: req.params.id,
       },
-      include: [{ model: Vendor, include: [VendorCategory] }, Area],
+      include: [{ model: Vendor, include: [VendorCategory] }, Area, City],
       attributes: { exclude: ["password"] },
     });
 
@@ -260,6 +267,7 @@ exports.getVendor = async (req, res) => {
         phone,
         address,
         status: user.vendor.status,
+        city: user.city,
         fcm,
         role: "vendor",
         description: user.vendor.description,

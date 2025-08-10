@@ -1,5 +1,4 @@
 const Category = require("../models/category");
-const Sequelize = require("sequelize");
 const Product = require("../models/product");
 const ProductImage = require("../models/productImage");
 const Vendor = require("../models/vendor");

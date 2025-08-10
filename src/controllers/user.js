@@ -374,7 +374,7 @@ exports.getAllUsers = async (req, res, next) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { id, password, confirm_password } = req.body;
+  const { id } = req.body;
 
   try {
     let user = null;
@@ -486,6 +486,7 @@ exports.forgetPassword = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {

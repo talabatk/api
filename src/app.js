@@ -123,6 +123,7 @@ const Alert = require("./models/alert");
 const Otp = require("./models/otps");
 const OrderTimeLine = require("./models/orderTimeLine");
 const Message = require("./models/messages");
+const City = require("./models/city");
 //--------routes------------------------------
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -142,6 +143,7 @@ const orderRoutes = require("./routes/order");
 const complainRoutes = require("./routes/complains");
 const VendorCategoryRoutes = require("./routes/vendorCategory");
 const messageRoutes = require("./routes/message");
+const bannerRoutes = require("./routes/banner");
 
 //--------relations---------------------------
 
@@ -173,6 +175,12 @@ CartProduct.belongsTo(Order);
 
 Area.hasMany(Order);
 Order.belongsTo(Area);
+
+City.hasMany(Area);
+Area.belongsTo(City);
+
+City.hasMany(User);
+User.belongsTo(City);
 
 Order.hasMany(OrderTimeLine);
 OrderTimeLine.belongsTo(Order);
@@ -287,6 +295,8 @@ app.use("/api", orderRoutes);
 app.use("/api", complainRoutes);
 
 app.use("/api", messageRoutes);
+
+app.use("/api", bannerRoutes);
 
 app.route("/").get((_req, res) => {
   // #swagger.ignore = true
