@@ -592,7 +592,15 @@ exports.updateOrder = async (req, res) => {
     const order = await Order.findByPk(id, {
       include: [
         User,
-        Vendor,
+        {
+          model: Vendor,
+          include: [
+            {
+              model: User,
+              attributes: ["name"],
+            },
+          ],
+        },
         {
           model: CartProduct,
           include: [
@@ -667,7 +675,7 @@ exports.updateOrder = async (req, res) => {
           d.phone,
           `
             مرحبا هناك طلبيه جاهزه من طلباتك .
-            اسم المطعم : ${order.vendor.name}
+            اسم المطعم : ${order.vendor.user.name}
             رقم الطلب : ${order.id}
           `
         );
