@@ -663,24 +663,6 @@ exports.updateOrder = async (req, res) => {
       });
     }
 
-    if (status && status === "finished") {
-      const deliveries = await User.findAll({
-        where: {
-          role: "delivery",
-        },
-        attributes: ["id", "phone"],
-      });
-      deliveries.forEach((d) => {
-        sendUltraMsg(
-          d.phone,
-          `
-            مرحبا هناك طلبيه جاهزه من طلباتك .
-            اسم المطعم : ${order.vendor.user.name}
-            رقم الطلب : ${order.id}
-          `
-        );
-      });
-    }
     order.status = status;
 
     if (+time && +order.time < +time) {
