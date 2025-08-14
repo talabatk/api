@@ -2,7 +2,7 @@ const express = require("express");
 const cityController = require("../controllers/city");
 const router = express.Router();
 
-router.post("/city", cityController.createSlider);
+router.post("/city", cityController.createCity);
 
 router.get("/city", cityController.getAll);
 
