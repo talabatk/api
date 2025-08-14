@@ -48,11 +48,11 @@ exports.editOne = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const city = await Category.findByPk(id);
+    const city = await City.findByPk(id);
 
-    return res.status(200).json({
-      ...city.toJSON(),
-    });
+    await city.update(req.body);
+
+    return res.status(200).json(city);
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
