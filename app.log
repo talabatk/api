@@ -5464,3 +5464,13 @@ Error
 2025-08-15 04:55:29:5529 [32minfo[39m: [32mResponse Body: {"count":71,"results":[{"id":80,"name":"Snacks Cafe","email":"cart","phone":"0584938000","address":"راس خميس ","city":{"id":4,"name":"مدينه ٢","topic":"rer","createdAt":"2025-08-15T00:21:44.000Z","upd ... [39m
 2025-08-15 04:55:29:5529 [32minfo[39m: [32mResponse: 304 898.851 ms  [39m
 2025-08-15 04:55:29:5529 [32mhttp[39m: [32m<<<----- Response [ "GET /vendor/get-vendors/" | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 | ::1 | - | 304 | - | 898.851 ms ][39m
+2025-08-15 04:58:34:5834 [32mhttp[39m: [32m----->>> Request [ "OPTIONS /api/banner" | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 | ::1 | - ][39m
+2025-08-15 04:58:34:5834 [32minfo[39m: [32m Request: OPTIONS /api/banner at Fri Aug 15 2025 04:58:34 GMT+0300, IP: ::1, User Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 [39m
+2025-08-15 04:58:34:5834 [32minfo[39m: [32mResponse: 204 0.179 ms  [39m
+2025-08-15 04:58:34:5834 [32mhttp[39m: [32m<<<----- Response [ "OPTIONS /api/banner" | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 | ::1 | - | 204 | 0 | 0.179 ms ][39m
+2025-08-15 04:58:34:5834 [32mhttp[39m: [32m----->>> Request [ "GET /api/banner" | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 | ::1 | - ][39m
+2025-08-15 04:58:34:5834 [32minfo[39m: [32m Request: GET /api/banner at Fri Aug 15 2025 04:58:34 GMT+0300, IP: ::1, User Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 [39m
+2025-08-15 04:58:34:5834 [34mdebug[39m: [34mExecuting (default): SELECT `id`, `title`, `discription`, `status`, `image`, `createdAt`, `updatedAt` FROM `adsBanners` AS `adsBanner`;[39m
+2025-08-15 04:58:35:5835 [32minfo[39m: [32mResponse Body: {"results":[]} [39m
+2025-08-15 04:58:35:5835 [32minfo[39m: [32mResponse: 201 495.661 ms  [39m
+2025-08-15 04:58:35:5835 [32mhttp[39m: [32m<<<----- Response [ "GET /api/banner" | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15 | ::1 | - | 201 | 14 | 495.661 ms ][39m
