@@ -197,6 +197,7 @@ exports.getAllVendors = async (req, res) => {
     if (cityId) {
       filters.cityId = cityId;
     }
+
     const users = await User.findAll({
       where: filters,
       include: [{ model: Vendor, include: [VendorCategory] }, Area, City],

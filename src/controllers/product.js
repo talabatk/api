@@ -131,7 +131,7 @@ exports.getAll = async (req, res) => {
     } else if (recent) {
       order.push(["createdAt", "DESC"]);
     } else {
-      order.push(["createdAt", "ASC"]);
+      order.push(["order", "ASC"]);
     }
 
     let products = [];

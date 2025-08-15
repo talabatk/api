@@ -8,6 +8,7 @@ const Otp = require("../models/otps");
 const AdminRole = require("../models/adminRole");
 const { Op } = require("sequelize");
 const Logger = require("../util/logger");
+const City = require("../models/city");
 
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
@@ -354,10 +355,12 @@ exports.getAllUsers = async (req, res, next) => {
         limit: limit,
         offset: offset,
         where: filters,
+        include: [City],
       });
     } else {
       users = await User.findAll({
         where: filters,
+        include: [City],
       });
     }
 

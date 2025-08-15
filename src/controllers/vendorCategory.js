@@ -30,7 +30,7 @@ exports.createVendorCategory = async (req, res, next) => {
 };
 
 exports.getAll = async (req, res, next) => {
-  const { supermarket, categoryId } = req.query;
+  const { supermarket, categoryId, cityId } = req.query;
   try {
     let categories = await VendorCategory.findAll({
       attributes: ["id", "order", "name", "image"],
@@ -46,6 +46,7 @@ exports.getAll = async (req, res, next) => {
               model: User,
               where: {
                 active: true,
+                cityId: cityId ? cityId : undefined,
               },
               include: [
                 Area,

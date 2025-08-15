@@ -13,7 +13,7 @@ const Banner = sequelize.define("adsBanner", {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  descritption: {
+  discription: {
     type: Sequelize.STRING,
     allowNull: true,
   },

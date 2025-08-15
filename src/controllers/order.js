@@ -152,6 +152,7 @@ exports.createOrder = async (req, res) => {
                 include: [{ model: Area }, Vendor],
               },
             },
+            Option,
           ],
           where: { ordered: false },
         },
@@ -186,7 +187,15 @@ exports.createOrder = async (req, res) => {
       products += `الكميه:${e.quantity}
       ${e.product.title}
       -----------------------------
+      الاضافات:
       `;
+      e.options?.forEach((e) => {
+        products += `
+        ${e.name}
+        `;
+      });
+      products += `
+      -----------------------------`;
       await Product.update(
         { orders: +e.product.orders + +e.quantity },
         { where: { id: e.product.id } }
