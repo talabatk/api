@@ -125,7 +125,8 @@ exports.createOrder = async (req, res) => {
     let shipping = 0,
       total = 0,
       total_quantity = 0,
-      products = "";
+      products = "",
+      isFree = false;
 
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -227,6 +228,18 @@ exports.createOrder = async (req, res) => {
     }
 
     const currentDate = getCurrentDateTimeInPalestine();
+
+    const points = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "points",
+      },
+    });
+
+    if (+user.points >= +shipping + +total) {
+      isFree = true;
+    }
+
     //save order
     const order = await Order.create({
       address,
@@ -250,18 +263,10 @@ exports.createOrder = async (req, res) => {
       cityId: vendor.cityId,
       lang: lang,
       lat,
+      isFree,
     });
 
-    const points = await Alert.findOne({
-      attributes: ["content", "active"],
-      where: {
-        name: "points",
-      },
-    });
-    console.log(user);
-    console.log(points);
-
-    if (+points.content > 0 && points.active) {
+    if (+points.content > 0 && points.active && !isFree) {
       await user.update({
         points: +points.content + user.points,
       });
