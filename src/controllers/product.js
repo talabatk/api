@@ -20,6 +20,7 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 const os = require("os");
+const City = require("../models/city");
 
 exports.createProduct = async (req, res) => {
   const {
@@ -452,6 +453,7 @@ exports.dataAnalysis = async (req, res) => {
       where: {
         name: "app_status",
       },
+      include: [City],
     });
 
     const alert = await Alert.findOne({
@@ -459,6 +461,15 @@ exports.dataAnalysis = async (req, res) => {
       where: {
         name: "alert",
       },
+      include: [City],
+    });
+
+    const banner = await Alert.findOne({
+      attributes: ["content", "status", "image", "discription"],
+      where: {
+        name: "banner",
+      },
+      include: [City],
     });
 
     return res.status(200).json({
@@ -468,6 +479,7 @@ exports.dataAnalysis = async (req, res) => {
       onlineDeliveries,
       app_status,
       alert,
+      banner,
     });
   } catch (error) {
     Logger.error(error);

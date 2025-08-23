@@ -237,6 +237,9 @@ exports.getVendorCategories = async (req, res) => {
       include: [
         {
           model: Product,
+          separate: true, // 👈 fetch products in separate query
+          where: filter,
+          order: [["order", "ASC"]], // 👈 works now per category
           include: [
             {
               model: ProductImage,
@@ -248,11 +251,9 @@ exports.getVendorCategories = async (req, res) => {
               include: Vendor,
             },
           ],
-          where: filter,
-          //   limit: 6,
         },
       ],
-      order: [["order"]],
+      order: [["order", "ASC"]], // categories order
     });
 
     return res.status(200).json({ results: categories });

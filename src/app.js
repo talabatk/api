@@ -143,8 +143,8 @@ const orderRoutes = require("./routes/order");
 const complainRoutes = require("./routes/complains");
 const VendorCategoryRoutes = require("./routes/vendorCategory");
 const messageRoutes = require("./routes/message");
-const bannerRoutes = require("./routes/banner");
 const cityRoutes = require("./routes/city");
+const CityAlerts = require("./models/cityAlerts");
 
 //--------relations---------------------------
 
@@ -179,6 +179,9 @@ Order.belongsTo(Area);
 
 City.hasMany(Area);
 Area.belongsTo(City);
+
+City.belongsToMany(Alert, { through: CityAlerts });
+Alert.belongsToMany(City, { through: CityAlerts });
 
 City.hasMany(User);
 User.belongsTo(City);
@@ -296,8 +299,6 @@ app.use("/api", orderRoutes);
 app.use("/api", complainRoutes);
 
 app.use("/api", messageRoutes);
-
-app.use("/api", bannerRoutes);
 
 app.use("/api", cityRoutes);
 

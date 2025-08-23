@@ -18,10 +18,25 @@ const Alert = sequelize.define("alert", {
     allowNull: true,
     defaultValue: null,
   },
+  discription: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
   active: {
     type: Sequelize.BOOLEAN,
     allowNull: false,
     defaultValue: false,
+  },
+  image: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+  status: {
+    type: Sequelize.ENUM,
+    values: ["disabled", "optional", "required"],
+    defaultValue: "disabled",
   },
 });
 module.exports = Alert;
