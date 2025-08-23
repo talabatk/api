@@ -267,6 +267,7 @@ exports.confirmOtp = async (req, res) => {
 exports.getUserByToken = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+    console.log(token);
 
     const user = await User.findOne({
       where: { token },

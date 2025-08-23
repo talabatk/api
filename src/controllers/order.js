@@ -256,11 +256,11 @@ exports.createOrder = async (req, res) => {
       },
     });
 
-    if (+points.content > 0 && points.active) {
-      await user.update({
-        points: +points.content + user.points,
-      });
-    }
+    // if (+points.content > 0 && points.active) {
+    //   await user.update({
+    //     points: +points.content + user.points,
+    //   });
+    // }
 
     io.to("admins").emit("new-order-admin", order);
 
