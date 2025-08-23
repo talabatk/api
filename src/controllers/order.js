@@ -16,6 +16,7 @@ const Logger = require("../util/logger");
 const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 const ProductImage = require("../models/productImage");
+const Alert = require("../models/alert");
 
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
@@ -115,6 +116,8 @@ exports.createOrder = async (req, res) => {
   const io = getIO();
 
   const { areaId, address, name, phone, location, notes, lang, lat } = req.body;
+
+  console.log(req.body);
 
   try {
     let vendor = null;
@@ -255,12 +258,14 @@ exports.createOrder = async (req, res) => {
         name: "points",
       },
     });
+    console.log(user);
+    console.log(points);
 
-    // if (+points.content > 0 && points.active) {
-    //   await user.update({
-    //     points: +points.content + user.points,
-    //   });
-    // }
+    if (+points.content > 0 && points.active) {
+      await user.update({
+        points: +points.content + user.points,
+      });
+    }
 
     io.to("admins").emit("new-order-admin", order);
 
