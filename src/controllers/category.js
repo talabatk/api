@@ -256,7 +256,17 @@ exports.getVendorCategories = async (req, res) => {
       order: [["order"]],
     });
 
-    return res.status(200).json({ results: categories });
+    const sortedCategories = categories.map((category) => {
+      const sortedProducts = category.products.sort(
+        (a, b) => a.order - b.order
+      );
+      return {
+        ...category.toJSON(), // convert Sequelize model to plain object
+        products: sortedProducts,
+      };
+    });
+
+    return res.status(200).json({ results: sortedCategories });
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error" });
