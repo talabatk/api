@@ -321,6 +321,7 @@ exports.getUserByToken = async (req, res) => {
       role: user.role,
       image: user.image ? user.image : null,
       active: user.active,
+      points: user.points,
     });
   } catch (error) {
     Logger.error(error);

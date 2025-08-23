@@ -12,7 +12,6 @@ exports.editAlert = async (req, res) => {
         name,
       },
     });
-    console.log(alert);
 
     await CityAlerts.destroy({
       where: {

@@ -472,6 +472,12 @@ exports.dataAnalysis = async (req, res) => {
       include: [City],
     });
 
+    const points = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "points",
+      },
+    });
     return res.status(200).json({
       products,
       customers,
@@ -480,6 +486,7 @@ exports.dataAnalysis = async (req, res) => {
       app_status,
       alert,
       banner,
+      points,
     });
   } catch (error) {
     Logger.error(error);

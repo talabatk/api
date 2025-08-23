@@ -249,6 +249,19 @@ exports.createOrder = async (req, res) => {
       lat,
     });
 
+    const points = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "points",
+      },
+    });
+
+    if (+points.content > 0 && points.active) {
+      await user.update({
+        points: +points.content + user.points,
+      });
+    }
+
     io.to("admins").emit("new-order-admin", order);
 
     io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
