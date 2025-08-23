@@ -5,7 +5,8 @@ const User = require("../models/user");
 const Alert = require("../models/alert");
 const Area = require("../models/area");
 const Product = require("../models/product");
-const { Op, where } = require("sequelize");
+const { Op, where, Sequelize } = require("sequelize");
+const City = require("../models/city");
 
 exports.createVendorCategory = async (req, res, next) => {
   const { name, order } = req.body;
@@ -68,45 +69,67 @@ exports.getAll = async (req, res, next) => {
     categories = categories
       .filter((c) => c.vendors.length > 0)
       .map((category) => {
-        const vendors = category.vendors.map((vendor) => {
-          return {
-            id: vendor.user?.id,
-            status: vendor.status,
-            name: vendor.user?.name,
-            image: vendor.user?.image,
-            email: vendor.user?.email,
-            phone: vendor.user?.phone,
-            address: vendor.user?.address,
-            fcm: vendor.user?.fcm,
-            role: "vendor",
-            description: vendor.description,
-            direction: vendor.direction,
-            distance: vendor.distance,
-            delivery_time: vendor.delivery_time,
-            free_delivery_limit: vendor.free_delivery_limit,
-            cover: vendor.cover,
-            areas: vendor.user?.areas,
-          };
-        });
+        const vendors = category.vendors
+          .map((vendor) => {
+            return {
+              id: vendor.user?.id,
+              status: vendor.status,
+              name: vendor.user?.name,
+              image: vendor.user?.image,
+              email: vendor.user?.email,
+              phone: vendor.user?.phone,
+              address: vendor.user?.address,
+              fcm: vendor.user?.fcm,
+              role: "vendor",
+              description: vendor.description,
+              direction: vendor.direction,
+              distance: vendor.distance,
+              delivery_time: vendor.delivery_time,
+              free_delivery_limit: vendor.free_delivery_limit,
+              cover: vendor.cover,
+              areas: vendor.user?.areas,
+            };
+          })
+          .sort((a, b) => {
+            // "open" first, others after
+            if (a.status === "open" && b.status !== "open") return -1;
+            if (a.status !== "open" && b.status === "open") return 1;
+            return 0;
+          });
+
         return {
           ...category.toJSON(),
           vendors,
         };
       });
-    const app_status = await Alert.findOne({
-      attributes: ["content", "active"],
-      where: {
-        name: "app_status",
-      },
-    });
 
     const alert = await Alert.findOne({
       attributes: ["content", "active"],
       where: {
         name: "alert",
       },
+      include: [City],
     });
-    return res.status(200).json({ results: categories, app_status, alert });
+
+    const banner = await Alert.findOne({
+      attributes: ["content", "status", "image", "discription"],
+      where: {
+        name: "banner",
+      },
+      include: [City],
+    });
+
+    const app_status = await Alert.findOne({
+      attributes: ["content", "active"],
+      where: {
+        name: "app_status",
+      },
+      include: [City],
+    });
+
+    return res
+      .status(200)
+      .json({ results: categories, app_status, alert, banner });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "error" });
