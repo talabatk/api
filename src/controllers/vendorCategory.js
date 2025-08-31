@@ -38,9 +38,14 @@ exports.getAll = async (req, res, next) => {
       include: [
         {
           model: Vendor,
-          where: {
-            type: supermarket === "true" ? "supermarket" : "restaurant",
-          },
+          where: cityId
+            ? {
+                type: supermarket === "true" ? "supermarket" : "restaurant",
+                cityId: +cityId,
+              }
+            : {
+                type: supermarket === "true" ? "supermarket" : "restaurant",
+              },
           include: [
             {
               model: User,
