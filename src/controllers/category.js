@@ -5,6 +5,7 @@ const Vendor = require("../models/vendor");
 const User = require("../models/user");
 const Logger = require("../util/logger");
 const Area = require("../models/area");
+const { Sequelize } = require("sequelize");
 
 exports.createCategory = async (req, res, next) => {
   const { name, order, type } = req.body;
@@ -223,17 +224,31 @@ exports.deleteOne = async (req, res, next) => {
 };
 
 exports.getVendorCategories = async (req, res) => {
-  const { vendorId } = req.query;
+  const { vendorId, page, size } = req.query;
 
   try {
     let filter = {};
-
+    const limit = Number.parseInt(size) || 1000;
+    const offset = (Number.parseInt(page) - 1) * limit || 0;
     if (vendorId) {
       filter = { vendorId };
     }
 
     const categories = await Category.findAll({
-      attributes: ["id", "name", "order", "image"],
+      attributes: [
+        "id",
+        "name",
+        "order",
+        "image",
+        [
+          Sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM products AS p
+          WHERE p.categoryId = category.id AND p.vendorId = ${vendorId}
+        )`),
+          "totalProducts",
+        ],
+      ],
       include: [
         {
           model: Product,
@@ -250,21 +265,24 @@ exports.getVendorCategories = async (req, res) => {
           ],
           where: filter,
           order: [["order", "ASC"]],
-          //   limit: 6,
+          limit: limit || 1000,
+          offset: offset || 0,
         },
       ],
       order: [["order"]],
     });
 
-    const sortedCategories = categories.map((category) => {
-      const sortedProducts = category.products.sort(
-        (a, b) => a.order - b.order
-      );
-      return {
-        ...category.toJSON(), // convert Sequelize model to plain object
-        products: sortedProducts,
-      };
-    });
+    const sortedCategories = categories
+      .filter((c) => c.products.length > 0)
+      .map((category) => {
+        const sortedProducts = category.products.sort(
+          (a, b) => a.order - b.order
+        );
+        return {
+          ...category.toJSON(), // convert Sequelize model to plain object
+          products: sortedProducts,
+        };
+      });
 
     return res.status(200).json({ results: sortedCategories });
   } catch (error) {
