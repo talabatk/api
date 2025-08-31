@@ -38,19 +38,15 @@ exports.getAll = async (req, res, next) => {
       include: [
         {
           model: Vendor,
-          where: cityId
-            ? {
-                type: supermarket === "true" ? "supermarket" : "restaurant",
-                cityId: +cityId,
-              }
-            : {
-                type: supermarket === "true" ? "supermarket" : "restaurant",
-              },
+          where: {
+            type: supermarket === "true" ? "supermarket" : "restaurant",
+          },
           include: [
             {
               model: User,
               where: {
                 active: true,
+                ...(cityId ? { cityId: +cityId } : {}),
               },
               include: [
                 Area,
