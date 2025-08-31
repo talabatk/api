@@ -9,7 +9,6 @@ exports.createOrUpdateGroup = async (req, res) => {
     const groupsList = [];
     const options = [];
     const updatedGroups = [];
-    console.log(req.body);
 
     // Process groups and products
     for (const group of groups) {
