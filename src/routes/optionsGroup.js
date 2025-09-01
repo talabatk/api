@@ -4,6 +4,10 @@ const router = express.Router();
 
 router.post("/group", optionGroupController.createOrUpdateGroup);
 
+router.post("/v1/group", optionGroupController.addGroup);
+
+router.post("/v1/option", optionGroupController.addOption);
+
 router.patch("/group/:id", optionGroupController.editGroup);
 
 router.delete("/group/:id", optionGroupController.removeGroup);

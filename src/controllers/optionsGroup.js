@@ -86,8 +86,55 @@ exports.createOrUpdateGroup = async (req, res) => {
     });
   } catch (error) {
     Logger.error(error);
-    console.log(error);
+    return res.status(500).json({ message: "internal server error!" });
+  }
+};
 
+exports.addGroup = async (req, res) => {
+  const products = req.body.products;
+  const group = req.body.group;
+
+  try {
+    const groupsList = [];
+    for (const product of products) {
+      groupsList.push({
+        productId: product,
+        name: group.name,
+        type: group.type,
+      });
+    }
+    const createdGroups = await OptionGroup.bulkCreate(groupsList, {
+      returning: true, // Ensure created entries are returned
+    });
+
+    return res.status(200).json({
+      message: "success",
+      groups: createdGroups,
+    });
+  } catch (error) {
+    Logger.error(error);
+    return res.status(500).json({ message: "internal server error!" });
+  }
+};
+
+exports.addOption = async (req, res) => {
+  const { name, value, groupId } = req.body;
+  try {
+    console.log(req.files);
+
+    const option = await Option.create({
+      name: name,
+      value: value,
+      optionsGroupId: groupId,
+      image: req.files.image ? req.files.image[0].location : null,
+    });
+
+    return res.status(200).json({
+      message: "success",
+      option,
+    });
+  } catch (error) {
+    Logger.error(error);
     return res.status(500).json({ message: "internal server error!" });
   }
 };
@@ -136,6 +183,11 @@ exports.editOption = async (req, res) => {
 
     await option.update(req.body);
 
+    if (req.files.image) {
+      await option.update({
+        image: req.files.image ? req.files.image[0].location : null,
+      });
+    }
     return res.status(200).json({
       message: "success",
       option,
