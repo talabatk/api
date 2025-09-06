@@ -271,7 +271,7 @@ exports.getUserByToken = async (req, res) => {
 
     const user = await User.findOne({
       where: { token },
-      include: [Vendor, { model: Admin, include: AdminRole }],
+      include: [Vendor, { model: Admin }, AdminRole],
       attributes: { exclude: ["password"] },
     });
 
@@ -308,6 +308,7 @@ exports.getUserByToken = async (req, res) => {
         active: user.active,
         role: "admin",
         super_admin: user.admin.super_admin,
+        roles: !user.admin.super_admin ? user.adminRole : null,
         image: user.image ? user.image : null,
         token,
       });
@@ -357,12 +358,12 @@ exports.getAllUsers = async (req, res, next) => {
         limit: limit,
         offset: offset,
         where: filters,
-        include: [City],
+        include: [City, AdminRole, Admin],
       });
     } else {
       users = await User.findAll({
         where: filters,
-        include: [City],
+        include: [City, AdminRole, Admin],
       });
     }
 
@@ -379,17 +380,22 @@ exports.getAllUsers = async (req, res, next) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { id } = req.body;
+  const { id, super_admin } = req.body;
 
   try {
     let user = null;
+    const roles = JSON.parse(req.body.roles || "[]");
+    let reformedRoles = {};
 
     if (id) {
-      user = await User.findByPk(id);
+      user = await User.findByPk(id, {
+        include: [Admin],
+      });
     } else {
       const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
       user = await User.findOne({
         where: { token },
+        include: [Admin],
       });
     }
 
@@ -415,7 +421,30 @@ exports.updateProfile = async (req, res) => {
     }
 
     const updatedUser = await user.update(req.body);
+    roles.forEach((role) => {
+      reformedRoles[role] = true;
+    });
 
+    if (req.body.role === "admin") {
+      await user.admin.update({
+        super_admin: super_admin === "true" ? true : false,
+      });
+
+      let adminRole = await AdminRole.findOne({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      await adminRole.update(reformedRoles);
+
+      if (!adminRole) {
+        adminRole = await AdminRole.create({
+          ...reformedRoles,
+          userId: user.id,
+        });
+      }
+    }
     if (req.files[0]) {
       await user.update({
         image: req.files[0].location,

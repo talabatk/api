@@ -205,8 +205,8 @@ CartProduct.belongsToMany(Option, { through: CartProductOption });
 Option.belongsToMany(CartProduct, { through: CartProductOption });
 
 //assign roles to admin profile
-Admin.hasOne(AdminRole);
-AdminRole.belongsTo(Admin);
+User.hasOne(AdminRole);
+AdminRole.belongsTo(User);
 
 User.hasOne(Vendor);
 Vendor.belongsTo(User);

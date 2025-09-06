@@ -24,12 +24,12 @@ exports.login = async (req, res) => {
     if (key.includes("@")) {
       user = await User.findOne({
         where: { email: key, role: "admin" },
-        include: [{ model: Admin, include: AdminRole }],
+        include: [{ model: Admin }, AdminRole],
       });
     } else {
       user = await User.findOne({
         where: { phone: key, role: "admin" },
-        include: [{ model: Admin, include: AdminRole }],
+        include: [{ model: Admin }, AdminRole],
       });
     }
 
@@ -66,11 +66,12 @@ exports.login = async (req, res) => {
         name: user.name,
         fcm: user.fcm,
         email: user.email,
+        cityId: user.cityId,
         phone: user.phone,
         role: user.role,
         super_admin: user.admin.super_admin,
         image: user.image ? user.image : null,
-        roles: !user.admin.super_admin ? user.admin.adminRole : null,
+        roles: !user.admin.super_admin ? user.adminRole : null,
         token,
       },
     });
@@ -80,16 +81,8 @@ exports.login = async (req, res) => {
 };
 
 exports.createAdmin = async (req, res) => {
-  const {
-    name,
-    email,
-    phone,
-    fcm,
-    password,
-    confirm_password,
-    roles,
-    super_admin,
-  } = req.body;
+  const { name, email, phone, fcm, password, confirm_password, super_admin } =
+    req.body;
 
   if (password !== confirm_password) {
     return res.status(400).json({ error: "passwords not matched" });
@@ -97,7 +90,9 @@ exports.createAdmin = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 12);
+    const roles = JSON.parse(req.body.roles || "[]");
 
+    let reformedRoles = {};
     const user = await User.create({
       name,
       email,
@@ -109,18 +104,18 @@ exports.createAdmin = async (req, res) => {
     });
 
     const admin = await Admin.create({
-      super_admin: !!super_admin,
+      super_admin: super_admin === "true" ? true : false,
       userId: user.id,
     });
 
-    let adminRoles = null;
+    roles.forEach((role) => {
+      reformedRoles[role] = true;
+    });
 
-    if (!super_admin && adminRoles) {
-      adminRoles = await AdminRole.create({
-        ...roles,
-        adminId: admin.id,
-      });
-    }
+    const adminRoles = await AdminRole.create({
+      ...reformedRoles,
+      userId: user.id,
+    });
 
     const token = generateToken(user.id);
 
@@ -199,7 +194,9 @@ exports.editAdmin = async (req, res) => {
 
   try {
     let admin = null;
+    const roles = JSON.parse(req.body.roles || "[]");
 
+    let reformedRoles = {};
     if (id) {
       admin = await User.findByPk(id, {
         include: [Admin],
@@ -215,6 +212,23 @@ exports.editAdmin = async (req, res) => {
       return res.status(404).json({ message: "notfound" });
     }
 
+    roles.forEach((role) => {
+      reformedRoles[role] = true;
+    });
+
+    let adminRole = await AdminRole.findOne({
+      where: {
+        userId: admin.id,
+      },
+    });
+    await adminRole.update(reformedRoles);
+
+    if (!adminRole) {
+      adminRole = await AdminRole.create({
+        ...reformedRoles,
+        userId: admin.id,
+      });
+    }
     // Check if email or phone exists and belongs to someone else
     const { email, phone } = req.body;
     if (
