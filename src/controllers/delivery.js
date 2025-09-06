@@ -103,7 +103,7 @@ exports.createDelivery = async (req, res) => {
       email,
       phone,
       fcm,
-      image: req.files.image ? req.files.image[0].location : null,
+      image: req.files[0] ? req.files[0].location : null,
       role: "delivery",
       password: hashedPassword,
       active,

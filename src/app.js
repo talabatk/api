@@ -38,12 +38,7 @@ morganBody(app, {
 });
 app.use(morganMiddleware);
 
-app.use(
-  upload.fields([
-    { name: "image", maxCount: 3 },
-    { name: "cover", maxCount: 1 },
-  ])
-);
+app.use(upload.any());
 
 app.use("/uploads", express.static("uploads"));
 app.use("/logs", express.static("logs"));

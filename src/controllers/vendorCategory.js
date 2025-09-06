@@ -16,7 +16,7 @@ exports.createVendorCategory = async (req, res, next) => {
     const vendorCategory = await VendorCategory.create({
       name,
       order: order ? order : +maxOrder + 1,
-      image: req.files.image ? req.files.image[0].location : null,
+      image: req.files[0] ? req.files[0].location : null,
     });
 
     return res
@@ -179,9 +179,9 @@ exports.editOne = async (req, res) => {
 
     await vendorCategory.update(req.body);
 
-    if (req.files.image) {
+    if (req.files[0]) {
       await vendorCategory.update({
-        image: req.files.image[0].location,
+        image: req.files[0].location,
       });
     }
 

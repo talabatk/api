@@ -62,23 +62,14 @@ exports.createProduct = async (req, res) => {
       order,
     });
 
-    const images = await ProductImage.bulkCreate(
-      req.files.image.map((file) => ({
-        productId: product.id,
-        image: file.location,
-      }))
-    );
-
-    const imagesWithUrl = images.map((image) => {
-      return {
-        ...image.toJSON(),
-        image: image.image,
-      };
+    const image = await ProductImage.create({
+      productId: product.id,
+      image: req.files[0].location,
     });
 
     return res.status(201).json({
       message: "success",
-      product: { ...product.toJSON(), images: imagesWithUrl },
+      product: { ...product.toJSON(), images: image },
     });
   } catch (error) {
     Logger.error(error);
@@ -401,15 +392,13 @@ exports.editOne = async (req, res) => {
 
     await product.update(req.body);
 
-    if (req.files.image) {
+    if (req.files[0]) {
       await ProductImage.destroy({ where: { productId: product.id } });
 
-      await ProductImage.bulkCreate(
-        req.files.image?.map((file) => ({
-          productId: product.id,
-          image: file.location,
-        }))
-      );
+      await ProductImage.create({
+        productId: product.id,
+        image: req.files[0].location,
+      });
     }
 
     return res.status(200).json({

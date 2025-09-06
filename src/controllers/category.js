@@ -15,7 +15,7 @@ exports.createCategory = async (req, res, next) => {
     const category = await Category.create({
       name,
       order: order ? order : +maxOrder + 1,
-      image: req.files.image ? req.files.image[0].location : null,
+      image: req.files[0] ? req.files[0].location : null,
       type: type ? type : "restaurant",
     });
 
@@ -117,9 +117,9 @@ exports.editOne = async (req, res) => {
 
     await category.update(req.body);
 
-    if (req.files.image) {
+    if (req.files[0]) {
       await category.update({
-        image: req.files.image[0].location,
+        image: req.files[0].location,
       });
     }
 

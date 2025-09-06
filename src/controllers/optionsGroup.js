@@ -3,30 +3,49 @@ const Option = require("../models/option");
 const Logger = require("../util/logger");
 
 exports.createOrUpdateGroup = async (req, res) => {
-  const groups = req.body.groups;
-  const products = req.body.products;
   try {
+    // Parse incoming JSON
+    const groups = JSON.parse(req.body.groups || "[]");
+    const products = JSON.parse(req.body.products || "[]");
+
     const groupsList = [];
     const options = [];
     const updatedGroups = [];
 
-    // Process groups and products
+    // 1. Attach images from req.files to corresponding options
+    if (req.files && req.files.length > 0) {
+      req.files.forEach((file) => {
+        // Example: fieldname = "groups[0][options][1][image]"
+        const match = file.fieldname.match(
+          /groups\[(\d+)\]\[options\]\[(\d+)\]\[image\]/
+        );
+        if (match) {
+          const groupIndex = parseInt(match[1], 10);
+          const optionIndex = parseInt(match[2], 10);
+          if (groups[groupIndex] && groups[groupIndex].options[optionIndex]) {
+            groups[groupIndex].options[optionIndex].image = file.location; // or file.filename if using multer storage
+          }
+        }
+      });
+    }
+
+    // 2. Process groups & products
     for (const group of groups) {
       for (const product of products) {
-        // Check if group exists for this product
         const existingGroup = await OptionGroup.findOne({
-          where: { productId: product, id: group?.id ? group?.id : null },
+          where: { productId: product, id: group?.id || null },
         });
 
         if (existingGroup) {
-          // Update the existing group
-          await existingGroup.update(group);
+          await existingGroup.update({
+            name: group.name,
+            type: group.type,
+          });
           updatedGroups.push({
             ...existingGroup.toJSON(),
             options: group.options,
           });
         } else {
-          // Add to the list of new groups to create
           groupsList.push({
             productId: product,
             name: group.name,
@@ -37,40 +56,42 @@ exports.createOrUpdateGroup = async (req, res) => {
       }
     }
 
-    // Bulk create new groups
+    // 3. Bulk create new groups
     const createdGroups = await OptionGroup.bulkCreate(groupsList, {
-      returning: true, // Ensure created entries are returned
+      returning: true,
     });
-    const newGroups = createdGroups.map((group, index) => {
-      return { ...group.toJSON(), options: groupsList[index].options };
-    });
-    // Combine created and updated groups
+    const newGroups = createdGroups.map((group, i) => ({
+      ...group.toJSON(),
+      options: groupsList[i].options,
+    }));
+
     const allGroups = [...newGroups, ...updatedGroups];
 
-    // Process options for each group
+    // 4. Process options
     for (const group of allGroups) {
       const groupOptions = group.options || [];
       for (const option of groupOptions) {
-        // Check if option exists
         const existingOption = await Option.findOne({
-          where: { optionsGroupId: group.id, id: option.id ? option.id : null },
+          where: { optionsGroupId: group.id, id: option.id || null },
         });
 
         if (existingOption) {
-          // Update existing option
-          await existingOption.update(option);
+          await existingOption.update({
+            name: option.name,
+            value: option.value,
+            image: option.image || existingOption.image,
+          });
         } else {
-          // Add to options list for bulk creation
           options.push({
             name: option.name,
             value: option.value,
+            image: option.image || null,
             optionsGroupId: group.id,
           });
         }
       }
     }
 
-    // // Bulk create new options
     const optionsRes = await Option.bulkCreate(options, { returning: true });
 
     return res.status(200).json({
@@ -78,14 +99,15 @@ exports.createOrUpdateGroup = async (req, res) => {
       groups: allGroups.map((group) => {
         return {
           group,
-          options: optionsRes.filter(
-            (option) => option.optionsGroupId === group.id
-          ),
+          options: [
+            ...optionsRes.filter((opt) => opt.optionsGroupId === group.id),
+            ...(group.options || []).filter((opt) => opt.id), // keep updated ones too
+          ],
         };
       }),
     });
   } catch (error) {
-    Logger.error(error);
+    console.error(error);
     return res.status(500).json({ message: "internal server error!" });
   }
 };

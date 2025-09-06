@@ -120,6 +120,8 @@ exports.createVendor = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 12);
+    const cover = req.files.find((file) => file.fieldname === "cover");
+    const image = req.files.find((file) => file.fieldname === "image");
 
     const user = await User.create({
       name,
@@ -127,16 +129,15 @@ exports.createVendor = async (req, res) => {
       phone,
       fcm,
       address,
-      image: req.files.image ? req.files.image[0].location : null,
+      image: image ? image.location : null,
       role: "vendor",
       password: hashedPassword,
       cityId,
     });
-
     const vendor = await Vendor.create({
       description,
       userId: user.id,
-      cover: req.files.cover ? req.files.cover[0].location : null,
+      cover: cover ? cover.location : null,
       status,
       free_delivery_limit,
       delivery_time,
@@ -296,7 +297,8 @@ exports.editVendor = async (req, res) => {
 
   try {
     let vendor = null;
-
+    const cover = req.files.find((file) => file.fieldname === "cover");
+    const image = req.files.find((file) => file.fieldname === "image");
     if (id) {
       vendor = await User.findByPk(id, {
         include: [Vendor, Area],
@@ -333,14 +335,14 @@ exports.editVendor = async (req, res) => {
 
     const updatedVendor = await vendor.update(req.body);
 
-    if (req.files.image) {
+    if (image) {
       await vendor.update({
-        image: req.files.image[0].location,
+        image: image.location,
       });
     }
 
-    if (req.files.cover) {
-      await vendor.vendor.update({ cover: req.files.cover[0].location });
+    if (cover) {
+      await vendor.vendor.update({ cover: cover.location });
     }
 
     if (categories) {
