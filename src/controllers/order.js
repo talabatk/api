@@ -117,8 +117,6 @@ exports.createOrder = async (req, res) => {
 
   const { areaId, address, name, phone, location, notes, lang, lat } = req.body;
 
-  console.log(req.body);
-
   try {
     let vendor = null;
 
@@ -238,6 +236,9 @@ exports.createOrder = async (req, res) => {
 
     if (+user.points >= +shipping + +total) {
       isFree = true;
+      await user.update({
+        points: +user.points - +shipping + +total,
+      });
     }
 
     //save order
@@ -473,7 +474,7 @@ exports.getAllOrders = async (req, res) => {
     }
 
     if (cityId) {
-      filters.cityId = cityId;
+      filters.cityId = +cityId;
     }
 
     if (vendorId) {

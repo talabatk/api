@@ -181,6 +181,9 @@ Alert.belongsToMany(City, { through: CityAlerts });
 City.hasMany(User);
 User.belongsTo(City);
 
+City.hasMany(Order);
+Order.belongsTo(City);
+
 Order.hasMany(OrderTimeLine);
 OrderTimeLine.belongsTo(Order);
 
