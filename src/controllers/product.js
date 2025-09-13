@@ -209,7 +209,7 @@ exports.getAll = async (req, res) => {
 exports.bulkCreate = async (req, res) => {
   try {
     // Assuming file uploaded via multer and available at req.file.path
-    const fileUrl = req.files.image[0].location;
+    const fileUrl = req.files[0].location;
     const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}.xlsx`);
 
     // Download the file from Spaces
