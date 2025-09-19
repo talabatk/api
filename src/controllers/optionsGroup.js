@@ -5,7 +5,8 @@ const Logger = require("../util/logger");
 exports.createOrUpdateGroup = async (req, res) => {
   try {
     // Parse incoming JSON
-    const groups = JSON.parse(req.body.groups || "[]");
+
+    const groups = JSON.parse(req.body.groupsData || "[]");
     const products = JSON.parse(req.body.products || "[]");
 
     const groupsList = [];
@@ -23,7 +24,7 @@ exports.createOrUpdateGroup = async (req, res) => {
           const groupIndex = parseInt(match[1], 10);
           const optionIndex = parseInt(match[2], 10);
           if (groups[groupIndex] && groups[groupIndex].options[optionIndex]) {
-            groups[groupIndex].options[optionIndex].image = file.location; // or file.filename if using multer storage
+            groups[groupIndex].options[optionIndex].image = file.location;
           }
         }
       });
