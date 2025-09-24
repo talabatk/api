@@ -1,28 +1,72 @@
-const Product = require("../models/product");
+import { startOfMonth, subMonths } from "date-fns";
+import Product from "../models/product.js";
+import ProductImage from "../models/productImage.js";
+import User from "../models/user.js";
+import Category from "../models/category.js";
+import { Op, col, fn } from "sequelize";
+import OptionGroup from "../models/optionGroup.js";
+import Option from "../models/option.js";
+import Order from "../models/order.js";
+import Vendor from "../models/vendor.js";
+import Logger from "../util/logger.js";
+import Alert from "../models/alert.js";
+import CartProduct from "../models/cartProduct.js";
+import XLSX from "xlsx";
+import fs from "fs";
+import path from "path";
+import axios from "axios";
+import os from "os";
+import City from "../models/city.js";
+import Area from "../models/area.js";
 
-const ProductImage = require("../models/productImage");
+export const getMonthlySales = async (cityId) => {
+  // من أول يوم في الشهر الحالي - 11 شهر (آخر 12 شهر)
+  const startDate = startOfMonth(subMonths(new Date(), 11));
 
-const User = require("../models/user");
+  const result = await Order.findAll({
+    attributes: [
+      // نجيب السنة والشهر
+      [fn("YEAR", col("createdAt")), "year"],
+      [fn("MONTH", col("createdAt")), "month"],
+      // مجموع المدفوع
+      [fn("SUM", col("total")), "total"],
+      // مجموع الكمية
+      [fn("SUM", col("shipping")), "shipping"],
+    ],
+    where: cityId
+      ? {
+          cityId: +cityId,
+          createdAt: {
+            [Op.gte]: startDate,
+          },
+        }
+      : {
+          createdAt: {
+            [Op.gte]: startDate,
+          },
+        },
+    group: [fn("YEAR", col("createdAt")), fn("MONTH", col("createdAt"))],
+    order: [
+      [fn("YEAR", col("createdAt")), "ASC"],
+      [fn("MONTH", col("createdAt")), "ASC"],
+    ],
+    raw: true,
+  });
 
-const Category = require("../models/category");
+  // نرجعهم بشكل مرتب (YYYY-MM => {totalPaid, totalQty})
+  const monthly = result.reduce((acc, row) => {
+    const monthKey = `${row.year}-${row.month}`;
+    acc[monthKey] = {
+      total: parseFloat(row.total) || 0,
+      shipping: parseInt(row.shipping) || 0,
+    };
+    return acc;
+  });
 
-const { Op, where } = require("sequelize");
-const OptionGroup = require("../models/optionGroup");
-const Option = require("../models/option");
-const Order = require("../models/order");
-const Vendor = require("../models/vendor");
-const Logger = require("../util/logger");
-const Alert = require("../models/alert");
-const CartProduct = require("../models/cartProduct");
-const Cart = require("../models/cart");
-const XLSX = require("xlsx");
-const fs = require("fs");
-const path = require("path");
-const axios = require("axios");
-const os = require("os");
-const City = require("../models/city");
+  return monthly;
+};
 
-exports.createProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   const {
     title,
     description,
@@ -77,7 +121,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-exports.getAll = async (req, res) => {
+export const getAll = async (req, res) => {
   const {
     size,
     page,
@@ -206,7 +250,7 @@ exports.getAll = async (req, res) => {
   }
 };
 
-exports.bulkCreate = async (req, res) => {
+export const bulkCreate = async (req, res) => {
   try {
     // Assuming file uploaded via multer and available at req.file.path
     const fileUrl = req.files[0].location;
@@ -253,7 +297,7 @@ exports.bulkCreate = async (req, res) => {
   }
 };
 
-exports.getOne = async (req, res) => {
+export const getOne = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -290,7 +334,7 @@ exports.getOne = async (req, res) => {
   }
 };
 
-exports.getOneProduct = async (req, res) => {
+export const getOneProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -327,7 +371,7 @@ exports.getOneProduct = async (req, res) => {
   }
 };
 
-exports.editOne = async (req, res) => {
+export const editOne = async (req, res) => {
   const { id } = req.params;
   try {
     const product = await Product.findByPk(id, {
@@ -411,7 +455,7 @@ exports.editOne = async (req, res) => {
   }
 };
 
-exports.deleteOne = async (req, res) => {
+export const deleteOne = async (req, res) => {
   const { id } = req.params;
   try {
     Product.destroy({ where: { id } }).then(() =>
@@ -423,7 +467,7 @@ exports.deleteOne = async (req, res) => {
   }
 };
 
-exports.deleteProductImage = async (req, res) => {
+export const deleteProductImage = async (req, res) => {
   const { id } = req.params;
 
   ProductImage.destroy({ where: { id } })
@@ -431,17 +475,40 @@ exports.deleteProductImage = async (req, res) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-exports.dataAnalysis = async (req, res) => {
+export const dataAnalysis = async (req, res) => {
+  const { cityId } = req.query;
   try {
     const products = await Product.count(); // Get total number of products
 
-    const customers = await User.count({ where: { role: "customer" } }); // Get total number of customers
+    const areas = await Area.count({
+      where: cityId ? { cityId: +cityId } : {},
+    }); // Get total number of products
+
+    const customers = await User.count({
+      where: cityId
+        ? { role: "customer", cityId: +cityId }
+        : { role: "customer" },
+    }); // Get total number of customers
+
+    const vendors = await User.count({
+      where: cityId
+        ? { role: "vendor", active: true, cityId: +cityId }
+        : { role: "vendor", active: true },
+    }); // Get total number of vendors
 
     const onlineDeliveries = await User.count({
-      where: { role: "delivery", online: true },
+      where: cityId
+        ? { role: "delivery", online: true, cityId: +cityId }
+        : { role: "delivery", online: true },
     });
 
-    const orders = await Order.count();
+    const orders = await Order.count({
+      where: cityId ? { cityId: +cityId } : {},
+    });
+
+    const deletedOrders = await Order.count({
+      where: cityId ? { cityId: +cityId, deleted: true } : { deleted: true },
+    });
 
     const app_status = await Alert.findOne({
       attributes: ["content", "active"],
@@ -473,10 +540,17 @@ exports.dataAnalysis = async (req, res) => {
         name: "points",
       },
     });
+    const mothly = await getMonthlySales(cityId);
+
     return res.status(200).json({
       products,
       customers,
       orders,
+      vendors,
+      areas,
+      mothly,
+      activeOrders: orders - deletedOrders,
+      deletedOrders,
       onlineDeliveries,
       app_status,
       alert,
