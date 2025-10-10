@@ -18,6 +18,10 @@ const Option = sequelize.define("option", {
     allowNull: false,
     defaultValue: 0,
   },
+  generalOption: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
   image: {
     type: Sequelize.STRING,
     allowNull: false,

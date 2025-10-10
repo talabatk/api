@@ -140,6 +140,8 @@ const VendorCategoryRoutes = require("./routes/vendorCategory");
 const messageRoutes = require("./routes/message");
 const cityRoutes = require("./routes/city");
 const CityAlerts = require("./models/cityAlerts");
+const GeneralOption = require("./models/generalOption");
+const GeneralOptionRoutes = require("./routes/generalOption");
 
 //--------relations---------------------------
 
@@ -299,6 +301,8 @@ app.use("/api", complainRoutes);
 app.use("/api", messageRoutes);
 
 app.use("/api", cityRoutes);
+
+app.use("/api", GeneralOptionRoutes);
 
 app.route("/").get((_req, res) => {
   // #swagger.ignore = true

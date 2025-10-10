@@ -1053,6 +1053,7 @@ exports.deleteOrders = async (req, res) => {
       });
       filters.vendorId = vendor.id;
     }
+
     let start_Date = new Date(startDate);
     let end_date = new Date(endDate);
     end_date.setDate(end_date.getDate() + 1);
@@ -1065,6 +1066,8 @@ exports.deleteOrders = async (req, res) => {
         ],
       };
     }
+    console.log(filters);
+
     await Order.update({ deleted: true }, { where: filters });
 
     return res.status(200).json({ message: "order deleted" });

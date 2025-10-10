@@ -1,6 +1,7 @@
 const OptionGroup = require("../models/optionGroup");
 const Option = require("../models/option");
 const Logger = require("../util/logger");
+const GeneralOption = require("../models/generalOption");
 
 exports.createOrUpdateGroup = async (req, res) => {
   try {
@@ -141,21 +142,35 @@ exports.addGroup = async (req, res) => {
 };
 
 exports.addOption = async (req, res) => {
-  const { name, value, groupId } = req.body;
+  let { name, value, groupId, generalOptionId } = req.body;
   try {
-    console.log(req.files);
+    if (generalOptionId) {
+      const generalOption = await GeneralOption.findByPk(+generalOptionId);
+      const option = await Option.create({
+        name: generalOption.name,
+        value: value,
+        optionsGroupId: groupId,
+        image: generalOption.image,
+        generalOption: +generalOptionId,
+      });
 
-    const option = await Option.create({
-      name: name,
-      value: value,
-      optionsGroupId: groupId,
-      image: req.files.image ? req.files.image[0].location : null,
-    });
+      return res.status(200).json({
+        message: "success",
+        option,
+      });
+    } else {
+      const option = await Option.create({
+        name: name,
+        value: value,
+        optionsGroupId: groupId,
+        image: req.files.image ? req.files.image[0].location : null,
+      });
 
-    return res.status(200).json({
-      message: "success",
-      option,
-    });
+      return res.status(200).json({
+        message: "success",
+        option,
+      });
+    }
   } catch (error) {
     Logger.error(error);
     return res.status(500).json({ message: "internal server error!" });
