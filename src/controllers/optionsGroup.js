@@ -84,12 +84,26 @@ exports.createOrUpdateGroup = async (req, res) => {
             image: option.image || existingOption.image,
           });
         } else {
-          options.push({
-            name: option.name,
-            value: option.value,
-            image: option.image || null,
-            optionsGroupId: group.id,
-          });
+          if (option.generalOptionId) {
+            const generalOption = await GeneralOption.findByPk(
+              +option.generalOptionId
+            );
+            options.push({
+              name: generalOption.name,
+              value: option.value,
+              image: generalOption.image,
+              generalOption: +option.generalOptionId,
+              value: option.value,
+              optionsGroupId: group.id,
+            });
+          } else {
+            options.push({
+              name: option.name,
+              value: option.value,
+              image: option.image || null,
+              optionsGroupId: group.id,
+            });
+          }
         }
       }
     }
