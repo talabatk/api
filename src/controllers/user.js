@@ -267,7 +267,6 @@ exports.confirmOtp = async (req, res) => {
 exports.getUserByToken = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
-    console.log(token);
 
     const user = await User.findOne({
       where: { token },
@@ -279,7 +278,7 @@ exports.getUserByToken = async (req, res) => {
       return res.status(404).json({ message: "notfound" });
     }
 
-    const { id, name, email, phone, address, fcm } = user;
+    const { id, name, email, phone, address, fcm, cityId } = user;
 
     if (user.vendor) {
       return res.status(200).json({
@@ -288,6 +287,7 @@ exports.getUserByToken = async (req, res) => {
         email,
         phone,
         address,
+        cityId,
         fcm,
         role: "vendor",
         description: user.vendor.description,
@@ -304,6 +304,7 @@ exports.getUserByToken = async (req, res) => {
         name,
         email,
         phone,
+        cityId,
         fcm,
         active: user.active,
         role: "admin",
@@ -317,6 +318,7 @@ exports.getUserByToken = async (req, res) => {
       id,
       name,
       email,
+      cityId,
       address,
       phone,
       fcm,
@@ -338,6 +340,15 @@ exports.getAllUsers = async (req, res, next) => {
   const role = req.query.role;
   const search = req.query.search;
   try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+      include: [{ model: Admin }],
+      attributes: { exclude: ["password"] },
+    });
+    let cityId = null;
+
     const limit = Number.parseInt(size);
     const offset = (Number.parseInt(page) - 1) * limit;
 
@@ -345,6 +356,10 @@ exports.getAllUsers = async (req, res, next) => {
 
     if (role) {
       filters.role = role;
+    }
+
+    if (user.admin && !user.admin.super_admin) {
+      filters.cityId = user.cityId;
     }
 
     if (search) {
@@ -421,6 +436,7 @@ exports.updateProfile = async (req, res) => {
     }
 
     const updatedUser = await user.update(req.body);
+
     roles.forEach((role) => {
       reformedRoles[role] = true;
     });
@@ -434,6 +450,16 @@ exports.updateProfile = async (req, res) => {
         where: {
           userId: user.id,
         },
+      });
+
+      await adminRole.update({
+        manage_orders: false,
+        manage_products: false,
+        manage_users: false,
+        manage_cities: false,
+        manage_categories: false,
+        manage_deliveries: false,
+        manage_vendors: false,
       });
 
       await adminRole.update(reformedRoles);

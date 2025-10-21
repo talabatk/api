@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 
 //models===============================
 const User = require("../models/user");
+const Admin = require("../models/admin");
+const AdminRole = require("../models/adminRole");
 const Vendor = require("../models/vendor");
 const Area = require("../models/area");
 const Logger = require("../util/logger");
@@ -189,7 +191,18 @@ exports.createVendor = async (req, res) => {
 };
 
 exports.getAllVendors = async (req, res) => {
-  const { cityId } = req.query;
+  let { cityId } = req.query;
+  const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+  const user = await User.findOne({
+    where: { token },
+    include: [{ model: Admin }, AdminRole],
+    attributes: { exclude: ["password"] },
+  });
+
+  if (user.admin && !user.admin.super_admin) {
+    cityId = user.cityId;
+  }
   try {
     const filters = {};
     filters.role = "vendor";

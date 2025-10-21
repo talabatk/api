@@ -197,6 +197,7 @@ exports.editAdmin = async (req, res) => {
     const roles = JSON.parse(req.body.roles || "[]");
 
     let reformedRoles = {};
+
     if (id) {
       admin = await User.findByPk(id, {
         include: [Admin],
@@ -221,6 +222,18 @@ exports.editAdmin = async (req, res) => {
         userId: admin.id,
       },
     });
+
+    await adminRole.update({
+      manage_orders: false,
+      manage_products: false,
+      manage_users: false,
+      manage_cities: false,
+      manage_categories: false,
+      manage_deliveries: false,
+      manage_vendors: false,
+    });
+    console.log(reformedRoles);
+
     await adminRole.update(reformedRoles);
 
     if (!adminRole) {

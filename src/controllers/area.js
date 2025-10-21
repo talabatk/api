@@ -1,5 +1,7 @@
+const Admin = require("../models/admin");
 const Area = require("../models/area");
 const City = require("../models/city");
+const User = require("../models/user");
 const Logger = require("../util/logger");
 
 exports.createArea = async (req, res, next) => {
@@ -21,7 +23,18 @@ exports.createArea = async (req, res, next) => {
 };
 
 exports.getAll = async (req, res, next) => {
-  const { cityId } = req.query;
+  let { cityId } = req.query;
+
+  const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+  const user = await User.findOne({
+    where: { token },
+    include: [{ model: Admin }],
+    attributes: { exclude: ["password"] },
+  });
+  if (user.admin && !user.admin.super_admin) {
+    cityId = user.cityId;
+  }
 
   Area.findAll({
     where: cityId

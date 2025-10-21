@@ -18,6 +18,7 @@ import axios from "axios";
 import os from "os";
 import City from "../models/city.js";
 import Area from "../models/area.js";
+import Admin from "../models/admin.js";
 
 export const getMonthlySales = async (cityId) => {
   // من أول يوم في الشهر الحالي - 11 شهر (آخر 12 شهر)
@@ -106,10 +107,13 @@ export const createProduct = async (req, res) => {
       order,
     });
 
-    const image = await ProductImage.create({
-      productId: product.id,
-      image: req.files[0].location,
-    });
+    let image = null;
+    if (req.files[0]) {
+      image = await ProductImage.create({
+        productId: product.id,
+        image: req.files[0].location,
+      });
+    }
 
     return res.status(201).json({
       message: "success",
@@ -135,6 +139,18 @@ export const getAll = async (req, res) => {
   } = req.query;
 
   try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+      include: [{ model: Admin }],
+      attributes: { exclude: ["password"] },
+    });
+    let cityId = null;
+    if (user.admin && !user.admin.super_admin) {
+      cityId = user.cityId;
+    }
+
     const limit = Number.parseInt(size);
     const offset = (Number.parseInt(page) - 1) * limit;
 
@@ -194,9 +210,14 @@ export const getAll = async (req, res) => {
             model: User,
             attributes: ["id", "name", "email", "phone", "image"],
             include: Vendor,
-            where: {
-              active: true,
-            },
+            where: cityId
+              ? {
+                  active: true,
+                  cityId,
+                }
+              : {
+                  active: true,
+                },
           },
           {
             model: Category,
@@ -476,8 +497,19 @@ export const deleteProductImage = async (req, res) => {
 };
 
 export const dataAnalysis = async (req, res) => {
-  const { cityId } = req.query;
+  let { cityId } = req.query;
   try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+      include: [{ model: Admin }],
+      attributes: { exclude: ["password"] },
+    });
+    if (user.admin && !user.admin.super_admin) {
+      cityId = user.cityId;
+    }
+
     const products = await Product.count(); // Get total number of products
 
     const areas = await Area.count({
