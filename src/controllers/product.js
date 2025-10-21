@@ -147,7 +147,7 @@ export const getAll = async (req, res) => {
       attributes: { exclude: ["password"] },
     });
     let cityId = null;
-    if (user.admin && !user.admin.super_admin) {
+    if (user && user?.admin && !user.admin?.super_admin) {
       cityId = user.cityId;
     }
 

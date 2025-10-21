@@ -358,7 +358,7 @@ exports.getAllUsers = async (req, res, next) => {
       filters.role = role;
     }
 
-    if (user.admin && !user.admin.super_admin) {
+    if (user && user?.admin && !user.admin.super_admin) {
       filters.cityId = user.cityId;
     }
 
