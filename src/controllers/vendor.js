@@ -200,9 +200,10 @@ exports.getAllVendors = async (req, res) => {
     attributes: { exclude: ["password"] },
   });
 
-  if (user.admin && !user.admin.super_admin) {
+  if (user && user?.admin && !user.admin?.super_admin) {
     cityId = user.cityId;
   }
+
   try {
     const filters = {};
     filters.role = "vendor";
