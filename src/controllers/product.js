@@ -20,7 +20,7 @@ const City = require("../models/city.js");
 const Area = require("../models/area.js");
 const Admin = require("../models/admin.js");
 
-export const getMonthlySales = async (cityId) => {
+async function getMonthlySales(cityId) {
   // من أول يوم في الشهر الحالي - 11 شهر (آخر 12 شهر)
   const startDate = startOfMonth(subMonths(new Date(), 11));
 
@@ -65,9 +65,9 @@ export const getMonthlySales = async (cityId) => {
   });
 
   return monthly;
-};
+}
 
-export const createProduct = async (req, res) => {
+exports.createProduct = async (req, res) => {
   const {
     title,
     description,
@@ -125,7 +125,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-export const getAll = async (req, res) => {
+exports.getAll = async (req, res) => {
   const {
     size,
     page,
@@ -271,7 +271,7 @@ export const getAll = async (req, res) => {
   }
 };
 
-export const bulkCreate = async (req, res) => {
+exports.bulkCreate = async (req, res) => {
   try {
     // Assuming file uploaded via multer and available at req.file.path
     const fileUrl = req.files[0].location;
@@ -318,7 +318,7 @@ export const bulkCreate = async (req, res) => {
   }
 };
 
-export const getOne = async (req, res) => {
+exports.getOne = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -355,7 +355,7 @@ export const getOne = async (req, res) => {
   }
 };
 
-export const getOneProduct = async (req, res) => {
+exports.getOneProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -392,7 +392,7 @@ export const getOneProduct = async (req, res) => {
   }
 };
 
-export const editOne = async (req, res) => {
+exports.editOne = async (req, res) => {
   const { id } = req.params;
   try {
     const product = await Product.findByPk(id, {
@@ -476,7 +476,7 @@ export const editOne = async (req, res) => {
   }
 };
 
-export const deleteOne = async (req, res) => {
+exports.deleteOne = async (req, res) => {
   const { id } = req.params;
   try {
     Product.destroy({ where: { id } }).then(() =>
@@ -488,7 +488,7 @@ export const deleteOne = async (req, res) => {
   }
 };
 
-export const deleteProductImage = async (req, res) => {
+exports.deleteProductImage = async (req, res) => {
   const { id } = req.params;
 
   ProductImage.destroy({ where: { id } })
@@ -496,7 +496,7 @@ export const deleteProductImage = async (req, res) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-export const dataAnalysis = async (req, res) => {
+exports.dataAnalysis = async (req, res) => {
   let { cityId } = req.query;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
