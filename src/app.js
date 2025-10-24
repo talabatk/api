@@ -14,13 +14,6 @@ const {
 } = require("./middlewares/morgan");
 const morganBody = require("morgan-body");
 const Logger = require("./util/logger");
-const admin = require("firebase-admin");
-
-const serviceAccount = require("./talabatek-firebase.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
 
 configDotenv();
 
@@ -50,9 +43,15 @@ app.use(upload.any());
 app.use("/uploads", express.static("uploads"));
 app.use("/logs", express.static("logs"));
 
-app.options("*", cors()); // include before other routes
+// app.options("*", cors()); // include before other routes
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://talabatk.top"], // ✅ allow only your front domain
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    credentials: true,
+  })
+);
 
 let io;
 
