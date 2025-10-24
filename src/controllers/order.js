@@ -457,6 +457,14 @@ exports.getAllOrders = async (req, res) => {
     cityId,
   } = req.query;
   try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+      include: [{ model: Admin }],
+      attributes: { exclude: ["password"] },
+    });
+
     const limit = Number.parseInt(size);
     const offset = (Number.parseInt(page) - 1) * limit;
 
@@ -487,13 +495,6 @@ exports.getAllOrders = async (req, res) => {
     if (status) {
       filters.status = status;
     }
-    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
-
-    const user = await User.findOne({
-      where: { token },
-      include: [{ model: Admin }],
-      attributes: { exclude: ["password"] },
-    });
 
     if (user && user?.admin && !user.admin?.super_admin) {
       filters.cityId = +user.cityId;
@@ -681,7 +682,7 @@ exports.updateOrder = async (req, res) => {
           status === "preparing" ? "طلبك قيد التحضير" : "تم رفض طلبك"
         );
       }
-      if (order.user.fcm) {
+      if (order.user.fcm && status !== "finished") {
         await messaging
           .send({
             token: order.user.fcm,
