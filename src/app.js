@@ -14,6 +14,13 @@ const {
 } = require("./middlewares/morgan");
 const morganBody = require("morgan-body");
 const Logger = require("./util/logger");
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./talabatek-firebase.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 configDotenv();
 
