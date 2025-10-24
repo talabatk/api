@@ -506,7 +506,7 @@ exports.dataAnalysis = async (req, res) => {
       include: [{ model: Admin }],
       attributes: { exclude: ["password"] },
     });
-    if (user.admin && !user.admin.super_admin) {
+    if (user && user.admin && !user.admin.super_admin) {
       cityId = user.cityId;
     }
 
