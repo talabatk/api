@@ -1,24 +1,24 @@
-import { startOfMonth, subMonths } from "date-fns";
-import Product from "../models/product.js";
-import ProductImage from "../models/productImage.js";
-import User from "../models/user.js";
-import Category from "../models/category.js";
-import { Op, col, fn } from "sequelize";
-import OptionGroup from "../models/optionGroup.js";
-import Option from "../models/option.js";
-import Order from "../models/order.js";
-import Vendor from "../models/vendor.js";
-import Logger from "../util/logger.js";
-import Alert from "../models/alert.js";
-import CartProduct from "../models/cartProduct.js";
-import XLSX from "xlsx";
-import fs from "fs";
-import path from "path";
-import axios from "axios";
-import os from "os";
-import City from "../models/city.js";
-import Area from "../models/area.js";
-import Admin from "../models/admin.js";
+const { startOfMonth, subMonths } = require("date-fns");
+const Product = require("../models/product.js");
+const ProductImage = require("../models/productImage.js");
+const User = require("../models/user.js");
+const Category = require("../models/category.js");
+const { Op, col, fn } = require("sequelize");
+const OptionGroup = require("../models/optionGroup.js");
+const Option = require("../models/option.js");
+const Order = require("../models/order.js");
+const Vendor = require("../models/vendor.js");
+const Logger = require("../util/logger.js");
+const Alert = require("../models/alert.js");
+const CartProduct = require("../models/cartProduct.js");
+const XLSX = require("xlsx");
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
+const os = require("os");
+const City = require("../models/city.js");
+const Area = require("../models/area.js");
+const Admin = require("../models/admin.js");
 
 export const getMonthlySales = async (cityId) => {
   // من أول يوم في الشهر الحالي - 11 شهر (آخر 12 شهر)
