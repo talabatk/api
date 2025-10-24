@@ -17,6 +17,7 @@ const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 const ProductImage = require("../models/productImage");
 const Alert = require("../models/alert");
+const Admin = require("../models/admin");
 
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
@@ -486,6 +487,18 @@ exports.getAllOrders = async (req, res) => {
     if (status) {
       filters.status = status;
     }
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+      include: [{ model: Admin }],
+      attributes: { exclude: ["password"] },
+    });
+
+    if (user && user?.admin && !user.admin?.super_admin) {
+      filters.cityId = +user.cityId;
+    }
+
     let start_Date = new Date(startDate);
     let end_date = new Date(endDate);
     end_date.setDate(end_date.getDate() + 1);
