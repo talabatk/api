@@ -317,26 +317,8 @@ exports.createOrder = async (req, res) => {
 
     const messaging = admin.messaging();
 
-    await messaging.send({
-      notification: {
-        title: "طلب جديد",
-        body: `هناك طلب جديد من ${name}`,
-      },
-      topic: "delivery",
-      ...soundSetting,
-    });
-
-    await messaging.send({
-      topic: `vendor_${vendor.phone}`,
-      notification: {
-        title: "طلب جديد",
-        body: `هناك طلب جديد من ${name}`,
-      },
-      ...soundSetting,
-    });
-
-    if (vendor.fcm) {
-      try {
+    try {
+      if (vendor.fcm) {
         await messaging.send({
           token: vendor.fcm,
           notification: {
@@ -345,9 +327,27 @@ exports.createOrder = async (req, res) => {
           },
           ...soundSetting,
         });
-      } catch (error) {
-        console.log(error);
       }
+
+      await messaging.send({
+        notification: {
+          title: "طلب جديد",
+          body: `هناك طلب جديد من ${name}`,
+        },
+        topic: "delivery",
+        ...soundSetting,
+      });
+
+      await messaging.send({
+        topic: `vendor_${vendor.phone}`,
+        notification: {
+          title: "طلب جديد",
+          body: `هناك طلب جديد من ${name}`,
+        },
+        ...soundSetting,
+      });
+    } catch (error) {
+      console.log(error);
     }
 
     await Notification.create({
