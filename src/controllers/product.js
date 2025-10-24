@@ -20,7 +20,7 @@ const City = require("../models/city.js");
 const Area = require("../models/area.js");
 const Admin = require("../models/admin.js");
 
-async function getMonthlySales(cityId) {
+const getMonthlySales = async (cityId) => {
   // من أول يوم في الشهر الحالي - 11 شهر (آخر 12 شهر)
   const startDate = startOfMonth(subMonths(new Date(), 11));
 
@@ -65,7 +65,7 @@ async function getMonthlySales(cityId) {
   });
 
   return monthly;
-}
+};
 
 exports.createProduct = async (req, res) => {
   const {
