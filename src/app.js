@@ -23,6 +23,10 @@ const server = http.createServer(app);
 
 // app.use(bodyParser.urlencoded({ extended: false }));
 
+app.options("*", cors()); // include before other routes
+
+app.use(cors());
+
 app.use(bodyParser.json());
 
 app.use(morganMiddlewareImmediate);
@@ -43,10 +47,6 @@ app.use(upload.any());
 
 app.use("/uploads", express.static("uploads"));
 app.use("/logs", express.static("logs"));
-
-app.options("*", cors()); // include before other routes
-
-app.use(cors());
 
 let io;
 
