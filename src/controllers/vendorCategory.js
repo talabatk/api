@@ -46,7 +46,7 @@ exports.getAll = async (req, res, next) => {
               model: User,
               where: {
                 active: true,
-                ...(cityId ? { cityId: +cityId } : {}),
+                ...(cityId && cityId !== "" ? { cityId: +cityId } : {}),
               },
               include: [
                 Area,
