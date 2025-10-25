@@ -320,11 +320,12 @@ const address = `http://localhost:${process.env.PORT}`;
 sequelize
   .sync()
   .then((result) => {
-    server.listen(process.env.PORT || 5000, () => {
+    const PORT = process.env.PORT || 8080;
+    server.listen(PORT, () => {
       console.info(
         "------------------------------------------------------------------------------------------\n"
       );
-      Logger.debug(`Starting APP On -> ${address}`);
+      Logger.debug(`Starting APP On -> http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
