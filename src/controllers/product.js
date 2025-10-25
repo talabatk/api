@@ -499,15 +499,20 @@ exports.deleteProductImage = async (req, res) => {
 exports.dataAnalysis = async (req, res) => {
   let { cityId } = req.query;
   try {
-    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+    const token = req.headers.authorization
+      ? req.headers.authorization.split(" ")[1]
+      : undefined; // get token from Authorization header
 
-    const user = await User.findOne({
-      where: { token },
-      include: [{ model: Admin }],
-      attributes: { exclude: ["password"] },
-    });
-    if (user && user.admin && !user.admin.super_admin) {
-      cityId = user.cityId;
+    if (token) {
+      const user = await User.findOne({
+        where: { token },
+        include: [{ model: Admin }],
+        attributes: { exclude: ["password"] },
+      });
+
+      if (user && user?.admin && !user.admin?.super_admin) {
+        cityId = user.cityId;
+      }
     }
 
     const products = await Product.count(); // Get total number of products
