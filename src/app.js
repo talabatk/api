@@ -50,7 +50,7 @@ app.use("/logs", express.static("logs"));
 
 let io;
 
-export function initSocket(server) {
+function initSocket(server) {
   io = new Server(server, {
     cors: {
       origin: [
