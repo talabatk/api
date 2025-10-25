@@ -1,8 +1,8 @@
 const express = require("express");
-const multer = require("multer");
+// const multer = require("multer");
 const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 const http = require("node:http");
 const cors = require("cors");
 const cron = require("node-cron");
@@ -48,48 +48,48 @@ app.use(upload.any());
 app.use("/uploads", express.static("uploads"));
 app.use("/logs", express.static("logs"));
 
-let io;
+// let io;
 
-function initSocket(server) {
-  io = new Server(server, {
-    cors: {
-      origin: "*", // or a specific frontend origin
-      credentials: true,
-    },
-  });
+// function initSocket(server) {
+//   io = new Server(server, {
+//     cors: {
+//       origin: "*", // or a specific frontend origin
+//       credentials: true,
+//     },
+//   });
 
-  io.on("connection", (socket) => {
-    console.log("✅ User connected:", socket.id);
+//   io.on("connection", (socket) => {
+//     console.log("✅ User connected:", socket.id);
 
-    socket.on("join-room", (room) => {
-      socket.join(room);
-      console.log(`${socket.id} joined room: ${room}`);
-    });
+//     socket.on("join-room", (room) => {
+//       socket.join(room);
+//       console.log(`${socket.id} joined room: ${room}`);
+//     });
 
-    socket.on("ping", () => {
-      console.log("📡 Received ping from client");
-      socket.emit("pong");
-    });
+//     socket.on("ping", () => {
+//       console.log("📡 Received ping from client");
+//       socket.emit("pong");
+//     });
 
-    socket.on("disconnect", (reason) => {
-      console.warn("❌ Disconnected:", reason);
-    });
-  });
-}
+//     socket.on("disconnect", (reason) => {
+//       console.warn("❌ Disconnected:", reason);
+//     });
+//   });
+// }
 
-function getIO() {
-  if (!io) {
-    throw new Error("Socket.io not initialized!");
-  }
-  return io;
-}
+// function getIO() {
+//   if (!io) {
+//     throw new Error("Socket.io not initialized!");
+//   }
+//   return io;
+// }
 
-module.exports = {
-  initSocket,
-  getIO,
-};
+// module.exports = {
+//   initSocket,
+//   getIO,
+// };
 
-initSocket(server); // ✅ Important!
+// initSocket(server); // ✅ Important!
 
 //---------models---------------------------------
 const User = require("./models/user");
