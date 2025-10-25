@@ -560,6 +560,8 @@ exports.getAllOrders = async (req, res) => {
       });
     } else {
       orders = await Order.findAll({
+        limit: 20,
+        offset: 0,
         include: [
           { model: User, attributes: ["id", "name", "phone", "address"] },
           { model: Delivery, include: User },

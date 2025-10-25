@@ -91,12 +91,12 @@ function getIO() {
   return io;
 }
 
+initSocket(server); // ✅ Important!
+
 module.exports = {
   initSocket,
   getIO,
 };
-
-initSocket(server); // ✅ Important!
 
 //---------models---------------------------------
 const User = require("./models/user");
