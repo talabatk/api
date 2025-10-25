@@ -13,7 +13,7 @@ const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
-const { getIO } = require("../app");
+// const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 const ProductImage = require("../models/productImage");
 const Alert = require("../models/alert");
@@ -114,7 +114,7 @@ async function sendUltraMsg(phone, message) {
 }
 
 exports.createOrder = async (req, res) => {
-  const io = getIO();
+  // const io = getIO();
 
   const { areaId, address, name, phone, location, notes, lang, lat } = req.body;
 
@@ -619,7 +619,7 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrder = async (req, res) => {
   const { id } = req.params;
   const { status, time } = req.body;
-  const io = getIO();
+  // const io = getIO();
 
   try {
     // Validate order status
@@ -733,7 +733,7 @@ exports.updateOrder = async (req, res) => {
 
 exports.assignDelivery = async (req, res) => {
   const { id } = req.params;
-  const io = getIO();
+  // const io = getIO();
 
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header

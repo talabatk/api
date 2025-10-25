@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const Logger = require("../util/logger");
 
-const { io } = require("../app");
+// const { io } = require("../app");
 const Message = require("../models/messages");
 
 exports.sendMessageFromUser = async (req, res) => {
@@ -24,7 +24,7 @@ exports.sendMessageFromUser = async (req, res) => {
       userId: user.id,
     });
 
-    io.to("admins").emit("new-message", newMessage);
+    // io.to("admins").emit("new-message", newMessage);
     return res.status(201).json({ status: "success", message: newMessage });
   } catch (error) {
     Logger.error(error);
@@ -52,7 +52,7 @@ exports.sendMessageToUser = async (req, res) => {
       userId,
     });
 
-    io.to(`${userId}`).emit("new-message", newMessage);
+    // io.to(`${userId}`).emit("new-message", newMessage);
 
     return res.status(201).json({ status: "success", message: newMessage });
   } catch (error) {

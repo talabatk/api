@@ -2,7 +2,6 @@ const express = require("express");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
-const { Server } = require("socket.io");
 const http = require("node:http");
 const cors = require("cors");
 const cron = require("node-cron");
@@ -14,12 +13,14 @@ const {
 } = require("./middlewares/morgan");
 const morganBody = require("morgan-body");
 const Logger = require("./util/logger");
+const { initSocket } = require("./socket");
 
 configDotenv();
 
 const app = express();
 
 const server = http.createServer(app);
+initSocket(server);
 
 // app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -47,56 +48,6 @@ app.use(upload.any());
 
 app.use("/uploads", express.static("uploads"));
 app.use("/logs", express.static("logs"));
-
-let io;
-
-function initSocket(server) {
-  io = new Server(server, {
-    cors: {
-      origin: [
-        "https://talabatk.top",
-        "https://www.talabatk.top",
-        "http://localhost:5173", // dev (optional)
-      ],
-      credentials: true,
-    },
-    transports: ["websocket"], // ✅ skip polling
-    pingInterval: 25000, // how often server sends ping (25 s)
-    pingTimeout: 60000, // wait up to 60 s before timing out
-    allowEIO3: true, // backward compat if old clients
-  });
-
-  io.on("connection", (socket) => {
-    console.log("✅ User connected:", socket.id);
-
-    socket.on("join-room", (room) => {
-      socket.join(room);
-      console.log(`${socket.id} joined room: ${room}`);
-    });
-
-    // optional: monitor heartbeat
-    socket.on("ping", () => {
-      console.log("📡 Received custom ping from client");
-      socket.emit("pong");
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.warn("❌ Disconnected:", reason);
-    });
-  });
-}
-
-function getIO() {
-  if (!io) throw new Error("Socket.io not initialized!");
-  return io;
-}
-
-initSocket(server); // ✅ Important!
-
-module.exports = {
-  initSocket,
-  getIO,
-};
 
 //---------models---------------------------------
 const User = require("./models/user");
