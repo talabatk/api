@@ -50,12 +50,20 @@ app.use("/logs", express.static("logs"));
 
 let io;
 
-function initSocket(server) {
+export function initSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: "*", // or a specific frontend origin
+      origin: [
+        "https://talabatk.top",
+        "https://www.talabatk.top",
+        "http://localhost:5173", // dev (optional)
+      ],
       credentials: true,
     },
+    transports: ["websocket"], // ✅ skip polling
+    pingInterval: 25000, // how often server sends ping (25 s)
+    pingTimeout: 60000, // wait up to 60 s before timing out
+    allowEIO3: true, // backward compat if old clients
   });
 
   io.on("connection", (socket) => {
@@ -66,8 +74,9 @@ function initSocket(server) {
       console.log(`${socket.id} joined room: ${room}`);
     });
 
+    // optional: monitor heartbeat
     socket.on("ping", () => {
-      console.log("📡 Received ping from client");
+      console.log("📡 Received custom ping from client");
       socket.emit("pong");
     });
 
@@ -77,10 +86,8 @@ function initSocket(server) {
   });
 }
 
-function getIO() {
-  if (!io) {
-    throw new Error("Socket.io not initialized!");
-  }
+export function getIO() {
+  if (!io) throw new Error("Socket.io not initialized!");
   return io;
 }
 
