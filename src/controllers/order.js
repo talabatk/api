@@ -13,6 +13,7 @@ const { Op, Sequelize } = require("sequelize");
 const DeliveryCost = require("../models/delivery_cost");
 const Delivery = require("../models/delivery");
 const Logger = require("../util/logger");
+const { getIO } = require("../app");
 const OrderTimeLine = require("../models/orderTimeLine");
 const ProductImage = require("../models/productImage");
 const Alert = require("../models/alert");
@@ -113,7 +114,7 @@ async function sendUltraMsg(phone, message) {
 }
 
 exports.createOrder = async (req, res) => {
-  // const io = getIO();
+  const io = getIO();
 
   const { areaId, address, name, phone, location, notes, lang, lat } = req.body;
 
@@ -273,9 +274,9 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // io.to("admins").emit("new-order-admin", order);
+    io.to("admins").emit("new-order-admin", order);
 
-    // io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
+    io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
     //assign order id to cart product
     await CartProduct.update(
       {
@@ -718,7 +719,7 @@ exports.updateOrder = async (req, res) => {
 
     await order.save();
 
-    // io.to("admins").emit("update-order-admin", order);
+    io.to("admins").emit("update-order-admin", order);
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     Logger.error(error);
@@ -784,7 +785,7 @@ exports.assignDelivery = async (req, res) => {
       deliveryId: decodedToken.userId,
     });
 
-    // io.to("admins").emit("update-order-admin", order);
+    io.to("admins").emit("update-order-admin", order);
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
