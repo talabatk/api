@@ -274,9 +274,9 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    io.to("admins").emit("new-order-admin", order);
+    // io.to("admins").emit("new-order-admin", order);
 
-    io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
+    // io.to(`vendor_${vendor.id}`).emit("new-order-vendor", order);
     //assign order id to cart product
     await CartProduct.update(
       {
@@ -317,38 +317,38 @@ exports.createOrder = async (req, res) => {
 
     const messaging = admin.messaging();
 
-    try {
-      if (vendor.fcm) {
-        await messaging.send({
-          token: vendor.fcm,
-          notification: {
-            title: "طلب جديد",
-            body: `هناك طلب جديد من ${name}`,
-          },
-          ...soundSetting,
-        });
-      }
+    // try {
+    //   if (vendor.fcm) {
+    //     await messaging.send({
+    //       token: vendor.fcm,
+    //       notification: {
+    //         title: "طلب جديد",
+    //         body: `هناك طلب جديد من ${name}`,
+    //       },
+    //       ...soundSetting,
+    //     });
+    //   }
 
-      await messaging.send({
-        notification: {
-          title: "طلب جديد",
-          body: `هناك طلب جديد من ${name}`,
-        },
-        topic: "delivery",
-        ...soundSetting,
-      });
+    //   await messaging.send({
+    //     notification: {
+    //       title: "طلب جديد",
+    //       body: `هناك طلب جديد من ${name}`,
+    //     },
+    //     topic: "delivery",
+    //     ...soundSetting,
+    //   });
 
-      await messaging.send({
-        topic: `vendor_${vendor.phone}`,
-        notification: {
-          title: "طلب جديد",
-          body: `هناك طلب جديد من ${name}`,
-        },
-        ...soundSetting,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    //   await messaging.send({
+    //     topic: `vendor_${vendor.phone}`,
+    //     notification: {
+    //       title: "طلب جديد",
+    //       body: `هناك طلب جديد من ${name}`,
+    //     },
+    //     ...soundSetting,
+    //   });
+    // } catch (error) {
+    //   console.log(error);
+    // }
 
     await Notification.create({
       userId: vendor.userId,
@@ -670,32 +670,32 @@ exports.updateOrder = async (req, res) => {
 
     if (status && status !== order.status) {
       // Map the order status to a valid VendorOrder status
-      const messaging = admin.messaging();
-      await OrderTimeLine.create({
-        orderId: order.id,
-        content: `لقد تم تغيير حاله طلبك من ${
-          orderStatusArabicNames[order.status]
-        } الى ${orderStatusArabicNames[status]}`,
-        lastStatus: orderStatusArabicNames[status],
-      });
+      // const messaging = admin.messaging();
+      // await OrderTimeLine.create({
+      //   orderId: order.id,
+      //   content: `لقد تم تغيير حاله طلبك من ${
+      //     orderStatusArabicNames[order.status]
+      //   } الى ${orderStatusArabicNames[status]}`,
+      //   lastStatus: orderStatusArabicNames[status],
+      // });
       if (status === "preparing" || status === "cancel") {
         sendUltraMsg(
           order.phone,
           status === "preparing" ? "طلبك قيد التحضير" : "تم رفض طلبك"
         );
       }
-      if (order.user.fcm && status !== "finished") {
-        await messaging
-          .send({
-            token: order.user.fcm,
-            notification: {
-              title: "تحديث للطلب",
-              body: orderStatusArabicNames[status],
-            },
-            ...soundSetting,
-          })
-          .catch((error) => {});
-      }
+      // if (order.user.fcm && status !== "finished") {
+      //   await messaging
+      //     .send({
+      //       token: order.user.fcm,
+      //       notification: {
+      //         title: "تحديث للطلب",
+      //         body: orderStatusArabicNames[status],
+      //       },
+      //       ...soundSetting,
+      //     })
+      //     .catch((error) => {});
+      // }
 
       await Notification.create({
         userId: order.user.id,
@@ -721,7 +721,7 @@ exports.updateOrder = async (req, res) => {
 
     await order.save();
 
-    io.to("admins").emit("update-order-admin", order);
+    // io.to("admins").emit("update-order-admin", order);
     return res.status(200).json({ message: "success", order });
   } catch (error) {
     Logger.error(error);
@@ -763,17 +763,17 @@ exports.assignDelivery = async (req, res) => {
 
     const messaging = admin.messaging();
 
-    if (order.user.fcm) {
-      await messaging
-        .send({
-          token: order.user.fcm,
-          notification: {
-            title: "تحديث للطلب",
-            body: "تم بدء توصيل طلبك",
-          },
-        })
-        .catch((error) => {});
-    }
+    // if (order.user.fcm) {
+    //   await messaging
+    //     .send({
+    //       token: order.user.fcm,
+    //       notification: {
+    //         title: "تحديث للطلب",
+    //         body: "تم بدء توصيل طلبك",
+    //       },
+    //     })
+    //     .catch((error) => {});
+    // }
 
     await Notification.create({
       userId: order.user.id,
@@ -787,7 +787,7 @@ exports.assignDelivery = async (req, res) => {
       deliveryId: decodedToken.userId,
     });
 
-    io.to("admins").emit("update-order-admin", order);
+    // io.to("admins").emit("update-order-admin", order);
 
     return res.status(200).json({ message: "success", order });
   } catch (error) {
