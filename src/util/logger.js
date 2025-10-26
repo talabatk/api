@@ -4,27 +4,35 @@ const winston = require("winston");
 
 const isWindows = os.platform() === "win32";
 
+// Create a safe logs directory if you want file logs
+if (!fs.existsSync("logs")) {
+  fs.mkdirSync("logs");
+}
+
 const Logger = winston.createLogger({
-  level: "error", // Only log errors in production
+  level: "error", // ✅ only log errors
   format: winston.format.combine(
     winston.format.errors({ stack: true }),
-    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
-    winston.format.colorize({ all: true }),
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.printf((info) => {
       return `${info.timestamp} ${info.level}: ${info.message}`;
     })
   ),
   transports: [
-    // Use null stream only on non-Windows systems
-    !isWindows
-      ? new winston.transports.Stream({
-          stream: fs.createWriteStream("/dev/null"),
-        })
-      : new winston.transports.Console(),
-  ],
+    // ✅ Always log errors to console
+    new winston.transports.Console({ level: "error" }),
+
+    // ✅ Also log to file if not in Windows (optional)
+    !isWindows &&
+      new winston.transports.File({
+        filename: "logs/error.log",
+        level: "error",
+      }),
+  ].filter(Boolean),
 });
 
 module.exports = Logger;
+
 // const fs = require("fs");
 // const os = require("os");
 // const winston = require("winston");
