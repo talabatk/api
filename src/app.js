@@ -292,30 +292,28 @@ app.use((err, _req, res, _next) => {
 
 // cron job to delete old notifications
 
-cron.schedule("0 0 * * *", async () => {
-  // Call your function to delete old notifications here
-  try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 3);
-    cutoffDate.setHours(0, 0, 0, 0); // Set to 00:00:00
+// cron.schedule("0 0 * * *", async () => {
+//   // Call your function to delete old notifications here
+//   try {
+//     const cutoffDate = new Date();
+//     cutoffDate.setDate(cutoffDate.getDate() - 3);
+//     cutoffDate.setHours(0, 0, 0, 0); // Set to 00:00:00
 
-    // Perform the deletion
-    const deletedCount = await Notification.destroy({
-      where: {
-        createdAt: {
-          [Op.lt]: cutoffDate.toISOString(), // Compare with the calculated cutoff date
-        },
-      },
-    });
-    console.log(`Deleted ${deletedCount} old notifications`);
-  } catch (error) {
-    console.error("Error in cron job:", error);
+//     // Perform the deletion
+//     const deletedCount = await Notification.destroy({
+//       where: {
+//         createdAt: {
+//           [Op.lt]: cutoffDate.toISOString(), // Compare with the calculated cutoff date
+//         },
+//       },
+//     });
+//     console.log(`Deleted ${deletedCount} old notifications`);
+//   } catch (error) {
+//     console.error("Error in cron job:", error);
 
-    Logger.error(error);
-  }
-});
-
-const address = `http://localhost:${process.env.PORT}`;
+//     Logger.error(error);
+//   }
+// });
 
 sequelize
   .sync()
@@ -325,7 +323,7 @@ sequelize
       console.info(
         "------------------------------------------------------------------------------------------\n"
       );
-      Logger.debug(`Starting APP On -> http://localhost:${PORT}`);
+      console.log(`Starting APP On -> http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
