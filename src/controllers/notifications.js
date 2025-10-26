@@ -6,12 +6,6 @@ const Notification = require("../models/notifications");
 const User = require("../models/user");
 const { Op } = require("sequelize");
 
-const serviceAccount = require("../talabatek-firebase.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
 exports.sendNotification = async (req, res) => {
   const { title, description, topic, fcm, userId } = req.body;
 

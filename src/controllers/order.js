@@ -18,6 +18,7 @@ const OrderTimeLine = require("../models/orderTimeLine");
 const ProductImage = require("../models/productImage");
 const Alert = require("../models/alert");
 const Admin = require("../models/admin");
+const { getIO } = require("../socket");
 
 const ULTRA_TOKEN = "lwtb6e3jk73dmb0p";
 const INSTANCE_ID = "instance131791";
@@ -176,9 +177,9 @@ exports.createOrder = async (req, res) => {
         .json({ message: "المطعم لا يدعم التوصيل لهذه المنطقه" });
     }
 
-    if (cart.cart_products[0]?.product.user.vendor.status !== "open") {
-      return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
-    }
+    // if (cart.cart_products[0]?.product.user.vendor.status !== "open") {
+    //   return res.status(400).json({ message: "هذا المطعم مغلق حاليا!" });
+    // }
     // calculate shipping cost
     products += `
     اسم المطعم:${cart.cart_products[0]?.product.user.name}

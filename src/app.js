@@ -14,6 +14,8 @@ const {
 const morganBody = require("morgan-body");
 const Logger = require("./util/logger");
 const { initSocket } = require("./socket");
+const serviceAccount = require("./talabatek-firebase.json");
+const admin = require("firebase-admin");
 
 configDotenv();
 
@@ -22,6 +24,9 @@ const app = express();
 const server = http.createServer(app);
 initSocket(server);
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 // app.use(bodyParser.urlencoded({ extended: false }));
 
 app.options("*", cors()); // include before other routes
